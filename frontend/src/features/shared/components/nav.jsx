@@ -118,6 +118,98 @@ const DockNavLink = React.memo(({ link, mouseX }) => {
   );
 });
 
+const ACCOUNT_TYPES = [
+  { value: 'trader', label: 'Trader Account', icon: User, desc: 'Standard trading account' },
+  { value: 'professional', label: 'Professional', icon: Briefcase, desc: 'Advanced tools & lower spreads' },
+];
+
+const AccountTypeDropdown = React.memo(() => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState('trader');
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isOpen]);
+
+  const currentType = ACCOUNT_TYPES.find((t) => t.value === selected) || ACCOUNT_TYPES[0];
+  const CurrentIcon = currentType.icon;
+
+  return (
+    <div className="account-type-dropdown-wrapper" ref={dropdownRef}>
+      <button
+        type="button"
+        className={`account-type-trigger ${isOpen ? 'is-open' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen((prev) => !prev);
+        }}
+      >
+        <div className="account-type-trigger-left">
+          <div className="account-type-icon-badge">
+            <CurrentIcon size={13} strokeWidth={2.2} />
+          </div>
+          <div className="account-type-trigger-text">
+            <span className="account-type-label">Account Type</span>
+            <span className="account-type-value">{currentType.label}</span>
+          </div>
+        </div>
+        <ChevronDown
+          size={12}
+          className={`account-type-chevron ${isOpen ? 'is-rotated' : ''}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="account-type-options"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {ACCOUNT_TYPES.map((type) => {
+              const TypeIcon = type.icon;
+              const isSelected = selected === type.value;
+              return (
+                <button
+                  key={type.value}
+                  type="button"
+                  className={`account-type-option ${isSelected ? 'is-selected' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelected(type.value);
+                    setIsOpen(false);
+                  }}
+                >
+                  <div className="account-type-option-left">
+                    <TypeIcon size={14} strokeWidth={2} />
+                    <div>
+                      <span className="account-type-option-label">{type.label}</span>
+                      <span className="account-type-option-desc">{type.desc}</span>
+                    </div>
+                  </div>
+                  {isSelected && (
+                    <CheckCircle2 size={14} strokeWidth={2.5} className="account-type-check" />
+                  )}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+});
+
 const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
   const { user, isAuthenticated, openLogin, openRegister, logout, verifySession } = useAuth();
   const toast = useToast();
@@ -134,6 +226,11 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
 
   useEffect(() => {
     if (!profileDropdownOpen) return;
+
+    // Force clipPath to none immediately when dropdown opens so content isn't clipped
+    if (navRef.current) {
+      navRef.current.style.clipPath = 'none';
+    }
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -687,6 +784,11 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                         </span>
                       </div>
                     </div>
+
+                    {/* Account Type Dropdown Selector */}
+                    {user?.role !== 'admin' && (
+                      <AccountTypeDropdown />
+                    )}
 
                     {/* Admin Dashboard Quick Access */}
                     {user?.role === 'admin' && (

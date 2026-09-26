@@ -561,3 +561,209 @@
     color: #ef4444;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCOUNT TYPE DROPDOWN SELECTOR (Inside Profile Dropdown)
+   ═══════════════════════════════════════════════════════════════ */
+
+.account-type-dropdown-wrapper {
+  margin-top: 12px;
+  position: relative;
+}
+
+.account-type-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 11px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.account-type-trigger:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(252, 93, 33, 0.35);
+}
+
+.account-type-trigger.is-open {
+  background: rgba(252, 93, 33, 0.08);
+  border-color: rgba(252, 93, 33, 0.5);
+}
+
+.account-type-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.account-type-icon-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(252, 93, 33, 0.15);
+  color: #fc5d21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account-type-trigger-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.account-type-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.account-type-value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.account-type-chevron {
+  color: #64748b;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.account-type-chevron.is-rotated {
+  transform: rotate(180deg);
+  color: #fc5d21;
+}
+
+.account-type-options {
+  margin-top: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 18, 23, 0.95);
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.account-type-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  color: #94a3b8;
+}
+
+.account-type-option + .account-type-option {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.account-type-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.account-type-option.is-selected {
+  background: rgba(252, 93, 33, 0.1);
+  color: #ffffff;
+}
+
+.account-type-option-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-type-option-left > div {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.account-type-option-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: inherit;
+  line-height: 1.2;
+}
+
+.account-type-option-desc {
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 1px;
+  line-height: 1.2;
+}
+
+.account-type-option.is-selected .account-type-option-desc {
+  color: #94a3b8;
+}
+
+.account-type-check {
+  color: #fc5d21;
+  flex-shrink: 0;
+}
+
+/* Light Theme */
+[data-theme='light'] .account-type-trigger {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .account-type-trigger:hover {
+  background: #f1f5f9;
+  border-color: rgba(252, 93, 33, 0.4);
+}
+
+[data-theme='light'] .account-type-trigger.is-open {
+  background: rgba(252, 93, 33, 0.06);
+  border-color: #fc5d21;
+}
+
+[data-theme='light'] .account-type-value {
+  color: #0f172a;
+}
+
+[data-theme='light'] .account-type-options {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .account-type-option {
+  color: #475569;
+}
+
+[data-theme='light'] .account-type-option:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+[data-theme='light'] .account-type-option.is-selected {
+  background: rgba(252, 93, 33, 0.06);
+  color: #0f172a;
+}
+
+[data-theme='light'] .account-type-option + .account-type-option {
+  border-top-color: #f1f5f9;
+}
+
+[data-theme='light'] .account-type-option-label {
+  color: inherit;
+}
