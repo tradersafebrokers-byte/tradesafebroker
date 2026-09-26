@@ -405,30 +405,50 @@ export const login = asyncHandler(async (req, res) => {
     throw new ApiError(403, 'Account is deactivated. Please contact support.');
   }
 
-  // 4. Generate & send fresh 4-digit Login OTP via Hostinger SMTP
-  const plainOtp = await user.generateAndSetOtp();
-  await user.save({ validateBeforeSave: false });
+  // If user registered earlier but never completed email verification, require registration OTP
+  if (!user.isEmailVerified) {
+    const plainOtp = await user.generateAndSetOtp();
+    await user.save({ validateBeforeSave: false });
 
-  // Deliver email via Hostinger SMTP
-  await sendOtpEmail({
-    to: user.email,
-    username: user.username,
-    otp: plainOtp,
-    expiresInMinutes: 10,
-    purpose: 'Login Verification',
-  });
+    await sendOtpEmail({
+      to: user.email,
+      username: user.username,
+      otp: plainOtp,
+      expiresInMinutes: 10,
+      purpose: 'Account Registration',
+    });
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        requiresOtp: true,
-        email: user.email,
-        cooldownSeconds: 60,
-      },
-      'A 4-digit login verification code has been sent to your email.'
-    )
-  );
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          requiresOtp: true,
+          email: user.email,
+          cooldownSeconds: 60,
+        },
+        'Please verify your email. A 4-digit verification code has been sent to your email.'
+      )
+    );
+  }
+
+  // 4. Direct Login - Issue JWT session without OTP
+  const token = user.generateAccessToken();
+  const sanitizedUser = user.toJSON();
+
+  return res
+    .status(200)
+    .cookie('accessToken', token, COOKIE_OPTIONS)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          requiresOtp: false,
+          user: sanitizedUser,
+          token,
+        },
+        'Login successful! Welcome back to TradeSafe Brokers.'
+      )
+    );
 });
 
 /**

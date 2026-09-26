@@ -320,15 +320,15 @@ export const AuthModal = () => {
 
     if (authModalMode === "login") {
       otpSourceModeRef.current = "login";
-      const toastId = toast.loading("Sending 4-digit OTP...", "Verifying credentials & sending login code");
+      const toastId = toast.loading("Signing in...", "Verifying your credentials...");
       const action = await login({ email: email.trim(), password });
       if (loginUser.fulfilled.match(action)) {
         if (action.payload?.requiresOtp) {
           setResendCooldown(action.payload.cooldownSeconds || 60);
           toast.update(toastId, {
             type: "success",
-            title: "4-Digit OTP Sent!",
-            message: `Check ${action.payload?.email || email} for your login verification code.`,
+            title: "Verification Required",
+            message: `Please check ${action.payload?.email || email} for your registration code.`,
           });
         } else {
           toast.update(toastId, {
