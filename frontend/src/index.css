@@ -5118,3 +5118,70 @@ input {
         text-align: center;
     }
 }
+/* --------------------------------------------------------------------------
+   Real-Time Live Market Cards - Pulse, Flash & Dynamic Sparklines
+   -------------------------------------------------------------------------- */
+.market-pair-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.market-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  text-transform: uppercase;
+}
+
+.market-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: livePingDot 1.5s ease-in-out infinite;
+}
+
+@keyframes livePingDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.8); }
+}
+
+.market-price-val {
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.market-price-val.flash-up {
+  color: #10b981 !important;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.45);
+}
+
+.market-price-val.flash-down {
+  color: #ef4444 !important;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.45);
+}
+
+.market-change-badge.positive {
+  color: #fc5d21;
+}
+
+[data-theme="dark"] .market-change-badge.positive {
+  color: #10b981;
+}
+
+.market-change-badge.negative {
+  color: #ef4444 !important;
+}
+
+.sparkline-svg path {
+  transition: d 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}

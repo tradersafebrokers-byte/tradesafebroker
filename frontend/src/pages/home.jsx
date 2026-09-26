@@ -8,6 +8,7 @@ import TopForexBrokers from '../features/shared/components/TopForexBrokers';
 import BrokerComparisonBanner from '../features/shared/components/BrokerComparisonBanner';
 import Testimonials from '../features/shared/components/Testimonials';
 import Footer from '../features/shared/components/Footer';
+import useLiveMarketData from '../features/shared/hooks/useLiveMarketData.js';
 
 const titleLines = [
   { words: ['Find', 'the', 'Best'] },
@@ -120,7 +121,35 @@ const TransparencyCard = React.memo(() => (
   </div>
 ));
 
+// Generate smooth cubic bezier SVG path for real-time market sparklines
+const generateSparklinePath = (points, width = 160, height = 36) => {
+  if (!points || points.length < 2) return `M 0 ${height / 2} L ${width} ${height / 2}`;
+  const min = Math.min(...points);
+  const max = Math.max(...points);
+  const range = max - min || 1;
+  const padding = 4;
+  const h = height - padding * 2;
+
+  const coords = points.map((p, i) => ({
+    x: (i / (points.length - 1)) * width,
+    y: height - padding - ((p - min) / range) * h,
+  }));
+
+  let d = `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const curr = coords[i];
+    const next = coords[i + 1];
+    const cp1x = (curr.x + (next.x - curr.x) / 2).toFixed(1);
+    const cp1y = curr.y.toFixed(1);
+    const cp2x = cp1x;
+    const cp2y = next.y.toFixed(1);
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${next.x.toFixed(1)} ${next.y.toFixed(1)}`;
+  }
+  return d;
+};
+
 const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
+  const { eurusd, gold } = useLiveMarketData();
   const [complete, setComplete] = useState(heroComplete);
 
   useEffect(() => {
@@ -370,17 +399,26 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   </svg>
                 </div>
 
-                {/* Floating Market Card - EUR/USD */}
+                {/* Floating Market Card - EUR/USD (Real-time Live WebSocket & API Stream) */}
                 <div className="market-card-eurusd">
                   <div className="market-card-header">
-                    <span className="market-pair-title">EUR / USD</span>
-                    <span className="market-arrow-btn">↗</span>
+                    <div className="market-pair-title-row">
+                      <span className="market-pair-title">{eurusd.symbol}</span>
+                      <span className="market-live-pill" title="Live Real-time Interbank Feed">
+                        <span className="market-live-dot" /> LIVE
+                      </span>
+                    </div>
+                    <Link to="/compare" className="market-arrow-btn" title="Compare broker spreads & execution for EUR/USD">↗</Link>
                   </div>
-                  <div className="market-price-val">1.0894</div>
-                  <div className="market-change-badge">+0.32% Today</div>
+                  <div className={`market-price-val ${eurusd.flash ? `flash-${eurusd.flash}` : ""}`}>
+                    {eurusd.price}
+                  </div>
+                  <div className={`market-change-badge ${eurusd.isPositive ? "positive" : "negative"}`}>
+                    {eurusd.change}% Today
+                  </div>
                   <svg className="sparkline-svg" viewBox="0 0 160 38" fill="none">
                     <path
-                      d="M 0 32 Q 35 12 70 24 T 120 10 T 160 6"
+                      d={generateSparklinePath(eurusd.history, 160, 36)}
                       stroke="var(--brand-green)"
                       strokeWidth="2.5"
                       strokeLinecap="round"
@@ -388,17 +426,26 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   </svg>
                 </div>
 
-                {/* Floating Market Card - Gold */}
+                {/* Floating Market Card - Gold (Real-time Live Spot Stream) */}
                 <div className="market-card-gold">
                   <div className="market-card-header">
-                    <span className="market-pair-title">XAU / USD · Gold</span>
-                    <span className="market-arrow-btn">↗</span>
+                    <div className="market-pair-title-row">
+                      <span className="market-pair-title">{gold.symbol}</span>
+                      <span className="market-live-pill" title="Live Real-time Spot Feed">
+                        <span className="market-live-dot" /> LIVE
+                      </span>
+                    </div>
+                    <Link to="/compare" className="market-arrow-btn" title="Compare broker spreads & execution for Gold">↗</Link>
                   </div>
-                  <div className="market-price-val">2,384.50</div>
-                  <div className="market-change-badge">+1.18% Today</div>
+                  <div className={`market-price-val ${gold.flash ? `flash-${gold.flash}` : ""}`}>
+                    {gold.price}
+                  </div>
+                  <div className={`market-change-badge ${gold.isPositive ? "positive" : "negative"}`}>
+                    {gold.change}% Today
+                  </div>
                   <svg className="sparkline-svg" viewBox="0 0 180 38" fill="none">
                     <path
-                      d="M 0 34 Q 40 26 80 16 T 140 18 T 180 4"
+                      d={generateSparklinePath(gold.history, 180, 36)}
                       stroke="var(--brand-green)"
                       strokeWidth="2.5"
                       strokeLinecap="round"
