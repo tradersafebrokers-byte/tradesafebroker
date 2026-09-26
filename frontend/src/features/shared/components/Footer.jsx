@@ -1,84 +1,122 @@
-import React, { useState, memo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, memo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown, Heart, Shield, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ContactModal from '../../contact/components/ContactModal.jsx';
+import FooterDetailModal from './FooterDetailModal.jsx';
+import apiClient from '../../auth/services/api.client.js';
 
-const footerSections = [
+export const ALL_FOOTER_SECTIONS = [
   {
     id: 'brokers',
     title: 'Top Forex Brokers',
     links: [
-      { label: 'XM Review & Spreads', href: '#brokers' },
-      { label: 'Exness Review & Fees', href: '#brokers' },
-      { label: 'IC Markets Scalping', href: '#brokers', highlight: true },
-      { label: 'Pepperstone ECN', href: '#brokers' },
-      { label: 'FXTM Zero Spread', href: '#brokers' },
-      { label: 'AvaTrade Multi-Asset', href: '#brokers' },
+      { label: 'XM Review & Spreads', href: '/brokers' },
+      { label: 'Exness Review & Fees', href: '/brokers' },
+      { label: 'IC Markets Scalping', href: '/brokers', highlight: true },
+      { label: 'Pepperstone ECN', href: '/brokers' },
+      { label: 'FXTM Zero Spread', href: '/brokers' },
+      { label: 'AvaTrade Multi-Asset', href: '/brokers' },
     ],
   },
   {
     id: 'compare',
     title: 'Compare & Categories',
     links: [
-      { label: 'Compare Brokers Side by Side', href: '#comparisons', coral: true },
-      { label: 'Lowest Spread Forex Brokers', href: '#comparisons' },
-      { label: 'Best Brokers for Scalping', href: '#comparisons' },
-      { label: 'Best for Beginners', href: '#comparisons' },
-      { label: 'High Leverage Accounts', href: '#comparisons' },
-      { label: 'MT4 & MT5 Platform Brokers', href: '#comparisons' },
+      { label: 'Compare Brokers Side by Side', href: '/compare', coral: true },
+      { label: 'Lowest Spread Forex Brokers', href: '/compare' },
+      { label: 'Best Brokers for Scalping', href: '/compare' },
+      { label: 'Best for Beginners', href: '/compare' },
+      { label: 'High Leverage Accounts', href: '/compare' },
+      { label: 'MT4 & MT5 Platform Brokers', href: '/compare' },
     ],
   },
   {
     id: 'tools',
     title: 'Trading Tools & Data',
     links: [
-      { label: 'Pip Value Calculator', href: '#tools' },
-      { label: 'Margin & Leverage Tool', href: '#tools' },
-      { label: 'Live Spread Benchmarks', href: '#tools', highlight: true },
-      { label: 'Broker Withdrawal Speed Test', href: '#tools' },
-      { label: 'License & Regulatory Check', href: '#tools' },
-      { label: 'Scam Broker Warning List', href: '#tools', alert: true },
+      { label: 'Pip Value Calculator', openModal: true },
+      { label: 'Margin & Leverage Tool', openModal: true },
+      { label: 'Live Spread Benchmarks', openModal: true, highlight: true },
+      { label: 'Broker Withdrawal Speed Test', openModal: true },
+      { label: 'License & Regulatory Check', openModal: true },
     ],
   },
   {
     id: 'company',
     title: 'About & Partners',
     links: [
-      { label: 'About Our Mission', href: '#about' },
+      { label: 'About Our Mission', openModal: true },
       { label: 'Join as Broker', href: '/join-broker', joinBroker: true },
-      { label: 'How We Rate Brokers', href: '#about' },
-      { label: 'Editorial Independence', href: '#about' },
-      { label: 'Trader Review Policy', href: '#reviews' },
-      { label: 'Contact Support & Desk', href: '#contact', coral: true },
-      { label: 'Privacy & Terms of Service', href: '#legal' },
+      { label: 'How We Rate Brokers', openModal: true },
+      { label: 'Editorial Independence', openModal: true },
+      { label: 'Trader Review Policy', openModal: true },
+      { label: 'Contact Support & Desk', isContact: true, coral: true },
+      { label: 'Privacy & Terms of Service', href: '/privacy' },
     ],
   },
 ];
 
 const Footer = ({ onNavigate }) => {
+  const navigate = useNavigate();
   const [openSection, setOpenSection] = useState(null);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [detailTopic, setDetailTopic] = useState(null);
+
+  const [hiddenLinks, setHiddenLinks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pipwise_hidden_footer_links');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    apiClient
+      .get('/contact/footer-settings')
+      .then((res) => {
+        if (Array.isArray(res.data?.data?.hiddenLinks)) {
+          setHiddenLinks(res.data.data.hiddenLinks);
+          try {
+            localStorage.setItem('pipwise_hidden_footer_links', JSON.stringify(res.data.data.hiddenLinks));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const toggleSection = (id) => {
     setOpenSection((prev) => (prev === id ? null : id));
   };
 
-  const handleLinkClick = (href, e) => {
-    if (href.startsWith('/')) {
+  const handleLinkAction = (link, e) => {
+    if (e) e.preventDefault();
+    if (link.isContact) {
+      setIsContactOpen(true);
       return;
     }
-    e.preventDefault();
-    if (onNavigate) {
-      onNavigate(href.replace('#', ''));
-    } else {
-      const el = document.querySelector(href);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
+    if (link.openModal) {
+      setDetailTopic(link.label);
+      return;
+    }
+    if (link.href) {
+      if (link.href.startsWith('/')) {
+        navigate(link.href);
+      } else if (link.href.startsWith('#')) {
+        if (onNavigate) {
+          onNavigate(link.href.replace('#', ''));
+        } else {
+          const el = document.querySelector(link.href);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     }
   };
 
   return (
-    <footer className="pipwise-footer" aria-label="Site Footer">
+    <>
+      <footer className="pipwise-footer" aria-label="Site Footer">
       <div className="pw-footer-container">
         {/* ════════════════════════════════════════════════════════════
             DESKTOP VIEW (Visible on desktop screens)
@@ -103,88 +141,28 @@ const Footer = ({ onNavigate }) => {
 
           {/* 5 Column Navigation Grid */}
           <div className="pw-footer-grid">
-            {/* Column 1: Top Brokers */}
-            <div className="pw-footer-col">
-              <h4 className="pw-footer-col-title">Top Forex Brokers</h4>
-              <ul className="pw-footer-links-list">
-                {footerSections[0].links.map((link, idx) => (
-                  <li key={idx}>
-                    <a
-                      href={link.href}
-                      onClick={(e) => handleLinkClick(link.href, e)}
-                      className={`pw-footer-link ${link.highlight ? 'is-highlight' : ''}`}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Column 2: Compare */}
-            <div className="pw-footer-col">
-              <h4 className="pw-footer-col-title">Compare & Categories</h4>
-              <ul className="pw-footer-links-list">
-                {footerSections[1].links.map((link, idx) => (
-                  <li key={idx}>
-                    <a
-                      href={link.href}
-                      onClick={(e) => handleLinkClick(link.href, e)}
-                      className={`pw-footer-link ${link.coral ? 'is-coral' : ''}`}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Column 3: Tools & Data */}
-            <div className="pw-footer-col">
-              <h4 className="pw-footer-col-title">Tools & Calculators</h4>
-              <ul className="pw-footer-links-list">
-                {footerSections[2].links.map((link, idx) => (
-                  <li key={idx}>
-                    <a
-                      href={link.href}
-                      onClick={(e) => handleLinkClick(link.href, e)}
-                      className={`pw-footer-link ${link.highlight ? 'is-highlight' : ''} ${link.alert ? 'is-alert' : ''}`}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Column 4: About */}
-            <div className="pw-footer-col">
-              <h4 className="pw-footer-col-title">About & Trust</h4>
-              <ul className="pw-footer-links-list">
-                {footerSections[3].links.map((link, idx) => (
-                  <li key={idx}>
-                    {link.href.startsWith('/') ? (
-                      <Link
-                        to={link.href}
-                        className={`pw-footer-link ${link.joinBroker ? 'is-join-broker' : ''} ${link.coral ? 'is-coral' : ''}`}
-                      >
-                        <span>{link.label}</span>
-                        {link.joinBroker && <span className="pw-join-pill-tag">Partner</span>}
-                      </Link>
-                    ) : (
-                      <a
-                        href={link.href}
-                        onClick={(e) => handleLinkClick(link.href, e)}
-                        className={`pw-footer-link ${link.joinBroker ? 'is-join-broker' : ''} ${link.coral ? 'is-coral' : ''}`}
-                      >
-                        <span>{link.label}</span>
-                        {link.joinBroker && <span className="pw-join-pill-tag">Partner</span>}
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {ALL_FOOTER_SECTIONS.map((section) => {
+              const visibleLinks = section.links.filter((l) => !hiddenLinks.includes(l.label));
+              return (
+                <div key={section.id} className="pw-footer-col">
+                  <h4 className="pw-footer-col-title">{section.title}</h4>
+                  <ul className="pw-footer-links-list">
+                    {visibleLinks.map((link, idx) => (
+                      <li key={idx}>
+                        <a
+                          href={link.href || '#'}
+                          onClick={(e) => handleLinkAction(link, e)}
+                          className={`pw-footer-link ${link.highlight ? 'is-highlight' : ''} ${link.coral ? 'is-coral' : ''} ${link.joinBroker ? 'is-join-broker' : ''}`}
+                        >
+                          <span>{link.label}</span>
+                          {link.joinBroker && <span className="pw-join-pill-tag">Partner</span>}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
 
             {/* Column 5: Social Links & Independence Badge */}
             <div className="pw-footer-col pw-footer-col-community">
@@ -330,7 +308,9 @@ const Footer = ({ onNavigate }) => {
 
           {/* Accordion List */}
           <div className="pw-footer-accordion">
-            {footerSections.map((sec) => {
+            {ALL_FOOTER_SECTIONS.map((sec) => {
+              const visibleLinks = sec.links.filter((l) => !hiddenLinks.includes(l.label));
+              if (visibleLinks.length === 0) return null;
               const isOpen = openSection === sec.id;
               return (
                 <div key={sec.id} className="pw-accordion-item">
@@ -357,27 +337,16 @@ const Footer = ({ onNavigate }) => {
                         className="pw-accordion-drawer"
                       >
                         <div className="pw-accordion-links">
-                          {sec.links.map((link, idx) => (
-                            link.href.startsWith('/') ? (
-                              <Link
-                                key={idx}
-                                to={link.href}
-                                className={`pw-accordion-link ${link.joinBroker ? 'is-join-broker' : ''} ${link.coral ? 'is-coral' : ''} ${link.highlight ? 'is-highlight' : ''}`}
-                              >
-                                <span>{link.label}</span>
-                                <ArrowRight size={13} className="pw-link-arrow" />
-                              </Link>
-                            ) : (
-                              <a
-                                key={idx}
-                                href={link.href}
-                                onClick={(e) => handleLinkClick(link.href, e)}
-                                className={`pw-accordion-link ${link.joinBroker ? 'is-join-broker' : ''} ${link.coral ? 'is-coral' : ''} ${link.highlight ? 'is-highlight' : ''}`}
-                              >
-                                <span>{link.label}</span>
-                                <ArrowRight size={13} className="pw-link-arrow" />
-                              </a>
-                            )
+                          {visibleLinks.map((link, idx) => (
+                            <a
+                              key={idx}
+                              href={link.href || '#'}
+                              onClick={(e) => handleLinkAction(link, e)}
+                              className={`pw-accordion-link ${link.joinBroker ? 'is-join-broker' : ''} ${link.coral ? 'is-coral' : ''} ${link.highlight ? 'is-highlight' : ''}`}
+                            >
+                              <span>{link.label}</span>
+                              <ArrowRight size={13} className="pw-link-arrow" />
+                            </a>
                           ))}
                         </div>
                       </motion.div>
@@ -437,8 +406,22 @@ const Footer = ({ onNavigate }) => {
             <span>for traders worldwide</span>
           </div>
         </div>
-      </div>
-    </footer>
+        </div>
+      </footer>
+
+      {/* Interactive Contact Us Modal with Paper Plane Takeoff Animation */}
+      <ContactModal
+        isOpen={isContactOpen}
+        onClose={() => setIsContactOpen(false)}
+      />
+
+      {/* Rich Informational Detail Modal for Footer Links */}
+      <FooterDetailModal
+        isOpen={!!detailTopic}
+        topic={detailTopic}
+        onClose={() => setDetailTopic(null)}
+      />
+    </>
   );
 };
 

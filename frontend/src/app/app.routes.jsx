@@ -5,6 +5,7 @@ import AllBrokers from '../pages/AllBrokers.jsx';
 import CompareBrokers from '../pages/CompareBrokers.jsx';
 import JoinBroker from '../pages/JoinBroker.jsx';
 import PrivacyPolicy from '../pages/PrivacyPolicy.jsx';
+import ContactPage from '../pages/ContactPage.jsx';
 import AdminDashboard from '../pages/AdminDashboard.jsx';
 import AdminRoute from '../features/auth/components/AdminRoute.jsx';
 
@@ -69,6 +70,14 @@ export const AppRoutes = React.memo(({ theme, heroComplete, setHeroComplete, onH
         <Route
           path="/privacy"
           element={<Navigate to="/privacy-policy" replace />}
+        />
+        <Route
+          path="/contact"
+          element={<ContactPage />}
+        />
+        <Route
+          path="/support"
+          element={<Navigate to="/contact" replace />}
         />
         {/* Fallback to Home */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,0 +1,236 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTER DETAIL MODAL STYLES (Light & Dark Mode)
+   ═══════════════════════════════════════════════════════════════ */
+
+.fdm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999 !important;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+  pointer-events: auto !important;
+}
+
+.fdm-card {
+  width: 100%;
+  max-width: 620px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+  padding: 28px 30px;
+  color: #0f172a;
+  position: relative;
+  max-height: 88vh;
+  overflow-y: auto;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+[data-theme='dark'] .fdm-card {
+  background: #111217;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.fdm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.fdm-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.fdm-icon-halo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(252, 93, 33, 0.12);
+  border: 1px solid rgba(252, 93, 33, 0.3);
+  color: #fc5d21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fdm-title {
+  margin: 0 0 3px 0;
+  font-size: 19px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'] .fdm-title {
+  color: #f8fafc;
+}
+
+.fdm-subtitle {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+[data-theme='dark'] .fdm-subtitle {
+  color: #94a3b8;
+}
+
+.fdm-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.fdm-close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #0f172a;
+}
+
+[data-theme='dark'] .fdm-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+[data-theme='dark'] .fdm-close-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.fdm-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 18px 0;
+}
+
+[data-theme='dark'] .fdm-divider {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.fdm-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #334155;
+}
+
+[data-theme='dark'] .fdm-body {
+  color: #cbd5e1;
+}
+
+.fdm-body p {
+  margin: 0 0 12px 0;
+}
+
+.fdm-body h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 16px 0 8px 0;
+  color: #0f172a;
+}
+
+[data-theme='dark'] .fdm-body h4 {
+  color: #f1f5f9;
+}
+
+.fdm-body ul {
+  margin: 0 0 14px 0;
+  padding-left: 20px;
+}
+
+.fdm-body li {
+  margin-bottom: 6px;
+}
+
+.fdm-highlight-box {
+  background: rgba(252, 93, 33, 0.08);
+  border-left: 3px solid #fc5d21;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin: 12px 0;
+  font-size: 13px;
+  color: #c2410c;
+}
+
+[data-theme='dark'] .fdm-highlight-box {
+  background: rgba(252, 93, 33, 0.12);
+  color: #ff9d66;
+}
+
+.fdm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='dark'] .fdm-footer {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.fdm-verified-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.fdm-done-btn {
+  padding: 8px 18px;
+  border-radius: 9px;
+  background: #fc5d21;
+  color: #ffffff;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.fdm-done-btn:hover {
+  background: #e64e14;
+}
+
+@media (max-width: 640px) {
+  .fdm-card {
+    padding: 20px 18px;
+    border-radius: 18px;
+  }
+  .fdm-title {
+    font-size: 16px;
+  }
+  .fdm-icon-halo {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+  }
+  .fdm-icon-halo svg {
+    width: 18px;
+    height: 18px;
+  }
+}

@@ -36,14 +36,17 @@ import {
   UserPlus,
   UserMinus,
   Eye,
+  EyeOff,
   ExternalLink,
   FileText,
   ZoomIn,
   Sparkles,
+  Mail,
 } from 'lucide-react';
 import useAuth from '../features/auth/hooks/useAuth.js';
 import adminService from '../features/admin/services/admin.service.js';
 import apiClient from '../features/auth/services/api.client.js';
+import { ALL_FOOTER_SECTIONS } from '../features/shared/components/Footer.jsx';
 import {
   INITIAL_DEMO_TESTIMONIALS,
   addDeletedId,
@@ -90,6 +93,8 @@ const DeleteConfirmModal = React.memo(({ modalData, onClose, onConfirm }) => {
                     ? 'User Account Deletion'
                     : modalData.type === 'broker'
                     ? 'Broker Directory Listing'
+                    : modalData.type === 'message'
+                    ? 'Contact Message / Inquiry'
                     : 'Review Moderation'}
                 </span>
                 <h3>Confirm Permanent Deletion</h3>
@@ -657,6 +662,11 @@ export default function AdminDashboard() {
   // Broker Application Inspection State
   const [inspectingBroker, setInspectingBroker] = useState(null);
 
+  // User Contact Messages & Footer Links Management States
+  const [messagesList, setMessagesList] = useState([]);
+  const [hiddenFooterLinks, setHiddenFooterLinks] = useState([]);
+  const [messagesSubTab, setMessagesSubTab] = useState('inquiries'); // 'inquiries' | 'footer'
+
   // Delete Confirmation Modal State
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
@@ -695,7 +705,17 @@ export default function AdminDashboard() {
   const loadAdminData = async () => {
     try {
       setLoading(true);
-      const [statsRes, brokersRes, usersRes, reviewsRes, healthRes, testimonialsRes, kycRes] = await Promise.allSettled([
+      const [
+        statsRes,
+        brokersRes,
+        usersRes,
+        reviewsRes,
+        healthRes,
+        testimonialsRes,
+        kycRes,
+        contactRes,
+        footerRes,
+      ] = await Promise.allSettled([
         adminService.getStats(),
         adminService.getBrokers(),
         adminService.getUsers(),
@@ -703,6 +723,8 @@ export default function AdminDashboard() {
         apiClient.get('/health'),
         adminService.getTestimonials(),
         adminService.getKycSubmissions(),
+        apiClient.get('/contact'),
+        apiClient.get('/contact/footer-settings'),
       ]);
 
       if (statsRes.status === 'fulfilled' && statsRes.value?.data) {
@@ -736,12 +758,55 @@ export default function AdminDashboard() {
           setKycCounts(kycRes.value.data.counts);
         }
       }
+
+      // Load Contact Messages
+      if (contactRes.status === 'fulfilled' && Array.isArray(contactRes.value?.data?.data)) {
+        setMessagesList(contactRes.value.data.data);
+      }
+
+      // Load Footer Link Visibility Settings
+      if (footerRes.status === 'fulfilled' && Array.isArray(footerRes.value?.data?.data?.hiddenLinks)) {
+        setHiddenFooterLinks(footerRes.value.data.data.hiddenLinks);
+      }
     } catch (err) {
       console.error('Error fetching admin metrics:', err);
       const fallback = await fetchActiveTestimonials();
       setTestimonialsList(fallback);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteMessage = async (msgId) => {
+    try {
+      await apiClient.delete(`/contact/${msgId}`);
+      setMessagesList((prev) => prev.filter((m) => m._id !== msgId));
+      showToast('Contact message deleted successfully');
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to delete message');
+    }
+  };
+
+  const handleToggleFooterLink = async (linkLabel) => {
+    try {
+      const isCurrentlyHidden = hiddenFooterLinks.includes(linkLabel);
+      const updated = isCurrentlyHidden
+        ? hiddenFooterLinks.filter((l) => l !== linkLabel)
+        : [...hiddenFooterLinks, linkLabel];
+
+      setHiddenFooterLinks(updated);
+      try {
+        localStorage.setItem('pipwise_hidden_footer_links', JSON.stringify(updated));
+      } catch {}
+
+      await apiClient.post('/contact/footer-settings', { hiddenLinks: updated });
+      showToast(
+        isCurrentlyHidden
+          ? `Restored "${linkLabel}" to public footer`
+          : `Hidden / Deleted "${linkLabel}" from public footer`
+      );
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to update footer link visibility');
     }
   };
 
@@ -809,6 +874,18 @@ export default function AdminDashboard() {
       return true;
     });
   }, [testimonialsList, testimonialFilter, searchQuery]);
+
+  // Filtered contact inquiries
+  const filteredMessages = useMemo(() => {
+    return messagesList.filter((msg) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      const matchesName = msg.name?.toLowerCase().includes(q);
+      const matchesEmail = msg.email?.toLowerCase().includes(q);
+      const matchesMessage = msg.message?.toLowerCase().includes(q);
+      return matchesName || matchesEmail || matchesMessage;
+    });
+  }, [messagesList, searchQuery]);
 
   // 1. APPROVE BROKER (WITH VERIFIED BROKER BADGE)
   const handleApproveBroker = useCallback(async (broker) => {
@@ -1059,8 +1136,26 @@ export default function AdminDashboard() {
       adminService.deleteTestimonial(id).catch((e) => {
         console.warn('Backend delete failed, local removal remains active', e);
       });
+    } else if (type === 'message') {
+      const prevList = [...messagesList];
+      setMessagesList((prev) => prev.filter((m) => m._id !== id));
+      showToast(`Inquiry from "${name}" deleted`);
+      apiClient.delete(`/contact/${id}`).catch((err) => {
+        setMessagesList(prevList);
+        showToast(err.response?.data?.message || err.message || 'Failed to delete message');
+      });
     }
-  }, [deleteModal, brokersList, usersList, reviewsList, closeDeleteModal, showToast]);
+  }, [deleteModal, brokersList, usersList, reviewsList, messagesList, closeDeleteModal, showToast]);
+
+  const promptDeleteMessage = useCallback((msg) => {
+    setDeleteModal({
+      isOpen: true,
+      type: 'message',
+      id: msg._id,
+      name: msg.name || 'Anonymous Inquiry',
+      extraInfo: `Email: ${msg.email} | Date: ${new Date(msg.createdAt).toLocaleDateString()}`,
+    });
+  }, []);
 
   // Toggle Broker Verification
   const handleToggleBrokerVerify = useCallback(async (brokerId) => {
@@ -1319,7 +1414,22 @@ export default function AdminDashboard() {
               <span className="d2-pro-badge">{testimonialsList.length}</span>
             </motion.button>
 
-            {/* 7. ANALYTICS */}
+            {/* 7. CONTACT MESSAGES & FOOTER LINKS */}
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              className={`d2-dock-item ${activeDock === 'messages' ? 'active' : ''}`}
+              onClick={() => switchDockView('messages', 'Contact Desk & Footer Links')}
+              title="User Inquiries & Footer Links"
+            >
+              <Mail size={19} />
+              {messagesList.length > 0 && (
+                <span className="d2-pro-badge" style={{ background: '#fc5d21' }}>
+                  {messagesList.length}
+                </span>
+              )}
+            </motion.button>
+
+            {/* 8. ANALYTICS */}
             <motion.button
               whileTap={{ scale: 0.92 }}
               className={`d2-dock-item ${activeDock === 'analytics' ? 'active' : ''}`}
@@ -1432,6 +1542,18 @@ export default function AdminDashboard() {
                 <Quote size={15} />
                 <span>Marquee Testimonials ({testimonialsList.length})</span>
               </button>
+
+              <button
+                className={`d2-nav-item ${activeNav === 'messages' || activeDock === 'messages' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveNav('messages');
+                  setActiveDock('messages');
+                  showToast('Navigated to Contact Inquiries & Footer Links');
+                }}
+              >
+                <Mail size={15} />
+                <span>Inquiries &amp; Footer ({messagesList.length})</span>
+              </button>
             </nav>
 
             <div className="d2-search-container">
@@ -1448,6 +1570,8 @@ export default function AdminDashboard() {
                     ? 'Search reviews or brokers...'
                     : activeDock === 'testimonials'
                     ? 'Search testimonials by trader name, role, quote...'
+                    : activeDock === 'messages' || activeNav === 'messages'
+                    ? 'Search inquiries by sender name, email, or message...'
                     : 'Search brokers by name, platforms, regulation...'
                 }
                 value={searchQuery}
@@ -2753,6 +2877,269 @@ export default function AdminDashboard() {
                       ))
                     )}
                   </div>
+                </motion.div>
+              )}
+
+              {/* VIEW: CONTACT INQUIRIES & FOOTER LINKS MANAGEMENT */}
+              {(activeDock === 'messages' || (activeNav === 'messages' && activeDock === 'dashboard')) && (
+                <motion.div
+                  key="view-messages"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="d2-generic-view"
+                >
+                  <div className="d2-view-banner">
+                    <div className="d2-view-banner-text">
+                      <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Mail size={20} color="#fc5d21" />
+                        <span>Contact Inquiries &amp; Footer Link Manager</span>
+                      </h2>
+                      <p>
+                        View questions &amp; inquiries sent via Contact Us modal, and manage live footer links with instant website synchronization.
+                      </p>
+                    </div>
+                    <button
+                      className="d2-banner-btn"
+                      onClick={() => loadAdminData()}
+                      title="Sync messages and footer settings"
+                    >
+                      <RefreshCw size={13} style={{ marginRight: '6px' }} />
+                      Sync Inquiries
+                    </button>
+                  </div>
+
+                  {/* Sub-Tabs: Inquiries vs Footer Links */}
+                  <div className="d2-filter-bar">
+                    <div className="d2-filter-tabs">
+                      <button
+                        className={`d2-filter-pill ${messagesSubTab === 'inquiries' ? 'active' : ''}`}
+                        onClick={() => setMessagesSubTab('inquiries')}
+                      >
+                        User Inquiries ({messagesList.length})
+                      </button>
+                      <button
+                        className={`d2-filter-pill ${messagesSubTab === 'footer' ? 'active' : ''}`}
+                        onClick={() => setMessagesSubTab('footer')}
+                      >
+                        Footer Links Manager ({hiddenFooterLinks.length > 0 ? `${hiddenFooterLinks.length} Hidden` : 'All Active'})
+                      </button>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                      {messagesSubTab === 'inquiries'
+                        ? `Showing ${filteredMessages.length} message(s)`
+                        : `Live control of public footer links`}
+                    </div>
+                  </div>
+
+                  {messagesSubTab === 'inquiries' ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      {filteredMessages.length === 0 ? (
+                        <div className="d2-empty-state" style={{ padding: '48px 20px', textAlign: 'center', background: 'var(--d2-card-bg, #ffffff)', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
+                          <Mail size={40} color="#94a3b8" style={{ margin: '0 auto 12px' }} />
+                          <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 6px' }}>No Inquiries Yet</h3>
+                          <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0' }}>
+                            When users submit the Contact Support &amp; Desk form on the website, user inquiries will appear here.
+                          </p>
+                        </div>
+                      ) : (
+                        filteredMessages.map((msg) => (
+                          <div
+                            key={msg._id}
+                            style={{
+                              background: 'var(--d2-card-bg, #ffffff)',
+                              border: '1px solid var(--d2-border, #e2e8f0)',
+                              borderRadius: '16px',
+                              padding: '20px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div
+                                  style={{
+                                    width: '42px',
+                                    height: '42px',
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #fc5d21 0%, #ff8c42 100%)',
+                                    color: '#ffffff',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontWeight: 800,
+                                    fontSize: '17px',
+                                  }}
+                                >
+                                  {msg.name ? msg.name.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                                <div>
+                                  <div style={{ fontWeight: 700, fontSize: '15px' }}>{msg.name || 'Anonymous User'}</div>
+                                  <div style={{ fontSize: '12px', color: '#64748b' }}>
+                                    <a href={`mailto:${msg.email}`} style={{ color: '#fc5d21', textDecoration: 'none' }}>
+                                      {msg.email}
+                                    </a>
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                                  {new Date(msg.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                                </span>
+                                <span className="d2-badge-verified" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+                                  Inquiry
+                                </span>
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                background: 'rgba(15, 23, 42, 0.03)',
+                                padding: '14px 16px',
+                                borderRadius: '10px',
+                                fontSize: '13.5px',
+                                lineHeight: '1.6',
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                borderLeft: '3px solid #fc5d21',
+                              }}
+                            >
+                              {msg.message}
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '4px' }}>
+                              <a
+                                href={`mailto:${msg.email}?subject=PipWise Support: Inquiry Reply&body=Hi ${msg.name},%0D%0A%0D%0AThank you for reaching out to PipWise Support Desk.`}
+                                className="d2-banner-btn"
+                                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                              >
+                                <Mail size={13} />
+                                <span>Reply via Email</span>
+                              </a>
+                              <button
+                                className="d2-btn-delete"
+                                onClick={() => promptDeleteMessage(msg)}
+                                title="Delete inquiry"
+                              >
+                                <Trash2 size={13} />
+                                <span>Delete Inquiry</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  ) : (
+                    /* Footer Links Management */
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                      <div
+                        style={{
+                          background: 'rgba(252, 93, 33, 0.06)',
+                          border: '1px solid rgba(252, 93, 33, 0.25)',
+                          borderRadius: '12px',
+                          padding: '14px 18px',
+                          fontSize: '13px',
+                          lineHeight: '1.5',
+                        }}
+                      >
+                        <strong>Live Footer Synchronization:</strong> Any link removed/hidden here is instantly removed from the live website footer. Click "Remove from Footer" to take down a link or "Restore Link" to put it back live.
+                      </div>
+
+                      {ALL_FOOTER_SECTIONS.map((sec) => (
+                        <div
+                          key={sec.id}
+                          style={{
+                            background: 'var(--d2-card-bg, #ffffff)',
+                            border: '1px solid var(--d2-border, #e2e8f0)',
+                            borderRadius: '16px',
+                            padding: '20px',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                            <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              {sec.title}
+                            </h3>
+                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                              {sec.links.length} total links
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+                            {sec.links.map((link) => {
+                              const isHidden = hiddenFooterLinks.includes(link.label);
+                              return (
+                                <div
+                                  key={link.label}
+                                  style={{
+                                    border: isHidden ? '1px dashed #ef4444' : '1px solid var(--d2-border, #e2e8f0)',
+                                    background: isHidden ? 'rgba(239, 68, 68, 0.04)' : 'var(--d2-card-bg, #ffffff)',
+                                    borderRadius: '10px',
+                                    padding: '12px 14px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '10px',
+                                    opacity: isHidden ? 0.75 : 1,
+                                    transition: 'all 0.2s',
+                                  }}
+                                >
+                                  <div style={{ minWidth: 0, flex: 1 }}>
+                                    <div
+                                      style={{
+                                        fontWeight: 600,
+                                        fontSize: '13px',
+                                        textDecoration: isHidden ? 'line-through' : 'none',
+                                        color: isHidden ? '#94a3b8' : 'inherit',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                      }}
+                                    >
+                                      {link.label}
+                                    </div>
+                                    <div style={{ fontSize: '10.5px', color: '#94a3b8', marginTop: '2px' }}>
+                                      {link.href ? `Route: ${link.href}` : 'Interactive Modal'}
+                                    </div>
+                                  </div>
+
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <button
+                                      onClick={() => handleToggleFooterLink(link.label)}
+                                      className={isHidden ? 'd2-banner-btn' : 'd2-btn-delete'}
+                                      style={{
+                                        padding: '5px 10px',
+                                        fontSize: '11px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                      }}
+                                      title={isHidden ? 'Restore to website footer' : 'Delete / Hide from website footer'}
+                                    >
+                                      {isHidden ? (
+                                        <>
+                                          <Eye size={12} />
+                                          <span>Restore</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Trash2 size={12} />
+                                          <span>Remove</span>
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               )}
 
