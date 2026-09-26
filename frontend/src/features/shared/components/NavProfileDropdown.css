@@ -1,0 +1,557 @@
+/* ═══════════════════════════════════════════════════════════════
+   PIWISE USER PROFILE NAVBAR TRIGGER & DROPDOWN MENU
+   ═══════════════════════════════════════════════════════════════ */
+
+.pipwise-profile-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Main Profile Pill Trigger in Floating Nav */
+.pipwise-profile-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 9px 3px 4px;
+  background: #1e2028;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 9999px;
+  color: #f8fafc;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.pipwise-profile-trigger-btn:hover {
+  background: #272a34;
+  border-color: rgba(252, 93, 33, 0.45);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  transform: translateY(-1px);
+}
+
+.pipwise-profile-trigger-btn.is-active {
+  background: #252833;
+  border-color: var(--brand-green, #fc5d21);
+  box-shadow: 0 0 0 2px rgba(252, 93, 33, 0.2);
+}
+
+.pipwise-profile-trigger-btn.is-admin {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.pipwise-profile-trigger-btn.is-admin:hover {
+  border-color: #818cf8;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Avatar circle inside trigger button */
+.profile-avatar-circle {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fc5d21 0%, #ff824d 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 800;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(252, 93, 33, 0.35);
+}
+
+.pipwise-profile-trigger-btn.is-admin .profile-avatar-circle {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+}
+
+.profile-trigger-name {
+  max-width: 95px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.profile-verified-badge {
+  color: #10b981;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.profile-chevron-icon {
+  color: #94a3b8;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.profile-chevron-icon.is-rotated {
+  transform: rotate(180deg);
+  color: var(--brand-green, #fc5d21);
+}
+
+/* Dropdown Menu Modal / Card */
+.pipwise-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 290px;
+  background: #111217;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  z-index: 10000;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* Header inside dropdown: Avatar + Name + Email + Role chip */
+.profile-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-dropdown-avatar-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.profile-dropdown-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fc5d21 0%, #f97316 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(252, 93, 33, 0.35);
+}
+
+.profile-dropdown-avatar.is-admin {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.profile-dropdown-online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #111217;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.profile-dropdown-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-dropdown-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-dropdown-email {
+  font-size: 11.5px;
+  color: #94a3b8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+.profile-dropdown-role-chip {
+  margin-top: 6px;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  letter-spacing: 0.02em;
+}
+
+.profile-dropdown-role-chip.verified {
+  background: rgba(16, 185, 129, 0.16);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.profile-dropdown-role-chip.pending {
+  background: rgba(245, 158, 11, 0.16);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.profile-dropdown-role-chip.rejected {
+  background: rgba(239, 68, 68, 0.16);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.profile-dropdown-role-chip.standard {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.profile-dropdown-role-chip.admin {
+  background: rgba(99, 102, 241, 0.16);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+/* Interactive KYC Action Card inside Dropdown */
+.profile-dropdown-kyc-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-dropdown-kyc-box:hover {
+  transform: translateY(-1px);
+}
+
+/* Action Required / Complete KYC Highlight */
+.profile-dropdown-kyc-box.action-needed {
+  background: linear-gradient(135deg, rgba(252, 93, 33, 0.14) 0%, rgba(252, 93, 33, 0.04) 100%);
+  border-color: rgba(252, 93, 33, 0.38);
+}
+
+.profile-dropdown-kyc-box.action-needed:hover {
+  border-color: #fc5d21;
+  box-shadow: 0 4px 16px rgba(252, 93, 33, 0.25);
+}
+
+/* Verified Status Box */
+.profile-dropdown-kyc-box.is-verified {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.profile-dropdown-kyc-box.is-verified:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+/* Pending Review Box */
+.profile-dropdown-kyc-box.is-pending {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.28);
+}
+
+.profile-dropdown-kyc-box.is-pending:hover {
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+/* Rejected Status Box */
+.profile-dropdown-kyc-box.is-rejected {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.28);
+}
+
+.profile-dropdown-kyc-box.is-rejected:hover {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* Admin Dashboard Box */
+.profile-dropdown-admin-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.32);
+  transition: all 0.2s ease;
+}
+
+.profile-dropdown-admin-box:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: #818cf8;
+  transform: translateY(-1px);
+}
+
+/* KYC / Admin Icon Halo */
+.kyc-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kyc-icon-badge.action {
+  background: var(--brand-green, #fc5d21);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(252, 93, 33, 0.35);
+}
+
+.kyc-icon-badge.verified {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.kyc-icon-badge.pending {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.kyc-icon-badge.rejected {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.kyc-icon-badge.admin {
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+}
+
+.kyc-box-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.kyc-box-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kyc-box-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.kyc-action-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--brand-green, #fc5d21);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(252, 93, 33, 0.35);
+}
+
+.kyc-arrow-icon {
+  color: #64748b;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.profile-dropdown-kyc-box:hover .kyc-arrow-icon,
+.profile-dropdown-admin-box:hover .kyc-arrow-icon {
+  transform: translateX(2px);
+  color: #ffffff;
+}
+
+/* Divider */
+.profile-dropdown-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 12px 0 8px 0;
+}
+
+/* Logout Button */
+.profile-dropdown-logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: #f87171;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.profile-dropdown-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT THEME SUPPORT
+   ═══════════════════════════════════════════════════════════════ */
+
+[data-theme='light'] .pipwise-profile-trigger-btn {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme='light'] .pipwise-profile-trigger-btn:hover {
+  background: #e2e8f0;
+  border-color: var(--brand-green, #fc5d21);
+}
+
+[data-theme='light'] .pipwise-profile-trigger-btn.is-active {
+  background: #e2e8f0;
+  border-color: #fc5d21;
+}
+
+[data-theme='light'] .profile-trigger-name {
+  color: #0f172a;
+}
+
+[data-theme='light'] .pipwise-profile-dropdown {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='light'] .profile-dropdown-header {
+  border-bottom-color: #f1f5f9;
+}
+
+[data-theme='light'] .profile-dropdown-name {
+  color: #0f172a;
+}
+
+[data-theme='light'] .profile-dropdown-email {
+  color: #64748b;
+}
+
+[data-theme='light'] .profile-dropdown-online-dot {
+  border-color: #ffffff;
+}
+
+[data-theme='light'] .profile-dropdown-kyc-box {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme='light'] .kyc-box-title {
+  color: #0f172a;
+}
+
+[data-theme='light'] .kyc-box-desc {
+  color: #64748b;
+}
+
+[data-theme='light'] .profile-dropdown-divider {
+  background: #f1f5f9;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVENESS FOR PROFILE MENU & MOBILE DRAWER
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .pipwise-profile-trigger-btn {
+    padding: 2px 7px 2px 3px !important;
+    gap: 5px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .profile-avatar-circle {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 10.5px !important;
+  }
+
+  .profile-trigger-name {
+    max-width: 65px !important;
+    font-size: 11.5px !important;
+  }
+
+  .pipwise-profile-dropdown {
+    width: calc(100vw - 32px);
+    max-width: 290px;
+    right: -10px;
+  }
+
+  /* Mobile menu drawer KYC button enhancement */
+  .mobile-drawer-kyc-btn {
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, rgba(252, 93, 33, 0.16) 0%, rgba(252, 93, 33, 0.05) 100%);
+    border: 1px solid rgba(252, 93, 33, 0.35);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-drawer-kyc-btn.verified {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #10b981;
+  }
+
+  .mobile-drawer-kyc-btn.pending {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #f59e0b;
+  }
+
+  .mobile-drawer-kyc-btn.rejected {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+  }
+}

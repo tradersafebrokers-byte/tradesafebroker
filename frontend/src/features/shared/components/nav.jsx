@@ -11,13 +11,20 @@ import {
   ChevronRight,
   LogIn,
   ShieldCheck,
+  ShieldAlert,
+  Clock,
+  ChevronDown,
   Sun,
   Moon,
   LayoutDashboard,
   CheckCircle2,
+  User,
+  ArrowRight,
 } from 'lucide-react';
 import useAuth from '../../auth/hooks/useAuth.js';
 import { useToast } from './toast/ToastContext.jsx';
+import KycModal from '../../kyc/components/KycModal.jsx';
+import './NavProfileDropdown.css';
 
 const bouncySpring = {
   type: 'spring',
@@ -112,7 +119,7 @@ const DockNavLink = React.memo(({ link, mouseX }) => {
 });
 
 const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
-  const { user, isAuthenticated, openLogin, openRegister, logout } = useAuth();
+  const { user, isAuthenticated, openLogin, openRegister, logout, verifySession } = useAuth();
   const toast = useToast();
 
   const handleLogout = async () => {
@@ -120,6 +127,31 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
     await logout();
     toast.info('Logged Out', currentUsername ? `See you next session, ${currentUsername}!` : 'You have been logged out.');
   };
+
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [kycModalOpen, setKycModalOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && profileDropdownOpen) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    const handleClickOutside = (e) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    if (profileDropdownOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileDropdownOpen]);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -519,7 +551,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
             )}
           </button>
 
-          {/* Login or User Profile Badge */}
+          {/* Login or User Profile Trigger with Interactive Details & KYC Dropdown */}
           {!isAuthenticated ? (
             <button
               type="button"
@@ -542,49 +574,216 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                 ))}
               </span>
             </button>
-          ) : user?.role === 'admin' ? (
-            <div className="pipwise-user-profile-badge is-admin" title="Open Admin Dashboard">
-              <Link
-                to="/admin"
-                className="user-badge-name admin-dashboard-text-link"
-                title="Go to Admin Dashboard"
-              >
-                <LayoutDashboard size={13} color="#818cf8" className="admin-badge-icon" />
-                <span className="admin-dashboard-label">Dashboard</span>
-              </Link>
+          ) : (
+            <div className="pipwise-profile-container" ref={profileDropdownRef}>
               <button
                 type="button"
-                className="user-logout-btn"
-                onClick={handleLogout}
-                title="Log out"
-                aria-label="Log out"
+                className={`pipwise-profile-trigger-btn ${profileDropdownOpen ? 'is-active' : ''} ${user?.role === 'admin' ? 'is-admin' : ''}`}
+                onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                aria-label="User Profile & Settings"
+                aria-expanded={profileDropdownOpen}
               >
-                <LogOut size={13} />
-              </button>
-            </div>
-          ) : (
-            <div className="pipwise-user-profile-badge" title={user?.username || 'Trader'}>
-              <span className="user-badge-name">
-                <span className="user-badge-username">{user?.username || 'Trader'}</span>
+                <div className="profile-avatar-circle">
+                  {(user?.username || user?.name || user?.email || 'T')[0].toUpperCase()}
+                </div>
+                <span className="profile-trigger-name">
+                  {user?.role === 'admin' ? 'Dashboard' : user?.username || 'Trader'}
+                </span>
                 {user?.isKycVerified && (
                   <span
-                    className="user-verified-chip"
+                    className="profile-verified-badge"
                     title="Verified Trader (ID Card KYC Approved)"
                   >
-                    <CheckCircle2 size={11} strokeWidth={3} />
-                    <span className="verified-text">Verified</span>
+                    <CheckCircle2 size={12} strokeWidth={2.8} />
                   </span>
                 )}
-              </span>
-              <button
-                type="button"
-                className="user-logout-btn"
-                onClick={handleLogout}
-                title="Log out"
-                aria-label="Log out"
-              >
-                <LogOut size={13} />
+                <ChevronDown
+                  size={12}
+                  className={`profile-chevron-icon ${profileDropdownOpen ? 'is-rotated' : ''}`}
+                />
               </button>
+
+              {/* Profile Details Dropdown Card */}
+              <AnimatePresence>
+                {profileDropdownOpen && (
+                  <motion.div
+                    className="pipwise-profile-dropdown"
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {/* Header: Avatar + User Details */}
+                    <div className="profile-dropdown-header">
+                      <div className="profile-dropdown-avatar-wrap">
+                        <div className={`profile-dropdown-avatar ${user?.role === 'admin' ? 'is-admin' : ''}`}>
+                          {(user?.username || user?.name || user?.email || 'T')[0].toUpperCase()}
+                        </div>
+                        <span className="profile-dropdown-online-dot" title="Online" />
+                      </div>
+                      <div className="profile-dropdown-meta">
+                        <span className="profile-dropdown-name">
+                          {user?.username || user?.name || 'Trader'}
+                        </span>
+                        <span className="profile-dropdown-email" title={user?.email || ''}>
+                          {user?.email || 'No email registered'}
+                        </span>
+                        <span
+                          className={`profile-dropdown-role-chip ${
+                            user?.role === 'admin'
+                              ? 'admin'
+                              : user?.isKycVerified || user?.kycStatus === 'verified'
+                              ? 'verified'
+                              : user?.kycStatus === 'pending'
+                              ? 'pending'
+                              : user?.kycStatus === 'rejected'
+                              ? 'rejected'
+                              : 'standard'
+                          }`}
+                        >
+                          {user?.role === 'admin' ? (
+                            <>
+                              <LayoutDashboard size={10} />
+                              <span>Administrator</span>
+                            </>
+                          ) : user?.isKycVerified || user?.kycStatus === 'verified' ? (
+                            <>
+                              <ShieldCheck size={10} strokeWidth={2.6} />
+                              <span>Verified Trader</span>
+                            </>
+                          ) : user?.kycStatus === 'pending' ? (
+                            <>
+                              <Clock size={10} strokeWidth={2.4} />
+                              <span>KYC Under Review</span>
+                            </>
+                          ) : user?.kycStatus === 'rejected' ? (
+                            <>
+                              <ShieldAlert size={10} strokeWidth={2.4} />
+                              <span>Action Required</span>
+                            </>
+                          ) : (
+                            <>
+                              <User size={10} />
+                              <span>Trader Account</span>
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Admin Dashboard Quick Access */}
+                    {user?.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        className="profile-dropdown-admin-box"
+                        onClick={() => setProfileDropdownOpen(false)}
+                      >
+                        <div className="kyc-icon-badge admin">
+                          <LayoutDashboard size={16} />
+                        </div>
+                        <div className="kyc-box-text">
+                          <div className="kyc-box-title">Admin Dashboard</div>
+                          <div className="kyc-box-desc">Brokers, reviews, and KYC queue</div>
+                        </div>
+                        <ArrowRight size={13} className="kyc-arrow-icon" />
+                      </Link>
+                    )}
+
+                    {/* KYC Section for Normal Traders */}
+                    {user?.role !== 'admin' && (
+                      <div
+                        className={`profile-dropdown-kyc-box ${
+                          user?.isKycVerified || user?.kycStatus === 'verified'
+                            ? 'is-verified'
+                            : user?.kycStatus === 'pending'
+                            ? 'is-pending'
+                            : user?.kycStatus === 'rejected'
+                            ? 'is-rejected'
+                            : 'action-needed'
+                        }`}
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          setKycModalOpen(true);
+                        }}
+                        title="Open Trader KYC Verification"
+                        role="button"
+                        tabIndex={0}
+                      >
+                        <div
+                          className={`kyc-icon-badge ${
+                            user?.isKycVerified || user?.kycStatus === 'verified'
+                              ? 'verified'
+                              : user?.kycStatus === 'pending'
+                              ? 'pending'
+                              : user?.kycStatus === 'rejected'
+                              ? 'rejected'
+                              : 'action'
+                          }`}
+                        >
+                          {user?.isKycVerified || user?.kycStatus === 'verified' ? (
+                            <ShieldCheck size={16} strokeWidth={2.5} />
+                          ) : user?.kycStatus === 'pending' ? (
+                            <Clock size={16} strokeWidth={2.5} />
+                          ) : user?.kycStatus === 'rejected' ? (
+                            <ShieldAlert size={16} strokeWidth={2.5} />
+                          ) : (
+                            <ShieldCheck size={16} strokeWidth={2.5} />
+                          )}
+                        </div>
+                        <div className="kyc-box-text">
+                          <div className="kyc-box-title">
+                            {user?.isKycVerified || user?.kycStatus === 'verified'
+                              ? 'KYC Verified'
+                              : user?.kycStatus === 'pending'
+                              ? 'KYC Under Review'
+                              : user?.kycStatus === 'rejected'
+                              ? 'Update Your KYC'
+                              : 'Complete Your KYC'}
+                          </div>
+                          <div className="kyc-box-desc">
+                            {user?.isKycVerified || user?.kycStatus === 'verified'
+                              ? 'ID Card verified • Click to view'
+                              : user?.kycStatus === 'pending'
+                              ? 'Under review • Click to view'
+                              : user?.kycStatus === 'rejected'
+                              ? 'Photo rejected • Click to re-upload'
+                              : 'Verify ID to get official badge'}
+                          </div>
+                        </div>
+                        {!user?.isKycVerified && user?.kycStatus !== 'verified' ? (
+                          <div className="kyc-action-pill">
+                            <span>
+                              {user?.kycStatus === 'rejected'
+                                ? 'Fix'
+                                : user?.kycStatus === 'pending'
+                                ? 'Status'
+                                : 'Verify'}
+                            </span>
+                            <ArrowRight size={11} strokeWidth={2.5} />
+                          </div>
+                        ) : (
+                          <ArrowRight size={13} className="kyc-arrow-icon" />
+                        )}
+                      </div>
+                    )}
+
+                    <div className="profile-dropdown-divider" />
+
+                    {/* Logout Option */}
+                    <button
+                      type="button"
+                      className="profile-dropdown-logout-btn"
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      <LogOut size={14} />
+                      <span>Log Out</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
@@ -718,10 +917,64 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                         <span className="mobile-user-name">{user?.username || user?.name || 'Trader'}</span>
                       )}
                       <span className="mobile-user-role">
-                        <ShieldCheck size={11} /> {user?.role === 'admin' ? 'Administrator' : 'Verified Trader'}
+                        {user?.isKycVerified || user?.kycStatus === 'verified' ? (
+                          <>
+                            <ShieldCheck size={11} /> Verified Trader
+                          </>
+                        ) : user?.role === 'admin' ? (
+                          <>
+                            <LayoutDashboard size={11} /> Administrator
+                          </>
+                        ) : (
+                          <>
+                            <User size={11} /> {user?.email || 'Trader Account'}
+                          </>
+                        )}
                       </span>
                     </div>
                   </div>
+
+                  {/* Mobile KYC Action for Traders */}
+                  {user?.role !== 'admin' && (
+                    <button
+                      type="button"
+                      className={`mobile-drawer-kyc-btn ${
+                        user?.isKycVerified || user?.kycStatus === 'verified'
+                          ? 'verified'
+                          : user?.kycStatus === 'pending'
+                          ? 'pending'
+                          : user?.kycStatus === 'rejected'
+                          ? 'rejected'
+                          : ''
+                      }`}
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setKycModalOpen(true);
+                      }}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        {user?.isKycVerified || user?.kycStatus === 'verified' ? (
+                          <>
+                            <ShieldCheck size={14} /> KYC Verified
+                          </>
+                        ) : user?.kycStatus === 'pending' ? (
+                          <>
+                            <Clock size={14} /> KYC Under Review
+                          </>
+                        ) : user?.kycStatus === 'rejected' ? (
+                          <>
+                            <ShieldAlert size={14} /> Re-upload KYC ID
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck size={14} /> Complete Your KYC
+                          </>
+                        )}
+                      </span>
+                      <ArrowRight size={13} />
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     className="mobile-user-logout-btn"
@@ -765,6 +1018,15 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Trader KYC Modal */}
+      <KycModal
+        isOpen={kycModalOpen}
+        onClose={() => setKycModalOpen(false)}
+        onKycUpdated={() => {
+          verifySession();
+        }}
+      />
     </header>
   );
 };

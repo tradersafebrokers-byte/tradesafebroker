@@ -2566,7 +2566,8 @@ input {
     /* When Search is Open on Mobile: Hide Theme Button and User badge so search bar expands seamlessly */
     .pipwise-nav-floating-bar.is-search-expanded .pipwise-theme-btn,
     .pipwise-theme-btn.is-search-hidden,
-    .pipwise-nav-floating-bar.is-search-expanded .pipwise-user-profile-badge {
+    .pipwise-nav-floating-bar.is-search-expanded .pipwise-user-profile-badge,
+    .pipwise-nav-floating-bar.is-search-expanded .pipwise-profile-container {
         display: none !important;
         width: 0 !important;
         height: 0 !important;
