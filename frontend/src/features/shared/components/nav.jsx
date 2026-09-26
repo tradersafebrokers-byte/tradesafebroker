@@ -570,248 +570,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
             )}
           </button>
 
-          {/* Login or User Profile Trigger with Interactive Details & KYC Dropdown */}
-          {!isAuthenticated ? (
-            <button
-              type="button"
-              className="pipwise-floating-login-btn"
-              onClick={() => {
-                triggerLoginWave();
-                openLogin();
-              }}
-              aria-label="Log in"
-            >
-              <span key={waveKey} className="login-wave-text">
-                {'Log in'.split('').map((char, index) => (
-                  <span
-                    key={index}
-                    className={`wave-letter ${waveKey > 0 ? 'is-animating' : ''}`}
-                    style={{ animationDelay: `${index * 0.035}s` }}
-                  >
-                    {char === ' ' ? '\u00A0' : char}
-                  </span>
-                ))}
-              </span>
-            </button>
-          ) : (
-            <div
-              className="pipwise-profile-container"
-              ref={profileDropdownRef}
-            >
-              <button
-                ref={profileTriggerRef}
-                type="button"
-                className={`pipwise-profile-trigger-btn ${profileDropdownOpen ? 'is-active' : ''} ${user?.role === 'admin' ? 'is-admin' : ''}`}
-                onClick={() => {
-                  setProfileDropdownOpen((prev) => !prev);
-                }}
-                aria-label="User Profile & Settings"
-                aria-expanded={profileDropdownOpen}
-              >
-                <div className="profile-avatar-circle">
-                  {(user?.username || user?.name || user?.email || 'T')[0].toUpperCase()}
-                </div>
-                <span className="profile-trigger-name">
-                  {user?.role === 'admin' ? 'Dashboard' : user?.username || 'Trader'}
-                </span>
-                {user?.isKycVerified && (
-                  <span
-                    className="profile-verified-badge"
-                    title="Verified Trader (ID Card KYC Approved)"
-                  >
-                    <CheckCircle2 size={12} strokeWidth={2.8} />
-                  </span>
-                )}
-                <ChevronDown
-                  size={12}
-                  className={`profile-chevron-icon ${profileDropdownOpen ? 'is-rotated' : ''}`}
-                />
-              </button>
-
-              {/* Profile Details Dropdown Card */}
-              <AnimatePresence>
-                {profileDropdownOpen && (
-                  <motion.div
-                    className="pipwise-profile-dropdown"
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                    transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {/* Header: Avatar + User Details */}
-                    <div className="profile-dropdown-header">
-                      <div className="profile-dropdown-avatar-wrap">
-                        <div className={`profile-dropdown-avatar ${user?.role === 'admin' ? 'is-admin' : ''}`}>
-                          {(user?.username || user?.name || user?.email || 'T')[0].toUpperCase()}
-                        </div>
-                        <span className="profile-dropdown-online-dot" title="Online" />
-                      </div>
-                      <div className="profile-dropdown-meta">
-                        <span className="profile-dropdown-name">
-                          {user?.username || user?.name || 'Trader'}
-                        </span>
-                        <span className="profile-dropdown-email" title={user?.email || ''}>
-                          {user?.email || 'No email registered'}
-                        </span>
-                        <span
-                          className={`profile-dropdown-role-chip ${
-                            user?.role === 'admin'
-                              ? 'admin'
-                              : user?.isKycVerified || user?.kycStatus === 'verified'
-                              ? 'verified'
-                              : user?.kycStatus === 'pending'
-                              ? 'pending'
-                              : user?.kycStatus === 'rejected'
-                              ? 'rejected'
-                              : 'standard'
-                          }`}
-                        >
-                          {user?.role === 'admin' ? (
-                            <>
-                              <LayoutDashboard size={10} />
-                              <span>Administrator</span>
-                            </>
-                          ) : user?.isKycVerified || user?.kycStatus === 'verified' ? (
-                            <>
-                              <ShieldCheck size={10} strokeWidth={2.6} />
-                              <span>Verified Trader</span>
-                            </>
-                          ) : user?.kycStatus === 'pending' ? (
-                            <>
-                              <Clock size={10} strokeWidth={2.4} />
-                              <span>KYC Under Review</span>
-                            </>
-                          ) : user?.kycStatus === 'rejected' ? (
-                            <>
-                              <ShieldAlert size={10} strokeWidth={2.4} />
-                              <span>Action Required</span>
-                            </>
-                          ) : (
-                            <>
-                              <User size={10} />
-                              <span>Trader Account</span>
-                            </>
-                          )}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Admin Dashboard Quick Access */}
-                    {user?.role === 'admin' && (
-                      <Link
-                        to="/admin"
-                        className="profile-dropdown-admin-box"
-                        onClick={() => setProfileDropdownOpen(false)}
-                      >
-                        <div className="kyc-icon-badge admin">
-                          <LayoutDashboard size={16} />
-                        </div>
-                        <div className="kyc-box-text">
-                          <div className="kyc-box-title">Admin Dashboard</div>
-                          <div className="kyc-box-desc">Brokers, reviews, and KYC queue</div>
-                        </div>
-                        <ArrowRight size={13} className="kyc-arrow-icon" />
-                      </Link>
-                    )}
-
-                    {/* KYC Section for Normal Traders */}
-                    {user?.role !== 'admin' && (
-                      <div
-                        className={`profile-dropdown-kyc-box ${
-                          user?.isKycVerified || user?.kycStatus === 'verified'
-                            ? 'is-verified'
-                            : user?.kycStatus === 'pending'
-                            ? 'is-pending'
-                            : user?.kycStatus === 'rejected'
-                            ? 'is-rejected'
-                            : 'action-needed'
-                        }`}
-                        onClick={() => {
-                          setProfileDropdownOpen(false);
-                          setKycModalOpen(true);
-                        }}
-                        title="Open Trader KYC Verification"
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <div
-                          className={`kyc-icon-badge ${
-                            user?.isKycVerified || user?.kycStatus === 'verified'
-                              ? 'verified'
-                              : user?.kycStatus === 'pending'
-                              ? 'pending'
-                              : user?.kycStatus === 'rejected'
-                              ? 'rejected'
-                              : 'action'
-                          }`}
-                        >
-                          {user?.isKycVerified || user?.kycStatus === 'verified' ? (
-                            <ShieldCheck size={16} strokeWidth={2.5} />
-                          ) : user?.kycStatus === 'pending' ? (
-                            <Clock size={16} strokeWidth={2.5} />
-                          ) : user?.kycStatus === 'rejected' ? (
-                            <ShieldAlert size={16} strokeWidth={2.5} />
-                          ) : (
-                            <ShieldCheck size={16} strokeWidth={2.5} />
-                          )}
-                        </div>
-                        <div className="kyc-box-text">
-                          <div className="kyc-box-title">
-                            {user?.isKycVerified || user?.kycStatus === 'verified'
-                              ? 'KYC Verified'
-                              : user?.kycStatus === 'pending'
-                              ? 'KYC Under Review'
-                              : user?.kycStatus === 'rejected'
-                              ? 'Update Your KYC'
-                              : 'Complete Your KYC'}
-                          </div>
-                          <div className="kyc-box-desc">
-                            {user?.isKycVerified || user?.kycStatus === 'verified'
-                              ? 'ID Card verified • Click to view'
-                              : user?.kycStatus === 'pending'
-                              ? 'Under review • Click to view'
-                              : user?.kycStatus === 'rejected'
-                              ? 'Photo rejected • Click to re-upload'
-                              : 'Verify ID to get official badge'}
-                          </div>
-                        </div>
-                        {!user?.isKycVerified && user?.kycStatus !== 'verified' ? (
-                          <div className="kyc-action-pill">
-                            <span>
-                              {user?.kycStatus === 'rejected'
-                                ? 'Fix'
-                                : user?.kycStatus === 'pending'
-                                ? 'Status'
-                                : 'Verify'}
-                            </span>
-                            <ArrowRight size={11} strokeWidth={2.5} />
-                          </div>
-                        ) : (
-                          <ArrowRight size={13} className="kyc-arrow-icon" />
-                        )}
-                      </div>
-                    )}
-
-                    <div className="profile-dropdown-divider" />
-
-                    {/* Logout Option */}
-                    <button
-                      type="button"
-                      className="profile-dropdown-logout-btn"
-                      onClick={() => {
-                        setProfileDropdownOpen(false);
-                        handleLogout();
-                      }}
-                    >
-                      <LogOut size={14} />
-                      <span>Log Out</span>
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
+          {/* Auth block moved outside the main navbar */}
 
           {/* Mobile Menu Toggle Button */}
           <button
@@ -838,6 +597,237 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
         </motion.div>
       </motion.nav>
 
+      {/* Side Profile/Login Widget (Fixed to the right on Desktop) */}
+      <div className="pipwise-fixed-auth-widget">
+        {!isAuthenticated ? (
+          <button
+            type="button"
+            className="pipwise-floating-login-btn"
+            onClick={() => {
+              triggerLoginWave();
+              openLogin();
+            }}
+            aria-label="Log in"
+          >
+            <span key={waveKey} className="login-wave-text">
+              {'Log in'.split('').map((char, index) => (
+                <span
+                  key={index}
+                  className={`wave-letter ${waveKey > 0 ? 'is-animating' : ''}`}
+                  style={{ animationDelay: `${index * 0.035}s` }}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </span>
+          </button>
+        ) : (
+          <div className="pipwise-profile-container" ref={profileDropdownRef}>
+            <button
+              ref={profileTriggerRef}
+              type="button"
+              className={`pipwise-side-avatar-trigger ${profileDropdownOpen ? 'is-active' : ''} ${user?.role === 'admin' ? 'is-admin' : ''}`}
+              onClick={() => {
+                setProfileDropdownOpen((prev) => !prev);
+              }}
+              aria-label="User Profile"
+              aria-expanded={profileDropdownOpen}
+            >
+              <div className="profile-avatar-circle">
+                {(user?.username || user?.name || user?.email || 'T')[0].toUpperCase()}
+              </div>
+              {user?.isKycVerified && (
+                <span className="side-avatar-verified-badge" title="Verified Trader">
+                  <CheckCircle2 size={12} strokeWidth={3} />
+                </span>
+              )}
+            </button>
+
+            {/* Profile Details Dropdown Card */}
+            <AnimatePresence>
+              {profileDropdownOpen && (
+                <motion.div
+                  className="pipwise-profile-dropdown"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Header: Avatar + User Details */}
+                  <div className="profile-dropdown-header">
+                    <div className="profile-dropdown-avatar-wrap">
+                      <div className={`profile-dropdown-avatar ${user?.role === 'admin' ? 'is-admin' : ''}`}>
+                        {(user?.username || user?.name || user?.email || 'T')[0].toUpperCase()}
+                      </div>
+                      <span className="profile-dropdown-online-dot" title="Online" />
+                    </div>
+                    <div className="profile-dropdown-meta">
+                      <span className="profile-dropdown-name">
+                        {user?.username || user?.name || 'Trader'}
+                      </span>
+                      <span className="profile-dropdown-email" title={user?.email || ''}>
+                        {user?.email || 'No email registered'}
+                      </span>
+                      <span
+                        className={`profile-dropdown-role-chip ${
+                          user?.role === 'admin'
+                            ? 'admin'
+                            : user?.isKycVerified || user?.kycStatus === 'verified'
+                            ? 'verified'
+                            : user?.kycStatus === 'pending'
+                            ? 'pending'
+                            : user?.kycStatus === 'rejected'
+                            ? 'rejected'
+                            : 'standard'
+                        }`}
+                      >
+                        {user?.role === 'admin' ? (
+                          <>
+                            <LayoutDashboard size={10} />
+                            <span>Administrator</span>
+                          </>
+                        ) : user?.isKycVerified || user?.kycStatus === 'verified' ? (
+                          <>
+                            <ShieldCheck size={10} strokeWidth={2.6} />
+                            <span>Verified Trader</span>
+                          </>
+                        ) : user?.kycStatus === 'pending' ? (
+                          <>
+                            <Clock size={10} strokeWidth={2.4} />
+                            <span>KYC Under Review</span>
+                          </>
+                        ) : user?.kycStatus === 'rejected' ? (
+                          <>
+                            <ShieldAlert size={10} strokeWidth={2.4} />
+                            <span>Action Required</span>
+                          </>
+                        ) : (
+                          <>
+                            <User size={10} />
+                            <span>Trader Account</span>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Admin Dashboard Quick Access */}
+                  {user?.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="profile-dropdown-admin-box"
+                      onClick={() => setProfileDropdownOpen(false)}
+                    >
+                      <div className="kyc-icon-badge admin">
+                        <LayoutDashboard size={16} />
+                      </div>
+                      <div className="kyc-box-text">
+                        <div className="kyc-box-title">Admin Dashboard</div>
+                        <div className="kyc-box-desc">Brokers, reviews, and KYC queue</div>
+                      </div>
+                      <ArrowRight size={13} className="kyc-arrow-icon" />
+                    </Link>
+                  )}
+
+                  {/* KYC Section for Normal Traders */}
+                  {user?.role !== 'admin' && (
+                    <div
+                      className={`profile-dropdown-kyc-box ${
+                        user?.isKycVerified || user?.kycStatus === 'verified'
+                          ? 'is-verified'
+                          : user?.kycStatus === 'pending'
+                          ? 'is-pending'
+                          : user?.kycStatus === 'rejected'
+                          ? 'is-rejected'
+                          : 'action-needed'
+                      }`}
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        setKycModalOpen(true);
+                      }}
+                      title="Open Trader KYC Verification"
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div
+                        className={`kyc-icon-badge ${
+                          user?.isKycVerified || user?.kycStatus === 'verified'
+                            ? 'verified'
+                            : user?.kycStatus === 'pending'
+                            ? 'pending'
+                            : user?.kycStatus === 'rejected'
+                            ? 'rejected'
+                            : 'action'
+                        }`}
+                      >
+                        {user?.isKycVerified || user?.kycStatus === 'verified' ? (
+                          <ShieldCheck size={16} strokeWidth={2.5} />
+                        ) : user?.kycStatus === 'pending' ? (
+                          <Clock size={16} strokeWidth={2.5} />
+                        ) : user?.kycStatus === 'rejected' ? (
+                          <ShieldAlert size={16} strokeWidth={2.5} />
+                        ) : (
+                          <ShieldCheck size={16} strokeWidth={2.5} />
+                        )}
+                      </div>
+                      <div className="kyc-box-text">
+                        <div className="kyc-box-title">
+                          {user?.isKycVerified || user?.kycStatus === 'verified'
+                            ? 'KYC Verified'
+                            : user?.kycStatus === 'pending'
+                            ? 'KYC Under Review'
+                            : user?.kycStatus === 'rejected'
+                            ? 'Update Your KYC'
+                            : 'Complete Your KYC'}
+                        </div>
+                        <div className="kyc-box-desc">
+                          {user?.isKycVerified || user?.kycStatus === 'verified'
+                            ? 'ID Card verified • Click to view'
+                            : user?.kycStatus === 'pending'
+                            ? 'Under review • Click to view'
+                            : user?.kycStatus === 'rejected'
+                            ? 'Photo rejected • Click to re-upload'
+                            : 'Verify ID to get official badge'}
+                        </div>
+                      </div>
+                      {!user?.isKycVerified && user?.kycStatus !== 'verified' ? (
+                        <div className="kyc-action-pill">
+                          <span>
+                            {user?.kycStatus === 'rejected'
+                              ? 'Fix'
+                              : user?.kycStatus === 'pending'
+                              ? 'Status'
+                              : 'Verify'}
+                          </span>
+                          <ArrowRight size={11} strokeWidth={2.5} />
+                        </div>
+                      ) : (
+                        <ArrowRight size={13} className="kyc-arrow-icon" />
+                      )}
+                    </div>
+                  )}
+
+                  <div className="profile-dropdown-divider" />
+
+                  {/* Logout Option */}
+                  <button
+                    type="button"
+                    className="profile-dropdown-logout-btn"
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    <LogOut size={14} />
+                    <span>Log Out</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
 
       {/* Premium Mobile Navigation Drawer with Auth & Theme Switcher */}
       <AnimatePresence>

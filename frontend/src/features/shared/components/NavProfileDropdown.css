@@ -561,3 +561,100 @@
     color: #ef4444;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   FIXED SIDE PROFILE WIDGET (Desktop Only)
+   ═══════════════════════════════════════════════════════════════ */
+
+.pipwise-fixed-auth-widget {
+  position: fixed;
+  top: 1.6rem;
+  right: 2rem;
+  z-index: 1050;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pipwise-side-avatar-trigger {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 18, 23, 0.85);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.pipwise-side-avatar-trigger:hover,
+.pipwise-side-avatar-trigger.is-active {
+  border-color: rgba(252, 93, 33, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(252, 93, 33, 0.15);
+}
+
+.pipwise-side-avatar-trigger .profile-avatar-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fc5d21 0%, #f97316 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.pipwise-side-avatar-trigger.is-admin .profile-avatar-circle {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.side-avatar-verified-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: #111217;
+  border-radius: 50%;
+  padding: 2px;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Adjust dropdown position for the side widget */
+.pipwise-fixed-auth-widget .pipwise-profile-dropdown {
+  top: calc(100% + 14px);
+  right: 0;
+  transform-origin: top right;
+}
+
+/* Light theme overrides */
+[data-theme='light'] .pipwise-side-avatar-trigger {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+[data-theme='light'] .pipwise-side-avatar-trigger:hover,
+[data-theme='light'] .pipwise-side-avatar-trigger.is-active {
+  border-color: rgba(252, 93, 33, 0.4);
+}
+[data-theme='light'] .side-avatar-verified-badge {
+  background: #ffffff;
+}
+
+/* Hide side widget on mobile (handled by drawer instead) */
+@media (max-width: 900px) {
+  .pipwise-fixed-auth-widget {
+    display: none !important;
+  }
+}
