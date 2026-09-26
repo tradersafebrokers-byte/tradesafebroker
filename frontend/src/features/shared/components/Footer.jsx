@@ -21,14 +21,9 @@ export const ALL_FOOTER_SECTIONS = [
   },
   {
     id: 'compare',
-    title: 'Compare & Categories',
+    title: 'Compare Brokers',
     links: [
       { label: 'Compare Brokers Side by Side', href: '/compare', coral: true },
-      { label: 'Lowest Spread Forex Brokers', href: '/compare' },
-      { label: 'Best Brokers for Scalping', href: '/compare' },
-      { label: 'Best for Beginners', href: '/compare' },
-      { label: 'High Leverage Accounts', href: '/compare' },
-      { label: 'MT4 & MT5 Platform Brokers', href: '/compare' },
     ],
   },
   {
