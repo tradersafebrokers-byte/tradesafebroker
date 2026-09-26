@@ -27,6 +27,7 @@ import {
   Crown,
   ShieldCheck,
   ShieldAlert,
+  ArrowLeft,
   ArrowRight,
   TrendingUp,
   RefreshCw,
@@ -1581,19 +1582,14 @@ export default function AdminDashboard() {
 
   return (
     <div className={`d2-canvas ${theme === 'dark' ? 'd2-theme-dark' : ''}`}>
-      {/* QUICK SWITCHER BUTTON TO TRADESAFEBROKERS PUBLIC SITE */}
+      {/* TOP RIGHT BACK TO WEBSITE BUTTON */}
       <Link
         to="/"
-        className="d2-dashboard-switcher"
-        title="Return to TradeSafeBrokers Public Portal"
-        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+        className="d2-back-btn"
+        title="Back to TradeSafeBrokers Website"
       >
-        <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: '2px', height: '14px' }}>
-          <span style={{ width: '2.5px', height: '9px', background: '#fc5d21', borderRadius: '1px' }} />
-          <span style={{ width: '2.5px', height: '14px', background: '#10b981', borderRadius: '1px' }} />
-          <span style={{ width: '2.5px', height: '7px', background: '#fc5d21', borderRadius: '1px' }} />
-        </span>
-        <span>TradeSafe<span style={{ color: '#fc5d21', fontWeight: 800 }}>Brokers</span> Admin</span>
+        <ArrowLeft size={15} strokeWidth={2.4} className="d2-back-btn-arrow" />
+        <span>Back to Website</span>
       </Link>
 
       <div className="d2-container">
@@ -1833,29 +1829,6 @@ export default function AdminDashboard() {
               </button>
             </nav>
 
-            <div className="d2-search-container">
-              <Search size={14} className="d2-search-icon" />
-              <input
-                type="text"
-                className="d2-search-input"
-                placeholder={
-                  activeDock === 'kyc' || activeNav === 'kyc'
-                    ? 'Search KYC by username, email, full name, or ID Card...'
-                    : activeDock === 'users'
-                    ? 'Search registered users by username/email...'
-                    : activeDock === 'reviews'
-                    ? 'Search reviews or brokers...'
-                    : activeDock === 'testimonials'
-                    ? 'Search testimonials by trader name, role, quote...'
-                    : activeDock === 'messages' || activeNav === 'messages'
-                    ? 'Search inquiries by sender name, email, or message...'
-                    : 'Search brokers by name, platforms, regulation...'
-                }
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-
             <div className="d2-header-actions">
               {/* THEME TOGGLE */}
               <div className="d2-theme-toggle">
@@ -1906,19 +1879,6 @@ export default function AdminDashboard() {
                 <Download size={13} strokeWidth={2.2} />
                 <span>Export</span>
                 <span className="d2-xls-tag">.csv</span>
-              </button>
-
-              {/* ADD NEW BROKER */}
-              <button
-                className="d2-add-board-btn"
-                onClick={() => navigate('/join-broker')}
-                title="Register or test new broker submission"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                <span>Add Broker</span>
               </button>
             </div>
           </header>
@@ -1972,18 +1932,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="d2-feature-cards">
-                      {/* CARD 1: ADD BUTTON CARD */}
-                      <div
-                        className="d2-add-feature-card"
-                        onClick={() => navigate('/join-broker')}
-                        title="Submit or add new broker"
-                      >
-                        <div className="d2-add-square-btn">
-                          <Plus size={18} strokeWidth={2.5} />
-                        </div>
-                      </div>
-
-                      {/* CARD 2: REAL BROKERS COUNT */}
+                      {/* CARD 1: REAL BROKERS COUNT */}
                       <div
                         className="d2-feature-card"
                         onClick={() => switchDockView('brokers', 'Brokers')}

@@ -46,30 +46,70 @@
   color: #f1f5f9;
 }
 
-/* ---------- Dashboard Switcher (Top Right Quick Link) ---------- */
+/* ---------- Dashboard Switcher & Top Right Back Button ---------- */
+.d2-back-btn,
 .d2-dashboard-switcher {
   position: absolute;
   top: clamp(10px, 1.4vh, 18px);
   right: clamp(28px, 4.5vw, 76px);
   z-index: 100;
-  border: none;
-  background: linear-gradient(135deg, #595ef2 0%, #7c5cf2 100%);
-  color: #fff;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: 20px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(89, 94, 242, 0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
 }
+
+.d2-back-btn .d2-back-btn-arrow {
+  color: #595ef2;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.d2-back-btn:hover,
 .d2-dashboard-switcher:hover {
+  background: #ffffff;
+  color: #595ef2;
+  border-color: #c7d2fe;
+  box-shadow: 0 4px 14px rgba(89, 94, 242, 0.18);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(89, 94, 242, 0.5);
+}
+
+.d2-back-btn:hover .d2-back-btn-arrow {
+  transform: translateX(-3px);
+}
+
+/* Dark mode for back button */
+.d2-theme-dark .d2-back-btn,
+.d2-theme-dark .d2-dashboard-switcher {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.d2-theme-dark .d2-back-btn .d2-back-btn-arrow {
+  color: #818cf8;
+}
+
+.d2-theme-dark .d2-back-btn:hover,
+.d2-theme-dark .d2-dashboard-switcher:hover {
+  background: #28354f;
+  color: #a5b4fc;
+  border-color: #4f46e5;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.d2-theme-dark .d2-back-btn:hover .d2-back-btn-arrow {
+  color: #c7d2fe;
 }
 
 /* ---------- Curved Wave Sidebar ---------- */
@@ -496,8 +536,8 @@
 .d2-feature-cards {
   flex: 1;
   display: grid;
-  grid-template-columns: 88px repeat(3, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
 }
 
 .d2-add-feature-card {
@@ -540,8 +580,8 @@
 
 .d2-feature-card {
   background: #f8fafc;
-  border-radius: 18px;
-  padding: 14px 16px;
+  border-radius: 16px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -550,6 +590,13 @@
   box-sizing: border-box;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid #f1f5f9;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.d2-feature-card > div:last-child {
+  min-width: 0;
+  width: 100%;
 }
 
 .d2-feature-card:hover {
@@ -574,6 +621,10 @@
   font-weight: 700;
   color: #0f172a;
   margin: 0 0 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .d2-theme-dark .d2-feature-card-title {
@@ -585,6 +636,10 @@
   color: #64748b;
   margin: 0;
   line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2355,7 +2410,8 @@
     justify-content: flex-end;
   }
 
-  .d2-dashboard-switcher {
+  .d2-dashboard-switcher,
+  .d2-back-btn {
     position: static;
     margin-bottom: 8px;
     align-self: flex-end;
