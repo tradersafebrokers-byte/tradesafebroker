@@ -91,7 +91,7 @@ const sendViaResend = async ({ to, subject, html, text }) => {
   const apiKey = (process.env.RESEND_API_KEY || '').trim();
   if (!apiKey) throw new Error('RESEND_API_KEY is not set');
 
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'no-reply@tradesafebrokers.com';
   const fromName = config.smtp.fromName || 'TradeSafe Brokers';
 
   const response = await fetch('https://api.resend.com/emails', {
