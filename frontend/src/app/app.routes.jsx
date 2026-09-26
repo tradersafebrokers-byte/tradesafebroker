@@ -8,6 +8,7 @@ import PrivacyPolicy from '../pages/PrivacyPolicy.jsx';
 import ContactPage from '../pages/ContactPage.jsx';
 import AdminDashboard from '../pages/AdminDashboard.jsx';
 import AdminRoute from '../features/auth/components/AdminRoute.jsx';
+import BrokerReviewPage from '../pages/BrokerReviewPage.jsx';
 
 export const AppRoutes = React.memo(({ theme, heroComplete, setHeroComplete, onHeroFinished }) => {
   return (
@@ -42,6 +43,18 @@ export const AppRoutes = React.memo(({ theme, heroComplete, setHeroComplete, onH
         <Route
           path="/all-brokers"
           element={<Navigate to="/brokers" replace />}
+        />
+        <Route
+          path="/reviews/:slug"
+          element={<BrokerReviewPage theme={theme} />}
+        />
+        <Route
+          path="/review/:slug"
+          element={<BrokerReviewPage theme={theme} />}
+        />
+        <Route
+          path="/brokers/:slug"
+          element={<BrokerReviewPage theme={theme} />}
         />
         <Route
           path="/compare"

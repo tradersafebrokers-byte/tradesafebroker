@@ -11,12 +11,12 @@ export const ALL_FOOTER_SECTIONS = [
     id: 'brokers',
     title: 'Top Forex Brokers',
     links: [
-      { label: 'XM Review & Spreads', href: '/brokers' },
-      { label: 'Exness Review & Fees', href: '/brokers' },
-      { label: 'IC Markets Scalping', href: '/brokers', highlight: true },
-      { label: 'Pepperstone ECN', href: '/brokers' },
-      { label: 'FXTM Zero Spread', href: '/brokers' },
-      { label: 'AvaTrade Multi-Asset', href: '/brokers' },
+      { label: 'XM Review & Spreads', href: '/reviews/xm' },
+      { label: 'Exness Review & Fees', href: '/reviews/exness' },
+      { label: 'IC Markets Scalping', href: '/reviews/ic-markets', highlight: true },
+      { label: 'Pepperstone ECN', href: '/reviews/pepperstone' },
+      { label: 'FXTM Zero Spread', href: '/reviews/fxtm' },
+      { label: 'AvaTrade Multi-Asset', href: '/reviews/avatrade' },
     ],
   },
   {
