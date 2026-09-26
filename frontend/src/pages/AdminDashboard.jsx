@@ -44,11 +44,15 @@ import {
   Sparkles,
   Mail,
   Pencil,
+  Send,
+  CornerDownRight,
 } from 'lucide-react';
 import useAuth from '../features/auth/hooks/useAuth.js';
 import adminService from '../features/admin/services/admin.service.js';
 import apiClient from '../features/auth/services/api.client.js';
 import { ALL_FOOTER_SECTIONS } from '../features/shared/components/Footer.jsx';
+import AdminReplyModal from '../features/admin/components/AdminReplyModal.jsx';
+import VerifiedGoldBadge from '../features/shared/components/VerifiedGoldBadge.jsx';
 import {
   INITIAL_DEMO_TESTIMONIALS,
   addDeletedId,
@@ -662,9 +666,9 @@ const UserKycInspectModal = React.memo(({
                       ? 'Rejected'
                       : 'Pending Review'}
                   </span>
-                  {kycUser.isKycVerified && (
-                    <span className="d2-badge-verified-glow">
-                      <CheckCircle2 size={13} strokeWidth={2.5} />
+                  {(kycUser.isKycVerified || kycUser.kycStatus === 'verified') && (
+                    <span className="d2-badge-verified-glow" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                      <VerifiedGoldBadge size={14} />
                       Verified Badge Active
                     </span>
                   )}
@@ -899,6 +903,11 @@ export default function AdminDashboard() {
   const [messagesList, setMessagesList] = useState([]);
   const [hiddenFooterLinks, setHiddenFooterLinks] = useState([]);
   const [messagesSubTab, setMessagesSubTab] = useState('inquiries'); // 'inquiries' | 'footer'
+  const [replyModal, setReplyModal] = useState({
+    isOpen: false,
+    message: null,
+    sending: false,
+  });
 
   // Delete Confirmation Modal State
   const [deleteModal, setDeleteModal] = useState({
@@ -1428,6 +1437,47 @@ export default function AdminDashboard() {
       extraInfo: `Email: ${msg.email} | Date: ${new Date(msg.createdAt).toLocaleDateString()}`,
     });
   }, []);
+
+  const openReplyModal = useCallback((msg) => {
+    setReplyModal({
+      isOpen: true,
+      message: msg,
+      sending: false,
+    });
+  }, []);
+
+  const closeReplyModal = useCallback(() => {
+    setReplyModal((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const handleSendReply = useCallback(
+    async ({ messageId, replySubject, replyMessage }) => {
+      setReplyModal((prev) => ({ ...prev, sending: true }));
+      try {
+        const res = await apiClient.post(`/contact/${messageId}/reply`, {
+          replySubject,
+          replyMessage,
+        });
+
+        const updated = res.data?.data || res.data;
+        setMessagesList((prev) =>
+          prev.map((m) =>
+            m._id === messageId ? { ...m, ...updated, status: 'replied' } : m
+          )
+        );
+
+        showToast(`Reply sent successfully to ${updated.email || 'user'}!`);
+        closeReplyModal();
+      } catch (err) {
+        console.error('Failed to send reply:', err);
+        showToast(
+          err.response?.data?.message || err.message || 'Failed to dispatch email reply'
+        );
+        setReplyModal((prev) => ({ ...prev, sending: false }));
+      }
+    },
+    [showToast, closeReplyModal]
+  );
 
   // Toggle Broker Verification
   const handleToggleBrokerVerify = useCallback(async (brokerId) => {
@@ -2703,8 +2753,11 @@ export default function AdminDashboard() {
                                       ? 'Rejected'
                                       : 'Pending Review'}
                                   </span>
-                                  {sub.isKycVerified && (
-                                    <span className="d2-badge-verified">Verified Badge Active</span>
+                                  {(sub.isKycVerified || sub.kycStatus === 'verified') && (
+                                    <span className="d2-badge-verified" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                      <VerifiedGoldBadge size={13} />
+                                      <span>Verified</span>
+                                    </span>
                                   )}
                                 </span>
                                 <span className="d2-item-sub">
@@ -2826,6 +2879,9 @@ export default function AdminDashboard() {
                           <div className="d2-item-info">
                             <span className="d2-item-title">
                               {u.username}
+                              {(u.isKycVerified || u.kycStatus === 'verified') && (
+                                <VerifiedGoldBadge size={14} title="Verified Trader" />
+                              )}
                               {u.role === 'admin' ? (
                                 <span className="d2-badge-admin">Admin</span>
                               ) : (
@@ -3219,12 +3275,21 @@ export default function AdminDashboard() {
                                 </div>
                               </div>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span className="d2-reply-ticket-pill">
+                                  #{msg.ticketId || `TSB-${msg._id.slice(-6).toUpperCase()}`}
+                                </span>
                                 <span style={{ fontSize: '11px', color: '#94a3b8' }}>
                                   {new Date(msg.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
                                 </span>
-                                <span className="d2-badge-verified" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-                                  Inquiry
-                                </span>
+                                {msg.status === 'replied' ? (
+                                  <span className="d2-badge-verified" style={{ background: 'rgba(99, 102, 241, 0.12)', color: '#6366f1', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <Check size={11} strokeWidth={2.5} /> Replied
+                                  </span>
+                                ) : (
+                                  <span className="d2-badge-verified" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <Clock size={11} strokeWidth={2.5} /> Needs Reply
+                                  </span>
+                                )}
                               </div>
                             </div>
 
@@ -3232,15 +3297,40 @@ export default function AdminDashboard() {
                               {msg.message}
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '4px' }}>
-                              <a
-                                href={`mailto:${msg.email}?subject=TradeSafeBrokers Support: Inquiry Reply&body=Hi ${msg.name},%0D%0A%0D%0AThank you for contacting TradeSafeBrokers Support Desk.`}
-                                className="d2-banner-btn"
-                                style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                            {msg.replyMessage && (
+                              <div className="d2-inquiry-reply-box">
+                                <div className="d2-inquiry-reply-header">
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <CornerDownRight size={13} color="#6366f1" />
+                                    <strong style={{ color: '#6366f1' }}>Official Staff Response</strong>
+                                    {msg.replySubject && (
+                                      <span style={{ color: '#94a3b8', fontSize: '11px' }}>
+                                        • {msg.replySubject}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {msg.repliedAt && (
+                                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                                      Sent {new Date(msg.repliedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="d2-inquiry-reply-text">
+                                  {msg.replyMessage}
+                                </div>
+                              </div>
+                            )}
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
+                              <button
+                                type="button"
+                                className="d2-reply-inquiry-btn"
+                                onClick={() => openReplyModal(msg)}
+                                title="Reply directly from Admin Dashboard"
                               >
-                                <Mail size={13} />
-                                <span>Reply via Email</span>
-                              </a>
+                                <Send size={13} strokeWidth={2.2} />
+                                <span>{msg.status === 'replied' ? 'Send Follow-up' : 'Reply from Dashboard'}</span>
+                              </button>
                               <button
                                 className="d2-btn-delete"
                                 onClick={() => promptDeleteMessage(msg)}
@@ -3614,6 +3704,15 @@ export default function AdminDashboard() {
         modalData={deleteModal}
         onClose={closeDeleteModal}
         onConfirm={confirmDeleteAction}
+      />
+
+      {/* INQUIRY EMAIL REPLY MODAL (OFFICIAL DASHBOARD EMAIL DISPATCHER) */}
+      <AdminReplyModal
+        isOpen={replyModal.isOpen}
+        message={replyModal.message}
+        onClose={closeReplyModal}
+        onSendReply={handleSendReply}
+        sending={replyModal.sending}
       />
 
       {/* TOAST FEEDBACK */}

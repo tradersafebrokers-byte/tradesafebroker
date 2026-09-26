@@ -24,6 +24,7 @@ import {
 import useAuth from '../../auth/hooks/useAuth.js';
 import { useToast } from './toast/ToastContext.jsx';
 import KycModal from '../../kyc/components/KycModal.jsx';
+import VerifiedGoldBadge from './VerifiedGoldBadge.jsx';
 import './NavProfileDropdown.css';
 
 const bouncySpring = {
@@ -636,9 +637,9 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
               <div className="profile-avatar-circle">
                 {(user?.username || user?.name || user?.email || 'T')[0].toUpperCase()}
               </div>
-              {user?.isKycVerified && (
+              {(user?.isKycVerified || user?.kycStatus === 'verified') && (
                 <span className="side-avatar-verified-badge" title="Verified Trader">
-                  <CheckCircle2 size={12} strokeWidth={3} />
+                  <VerifiedGoldBadge size={16} />
                 </span>
               )}
             </button>
@@ -660,6 +661,11 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                       <div className={`profile-dropdown-avatar ${user?.role === 'admin' ? 'is-admin' : ''}`}>
                         {(user?.username || user?.name || user?.email || 'T')[0].toUpperCase()}
                       </div>
+                      {(user?.isKycVerified || user?.kycStatus === 'verified') && (
+                        <span className="dropdown-avatar-verified-badge" title="Verified Trader">
+                          <VerifiedGoldBadge size={18} />
+                        </span>
+                      )}
                       <span className="profile-dropdown-online-dot" title="Online" />
                     </div>
                     <div className="profile-dropdown-meta">
@@ -909,8 +915,15 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                 <div className="mobile-auth-user-card">
                   <div className="mobile-auth-top-row">
                     <div className="mobile-user-info">
-                      <div className="mobile-user-avatar">
-                        {(user?.username || user?.name || 'T')[0].toUpperCase()}
+                      <div className="mobile-user-avatar-wrap" style={{ position: 'relative', display: 'inline-flex' }}>
+                        <div className="mobile-user-avatar">
+                          {(user?.username || user?.name || 'T')[0].toUpperCase()}
+                        </div>
+                        {(user?.isKycVerified || user?.kycStatus === 'verified') && (
+                          <span className="mobile-avatar-verified-badge" title="Verified Trader">
+                            <VerifiedGoldBadge size={16} />
+                          </span>
+                        )}
                       </div>
                       <div className="mobile-user-text">
                         {user?.role === 'admin' ? (

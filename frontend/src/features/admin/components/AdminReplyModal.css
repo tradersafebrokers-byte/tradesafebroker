@@ -1,0 +1,533 @@
+/* ═══════════════════════════════════════════════════════════════
+   ADMIN REPLY MODAL STYLING (CLEAN, MINIMAL & LUXURIOUS)
+   ═══════════════════════════════════════════════════════════════ */
+
+.d2-reply-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.d2-reply-modal-card {
+  width: 100%;
+  max-width: 640px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 90vh;
+}
+
+.d2-theme-dark .d2-reply-modal-card {
+  background: #182032;
+  border-color: #334155;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+  color: #f1f5f9;
+}
+
+/* Modal Header */
+.d2-reply-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fafafa;
+}
+
+.d2-theme-dark .d2-reply-modal-header {
+  background: #1e293b;
+  border-bottom-color: #27354f;
+}
+
+.d2-reply-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.d2-reply-modal-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(252, 93, 33, 0.12);
+  color: #fc5d21;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.d2-reply-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.d2-theme-dark .d2-reply-modal-title {
+  color: #ffffff;
+}
+
+.d2-reply-ticket-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #fc5d21;
+  border: 1px solid rgba(252, 93, 33, 0.25);
+  font-family: monospace;
+}
+
+.d2-theme-dark .d2-reply-ticket-pill {
+  background: #232c45;
+  color: #ff8c42;
+}
+
+.d2-reply-modal-sub {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.d2-theme-dark .d2-reply-modal-sub {
+  color: #94a3b8;
+}
+
+.d2-reply-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.d2-reply-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.d2-theme-dark .d2-reply-close-btn {
+  background: #232c45;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.d2-theme-dark .d2-reply-close-btn:hover {
+  background: #2f3b5c;
+  color: #ffffff;
+}
+
+/* Modal Body */
+.d2-reply-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* User Card with Quote */
+.d2-reply-user-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.d2-theme-dark .d2-reply-user-card {
+  background: #1e293b;
+  border-color: #2e3e5b;
+}
+
+.d2-reply-user-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.d2-reply-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fc5d21 0%, #ff8c42 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.d2-reply-user-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.d2-theme-dark .d2-reply-user-name {
+  color: #ffffff;
+}
+
+.d2-reply-user-email {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.d2-theme-dark .d2-reply-user-email {
+  color: #94a3b8;
+}
+
+.d2-reply-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+.d2-reply-original-quote {
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.d2-theme-dark .d2-reply-original-quote {
+  background: #151d2d;
+  border-color: #334155;
+}
+
+.d2-reply-quote-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.d2-theme-dark .d2-reply-quote-label {
+  color: #94a3b8;
+}
+
+.d2-reply-quote-text {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0;
+  max-height: 90px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.d2-theme-dark .d2-reply-quote-text {
+  color: #cbd5e1;
+}
+
+/* Quick Response Templates */
+.d2-reply-templates-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.d2-reply-templates-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.d2-theme-dark .d2-reply-templates-label {
+  color: #94a3b8;
+}
+
+.d2-reply-template-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.d2-reply-template-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.d2-reply-template-btn:hover {
+  background: #f1f5f9;
+  color: #fc5d21;
+  border-color: #fdba74;
+}
+
+.d2-reply-template-btn.active {
+  background: rgba(252, 93, 33, 0.1);
+  color: #fc5d21;
+  border-color: #fc5d21;
+}
+
+.d2-theme-dark .d2-reply-template-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.d2-theme-dark .d2-reply-template-btn:hover,
+.d2-theme-dark .d2-reply-template-btn.active {
+  background: rgba(252, 93, 33, 0.2);
+  color: #ff8c42;
+  border-color: #fc5d21;
+}
+
+/* Form Fields */
+.d2-reply-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.d2-reply-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.d2-theme-dark .d2-reply-label {
+  color: #cbd5e1;
+}
+
+.d2-reply-input,
+.d2-reply-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 13px;
+  font-family: inherit;
+  transition: all 0.18s ease;
+  outline: none;
+}
+
+.d2-reply-textarea {
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.d2-reply-input:focus,
+.d2-reply-textarea:focus {
+  border-color: #fc5d21;
+  box-shadow: 0 0 0 3px rgba(252, 93, 33, 0.15);
+}
+
+.d2-theme-dark .d2-reply-input,
+.d2-theme-dark .d2-reply-textarea {
+  background: #151d2d;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+.d2-theme-dark .d2-reply-input:focus,
+.d2-theme-dark .d2-reply-textarea:focus {
+  border-color: #fc5d21;
+  box-shadow: 0 0 0 3px rgba(252, 93, 33, 0.25);
+}
+
+/* Modal Footer */
+.d2-reply-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: #fafafa;
+}
+
+.d2-theme-dark .d2-reply-modal-footer {
+  background: #1e293b;
+  border-top-color: #27354f;
+}
+
+.d2-reply-footer-hint {
+  font-size: 11.5px;
+  color: #64748b;
+}
+
+.d2-theme-dark .d2-reply-footer-hint {
+  color: #94a3b8;
+}
+
+.d2-reply-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.d2-reply-btn-cancel {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.d2-reply-btn-cancel:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.d2-theme-dark .d2-reply-btn-cancel {
+  background: #232c45;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+.d2-theme-dark .d2-reply-btn-cancel:hover {
+  background: #2f3b5c;
+  color: #ffffff;
+}
+
+.d2-reply-btn-send {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #fc5d21 0%, #ff7a18 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 14px rgba(252, 93, 33, 0.35);
+  transition: all 0.18s ease;
+}
+
+.d2-reply-btn-send:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(252, 93, 33, 0.45);
+}
+
+.d2-reply-btn-send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.d2-reply-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: d2-reply-spin 0.7s linear infinite;
+}
+
+@keyframes d2-reply-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Response Thread in Inquiry Card */
+.d2-inquiry-reply-box {
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.d2-theme-dark .d2-inquiry-reply-box {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.d2-inquiry-reply-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.d2-inquiry-reply-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #334155;
+  white-space: pre-wrap;
+}
+
+.d2-theme-dark .d2-inquiry-reply-text {
+  color: #cbd5e1;
+}
+
+.d2-reply-inquiry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #fc5d21 0%, #ff8c42 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(252, 93, 33, 0.25);
+  transition: all 0.18s ease;
+}
+
+.d2-reply-inquiry-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(252, 93, 33, 0.4);
+}

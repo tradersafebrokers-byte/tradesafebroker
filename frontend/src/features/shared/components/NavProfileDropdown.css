@@ -730,15 +730,45 @@
 
 .side-avatar-verified-badge {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
-  background: #111217;
-  border-radius: 50%;
-  padding: 2px;
-  color: #10b981;
+  top: -4px;
+  right: -4px;
+  bottom: auto;
+  left: auto;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
+  filter: drop-shadow(0 2px 5px rgba(251, 133, 0, 0.45));
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.pipwise-side-avatar-trigger:hover .side-avatar-verified-badge {
+  transform: scale(1.15);
+}
+
+.dropdown-avatar-verified-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 6px rgba(251, 133, 0, 0.5));
+  pointer-events: none;
+}
+
+.mobile-avatar-verified-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 5px rgba(251, 133, 0, 0.45));
+  pointer-events: none;
 }
 
 /* Adjust dropdown position for the side widget */
