@@ -100,3 +100,5 @@ Accessible at: `http://localhost:5001`
 Because frontend and backend are cleanly separated into their own folders:
 - **Frontend**: Deploy effortlessly to [Vercel](https://vercel.com/) or [Cloudflare Pages](https://pages.cloudflare.com/) by setting the **Root Directory** to `frontend`.
 - **Backend**: Deploy to [Render](https://render.com/), [Railway](https://railway.app/), or any Node.js hosting by setting the **Root Directory** to `backend`.
+
+- Production deployment setup
