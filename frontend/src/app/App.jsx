@@ -6,6 +6,7 @@ import AuthModal from '../features/auth/components/AuthModal.jsx';
 import useAuth from '../features/auth/hooks/useAuth.js';
 import ToastContainer from '../features/shared/components/toast/ToastContainer.jsx';
 import SupportReplyPopup from '../features/contact/components/SupportReplyPopup.jsx';
+import BrokerReviewsModal from '../features/reviews/components/BrokerReviewsModal.jsx';
 import AppRoutes from './app.routes.jsx';
 
 function App() {
@@ -101,6 +102,24 @@ function App() {
     });
   }, []);
 
+  const [globalReviewModal, setGlobalReviewModal] = useState({
+    isOpen: false,
+    broker: null,
+    initialWriteReview: false,
+  });
+
+  useEffect(() => {
+    const handleOpenReview = (e) => {
+      setGlobalReviewModal({
+        isOpen: true,
+        broker: e.detail?.broker || null,
+        initialWriteReview: e.detail?.openWrite !== false,
+      });
+    };
+    window.addEventListener('open_review_modal', handleOpenReview);
+    return () => window.removeEventListener('open_review_modal', handleOpenReview);
+  }, []);
+
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
@@ -118,6 +137,12 @@ function App() {
       <AuthModal />
       <ToastContainer />
       {!isAdminRoute && <SupportReplyPopup />}
+      <BrokerReviewsModal
+        isOpen={globalReviewModal.isOpen}
+        broker={globalReviewModal.broker}
+        initialWriteReview={globalReviewModal.initialWriteReview}
+        onClose={() => setGlobalReviewModal((prev) => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

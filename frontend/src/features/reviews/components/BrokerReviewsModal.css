@@ -1022,3 +1022,157 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* --------------------------------------------------------------------------
+   Trustpilot-Style Broker Header & Rating Badges on Review Cards
+   -------------------------------------------------------------------------- */
+.brm-rc-broker-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 11px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 10px;
+}
+
+[data-theme='light'] .brm-rc-broker-bar {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+.brm-rc-broker-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #cbd5e1;
+  background: rgba(252, 93, 33, 0.08);
+  padding: 4px 10px;
+  border-radius: 7px;
+  border: 1px solid rgba(252, 93, 33, 0.25);
+}
+
+[data-theme='light'] .brm-rc-broker-tag {
+  color: #1e293b;
+  background: rgba(252, 93, 33, 0.07);
+  border-color: rgba(252, 93, 33, 0.22);
+}
+
+.brm-rc-broker-name {
+  color: #fc5d21;
+  font-weight: 800;
+}
+
+.brm-rc-rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 9px;
+  border-radius: 7px;
+}
+
+[data-theme='light'] .brm-rc-rating-badge {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.brm-rc-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.brm-rc-rating-number {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #fc5d21;
+}
+
+/* --------------------------------------------------------------------------
+   Trustpilot-Style 5 Big Interactive Star Boxes in Review Form
+   -------------------------------------------------------------------------- */
+.brm-trustpilot-stars-group {
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+[data-theme='light'] .brm-trustpilot-stars-group {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.brm-trustpilot-boxes-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 10px 0;
+}
+
+.brm-trustpilot-star-box {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0;
+}
+
+.brm-trustpilot-star-box:hover {
+  transform: translateY(-2px) scale(1.08);
+}
+
+[data-theme='light'] .brm-trustpilot-star-box {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.brm-trustpilot-feedback-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brm-trustpilot-score-tag {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fc5d21;
+}
+
+.brm-trustpilot-desc-tag {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+[data-theme='light'] .brm-trustpilot-desc-tag {
+  color: #64748b;
+}
+
+.brm-select-broker {
+  background: #181d26;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+}
+
+[data-theme='light'] .brm-select-broker {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}

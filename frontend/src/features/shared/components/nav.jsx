@@ -37,6 +37,7 @@ const bouncySpring = {
 const NAV_LINKS = [
   { label: 'Brokers', href: '/brokers', Icon: Building2 },
   { label: 'Comparisons', href: '/compare', Icon: SlidersHorizontal },
+  { label: 'Write a Review', isReviewAction: true, Icon: Star },
   { label: 'Join as Broker', href: '/join-broker', Icon: Briefcase, badge: 'Partner' },
   { label: 'About', href: '/#about', Icon: Info },
 ];
@@ -77,7 +78,19 @@ const DockNavLink = React.memo(({ link, mouseX }) => {
         transformOrigin: 'center center',
       }}
     >
-      {link.href.startsWith('/') && !link.href.startsWith('/#') ? (
+      {link.isReviewAction ? (
+        <button
+          type="button"
+          className="nav-link-item-btn"
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
+          }}
+          title="Write a Broker Review (Trustpilot style)"
+        >
+          <Star size={12} fill="#fc5d21" color="#fc5d21" style={{ flexShrink: 0 }} />
+          <span>{link.label}</span>
+        </button>
+      ) : link.href.startsWith('/') && !link.href.startsWith('/#') ? (
         <Link to={link.href}>
           <span>{link.label}</span>
           <svg
@@ -848,7 +861,28 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
             <div className="mobile-menu-links-list">
               {navLinks.map((link) => {
                 const IconComponent = link.Icon;
-                const isExternal = link.href.startsWith('/#');
+                if (link.isReviewAction) {
+                  return (
+                    <button
+                      key={link.label}
+                      type="button"
+                      className="mobile-nav-link"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
+                      }}
+                      style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', font: 'inherit' }}
+                    >
+                      <div className="mobile-link-left">
+                        <Star size={17} fill="#fc5d21" color="#fc5d21" className="mobile-link-icon" />
+                        <span className="mobile-link-text">{link.label}</span>
+                        <span className="mobile-link-badge" style={{ background: 'rgba(252,93,33,0.15)', color: '#fc5d21' }}>⭐ Trust</span>
+                      </div>
+                      <ChevronRight size={14} className="mobile-link-chevron" />
+                    </button>
+                  );
+                }
+                const isExternal = link.href && link.href.startsWith('/#');
 
                 const content = (
                   <>
