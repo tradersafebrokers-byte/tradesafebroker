@@ -526,12 +526,12 @@
 
   /* Mobile menu drawer KYC button enhancement */
   .mobile-drawer-kyc-btn {
-    margin-top: 10px;
+    margin-top: 4px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 9px 12px;
+    padding: 7px 12px;
     border-radius: 11px;
     background: linear-gradient(135deg, rgba(252, 93, 33, 0.16) 0%, rgba(252, 93, 33, 0.05) 100%);
     border: 1px solid rgba(252, 93, 33, 0.35);

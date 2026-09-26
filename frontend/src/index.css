@@ -1092,13 +1092,19 @@ input {
 /* Logged-in User Profile Card in Mobile Menu */
 .mobile-auth-user-card {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: 0.65rem;
     padding: 0.65rem 0.85rem;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mobile-auth-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
 [data-theme='light'] .mobile-auth-user-card {

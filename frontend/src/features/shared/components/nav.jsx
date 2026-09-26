@@ -907,50 +907,65 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                 </div>
               ) : (
                 <div className="mobile-auth-user-card">
-                  <div className="mobile-user-info">
-                    <div className="mobile-user-avatar">
-                      {(user?.username || user?.name || 'T')[0].toUpperCase()}
-                    </div>
-                    <div className="mobile-user-text">
-                      {user?.role === 'admin' ? (
-                        <Link
-                          to="/admin"
-                          onClick={() => setMobileMenuOpen(false)}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            color: '#ffffff',
-                            textDecoration: 'none',
-                            fontWeight: 700,
-                            fontSize: '0.92rem'
-                          }}
-                        >
-                          <LayoutDashboard size={13} color="#818cf8" />
-                          <span>Dashboard</span>
-                        </Link>
-                      ) : (
-                        <span className="mobile-user-name">{user?.username || user?.name || 'Trader'}</span>
-                      )}
-                      <span className="mobile-user-role">
-                        {user?.isKycVerified || user?.kycStatus === 'verified' ? (
-                          <>
-                            <ShieldCheck size={11} /> Verified Trader
-                          </>
-                        ) : user?.role === 'admin' ? (
-                          <>
-                            <LayoutDashboard size={11} /> Administrator
-                          </>
+                  <div className="mobile-auth-top-row">
+                    <div className="mobile-user-info">
+                      <div className="mobile-user-avatar">
+                        {(user?.username || user?.name || 'T')[0].toUpperCase()}
+                      </div>
+                      <div className="mobile-user-text">
+                        {user?.role === 'admin' ? (
+                          <Link
+                            to="/admin"
+                            onClick={() => setMobileMenuOpen(false)}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              color: '#ffffff',
+                              textDecoration: 'none',
+                              fontWeight: 700,
+                              fontSize: '0.92rem'
+                            }}
+                          >
+                            <LayoutDashboard size={13} color="#818cf8" />
+                            <span>Dashboard</span>
+                          </Link>
                         ) : (
-                          <>
-                            <User size={11} /> {user?.email || 'Trader Account'}
-                          </>
+                          <span className="mobile-user-name">{user?.username || user?.name || 'Trader'}</span>
                         )}
-                      </span>
+                        <span className="mobile-user-role">
+                          {user?.isKycVerified || user?.kycStatus === 'verified' ? (
+                            <>
+                              <ShieldCheck size={11} /> Verified Trader
+                            </>
+                          ) : user?.role === 'admin' ? (
+                            <>
+                              <LayoutDashboard size={11} /> Administrator
+                            </>
+                          ) : (
+                            <>
+                              <User size={11} /> {user?.email || 'Trader Account'}
+                            </>
+                          )}
+                        </span>
+                      </div>
                     </div>
+
+                    <button
+                      type="button"
+                      className="mobile-user-logout-btn"
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                      title="Log out"
+                    >
+                      <LogOut size={14} />
+                      <span>Sign Out</span>
+                    </button>
                   </div>
 
-                  {/* Mobile KYC Action for Traders */}
+                  {/* Mobile KYC Action for Traders (Full width bottom) */}
                   {user?.role !== 'admin' && (
                     <button
                       type="button"
@@ -990,19 +1005,6 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                       <ArrowRight size={13} />
                     </button>
                   )}
-
-                  <button
-                    type="button"
-                    className="mobile-user-logout-btn"
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                    title="Log out"
-                  >
-                    <LogOut size={14} />
-                    <span>Sign Out</span>
-                  </button>
                 </div>
               )}
             </div>
