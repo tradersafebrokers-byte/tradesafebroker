@@ -6,6 +6,22 @@ import axios from 'axios';
  */
 const getBaseUrl = () => {
   let envUrl = import.meta.env.VITE_API_URL;
+
+  // Auto-upgrade obsolete/dead Render backend URL to active live backend
+  if (typeof envUrl === 'string' && envUrl.includes('pip-wise-9lox.onrender.com')) {
+    envUrl = 'https://tradesafebroker.onrender.com';
+  }
+
+  // If running in production browser on tradesafebrokers.com, guarantee live backend target
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname.includes('tradesafebrokers.com')
+  ) {
+    if (!envUrl || envUrl.includes('localhost') || envUrl.includes('pip-wise-9lox')) {
+      return 'https://tradesafebroker.onrender.com/api/v1';
+    }
+  }
+
   if (!envUrl) return 'http://localhost:5001/api/v1';
 
   // If user accidentally entered "VITE_API_URL=https://..." in Vercel Value field
@@ -21,7 +37,7 @@ const getBaseUrl = () => {
     clean = `https://${clean}`;
   }
 
-  if (!clean) return 'http://localhost:5001/api/v1';
+  if (!clean) return 'https://tradesafebroker.onrender.com/api/v1';
 
   return clean.endsWith('/api/v1') ? clean : `${clean}/api/v1`;
 };
