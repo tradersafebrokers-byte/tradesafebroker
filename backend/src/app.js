@@ -55,8 +55,10 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader(
       'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, X-Requested-With, Accept, Origin'
+      req.headers['access-control-request-headers'] ||
+        'Content-Type, Authorization, X-Requested-With, Accept, Origin'
     );
+    res.setHeader('Access-Control-Max-Age', '86400');
   }
   // Immediately return 204 No Content for all browser OPTIONS pre-flight checks
   if (req.method === 'OPTIONS') {
