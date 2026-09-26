@@ -35,7 +35,6 @@ const bouncySpring = {
 
 const NAV_LINKS = [
   { label: 'Brokers', href: '/brokers', Icon: Building2 },
-  { label: 'Reviews', href: '/#reviews', Icon: Star },
   { label: 'Comparisons', href: '/compare', Icon: SlidersHorizontal },
   { label: 'Join as Broker', href: '/join-broker', Icon: Briefcase, badge: 'Partner' },
   { label: 'About', href: '/#about', Icon: Info },
@@ -464,7 +463,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                   ref={searchInputRef}
                   type="text"
                   className="pipwise-inline-search-input"
-                  placeholder="Search brokers, reviews..."
+                  placeholder="Search brokers..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   tabIndex={searchOpen ? 0 : -1}
