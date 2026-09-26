@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Star, CheckCircle2, Heart } from 'lucide-react';
+import { Star, CheckCircle2, Heart, Building2 } from 'lucide-react';
 import {
   getSynchronousTestimonials,
   fetchActiveTestimonials,
@@ -10,7 +10,31 @@ import {
 const TestimonialCard = React.memo(({ item }) => (
   <div className="pw-testimonial-card">
     <div className="pw-testimonial-body">
-      {/* Card Header: Avatar, Name & Role */}
+      {/* Top Header: Broker Name Pill & Trustpilot Star Boxes */}
+      <div className="pw-card-broker-header">
+        <div className="pw-broker-badge-pill" title={`Verified Trader review for ${item.brokerName || 'Broker'}`}>
+          <Building2 size={12} className="pw-broker-icon" />
+          <span>Review for <strong>{item.brokerName || 'Forex Broker'}</strong></span>
+        </div>
+        <div className="pw-trustpilot-stars-cluster" aria-label={`${item.rating || '5.0'} out of 5 stars`}>
+          {[1, 2, 3, 4, 5].map((s) => {
+            const isFilled = s <= Math.round(Number(item.rating) || 5);
+            const fillColor = Number(item.rating) >= 4 ? '#00b67a' : Number(item.rating) === 3 ? '#ffce00' : '#ff3722';
+            return (
+              <span
+                key={s}
+                className="pw-tp-star-box"
+                style={{ backgroundColor: isFilled ? fillColor : 'rgba(255,255,255,0.12)' }}
+              >
+                <Star size={9} fill="#ffffff" color="#ffffff" strokeWidth={2.4} />
+              </span>
+            );
+          })}
+          <span className="pw-tp-score-text">{Number(item.rating || 5.0).toFixed(1)}</span>
+        </div>
+      </div>
+
+      {/* Reviewer Header: Avatar, Name & Role */}
       <div className="pw-testimonial-header">
         <div className="pw-testimonial-avatar-wrap">
           <img
@@ -29,15 +53,10 @@ const TestimonialCard = React.memo(({ item }) => (
         </div>
       </div>
 
-      {/* Star Rating */}
-      <div className="pw-testimonial-rating-row">
-        <span className="pw-rating-score">{item.rating || '5.0'}</span>
-        <div className="pw-stars-cluster" aria-label={`${item.rating || '5.0'} out of 5 stars`}>
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} size={13} className="pw-star-icon" />
-          ))}
-        </div>
-      </div>
+      {/* Review Title */}
+      {item.title && (
+        <h5 className="pw-testimonial-card-title">{item.title}</h5>
+      )}
 
       {/* Review Quote Text */}
       <p className="pw-testimonial-quote-text">
@@ -48,9 +67,13 @@ const TestimonialCard = React.memo(({ item }) => (
     {/* Footer Verified Badge */}
     <div className="pw-testimonial-footer">
       <span className="pw-verified-tag">
-        <Heart size={11} className="pw-heart-icon" /> Verified Trader
+        <CheckCircle2 size={11} className="pw-check-icon-footer" /> Verified Trader
       </span>
-      <span className="pw-supporter-tag">PipWise Community</span>
+      {item.depositMethod ? (
+        <span className="pw-deposit-tag">{item.depositMethod}</span>
+      ) : (
+        <span className="pw-supporter-tag">Trustpilot Verified</span>
+      )}
     </div>
   </div>
 ));
@@ -150,8 +173,40 @@ const Testimonials = React.memo(() => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="pw-testimonials-subheading"
         >
-          Read real experiences from active scalpers, day traders, and fund managers who empower their trading edge with PipWise broker comparisons.
+          Read real experiences from active scalpers, day traders, and fund managers who empower their trading edge with TradeSafeBrokers comparisons.
         </motion.p>
+
+        {/* Trustpilot-Style Rating & Write Review CTA Strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55, delay: 0.25 }}
+          className="pw-testimonials-cta-bar"
+        >
+          <div className="pw-trustpilot-score-strip">
+            <span className="pw-tp-brand-logo">★ Trustpilot</span>
+            <div className="pw-tp-stars-row">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <span key={s} className="pw-tp-star-box-lg">
+                  <Star size={13} fill="#ffffff" color="#ffffff" strokeWidth={2.4} />
+                </span>
+              ))}
+            </div>
+            <span className="pw-tp-score-label">TrustScore <strong>4.9</strong> • 50,000+ Verified Trader Reviews</span>
+          </div>
+
+          <button
+            type="button"
+            className="pw-write-review-hero-btn"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
+            }}
+          >
+            <Star size={14} fill="#ffffff" color="#ffffff" />
+            <span>Write a Broker Review</span>
+          </button>
+        </motion.div>
       </div>
 
       {/* Seamless Continuous Dual Marquee */}

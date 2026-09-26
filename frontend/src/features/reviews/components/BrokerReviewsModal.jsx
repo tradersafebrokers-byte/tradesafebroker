@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { reviewService } from '../services/review.service.js';
 import { brokerService } from '../../brokers/services/broker.service.js';
+import { ALL_BROKERS_DATA } from '../../brokers/data/brokersData.jsx';
 import useAuth from '../../auth/hooks/useAuth.js';
 import { useToast } from '../../shared/components/toast/ToastContext.jsx';
 import './BrokerReviewsModal.css';
@@ -37,27 +38,34 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
   const { user, isAuthenticated } = useAuth();
   const toast = useToast();
 
-  const [allBrokersList, setAllBrokersList] = useState([]);
-  const [selectedBroker, setSelectedBroker] = useState(null);
+  const [allBrokersList, setAllBrokersList] = useState(() => (Array.isArray(ALL_BROKERS_DATA) && ALL_BROKERS_DATA.length > 0 ? ALL_BROKERS_DATA : []));
+  const [selectedBroker, setSelectedBroker] = useState(() => broker || (ALL_BROKERS_DATA && ALL_BROKERS_DATA[0]) || null);
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedRatingFilter, setSelectedRatingFilter] = useState('all');
 
+  useEffect(() => {
+    if (broker) {
+      setSelectedBroker(broker);
+    }
+  }, [broker]);
 
   // Fetch available brokers for global review dropdown
   useEffect(() => {
     if (isOpen) {
       brokerService.getAllBrokers().then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          setAllBrokersList(data);
-          if (!broker && !selectedBroker) {
-            setSelectedBroker(data[0]);
-          }
+          setAllBrokersList((prev) => {
+            const map = new Map();
+            (ALL_BROKERS_DATA || []).forEach((b) => map.set(b.slug || b.id || b.name, b));
+            data.forEach((b) => map.set(b.slug || b.id || b.name, { ...(map.get(b.slug || b.id || b.name) || {}), ...b }));
+            return Array.from(map.values());
+          });
         }
       }).catch((e) => console.warn('Failed to load brokers list:', e));
     }
-  }, [isOpen, broker]);
+  }, [isOpen]);
 
   const currentBroker = broker || selectedBroker || (allBrokersList.length > 0 ? allBrokersList[0] : null);
 
@@ -93,12 +101,16 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
     setLoading(true);
     try {
       const params = { limit: 50 };
-      if (b?._id) {
-        params.brokerId = b._id;
-      } else if (b?.slug) {
+      if (b?.slug) {
         params.brokerSlug = b.slug;
-      } else if (b?.name) {
+      } else if (b?.id) {
+        params.brokerSlug = b.id;
+      }
+      if (b?.name) {
         params.brokerName = b.name;
+      }
+      if (b?._id && typeof b._id === 'string' && b._id.length === 24) {
+        params.brokerId = b._id;
       }
 
       const res = await reviewService.getBrokerReviews(params);
@@ -141,11 +153,11 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
     setSubmittingReview(true);
     try {
       const payload = {
-        brokerId: currentBroker._id,
-        brokerSlug: currentBroker.slug,
+        brokerId: currentBroker._id && String(currentBroker._id).length === 24 ? currentBroker._id : undefined,
+        brokerSlug: currentBroker.slug || currentBroker.id || currentBroker.name.toLowerCase().replace(/\s+/g, '-'),
         brokerName: currentBroker.name,
         rating,
-        title: title.trim() || `${rating}★ Trader Experience with ${broker.name}`,
+        title: title.trim() || `${rating}★ Trader Experience with ${currentBroker?.name || "Forex Broker"}`,
         comment: comment.trim(),
         depositMethodUsed: depositMethod,
         recommend,
@@ -170,6 +182,8 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
 
       // Refresh list
       loadReviews();
+      window.dispatchEvent(new CustomEvent('pipwise_testimonials_updated', { detail: { newReview: res?.data?.review } }));
+      window.dispatchEvent(new CustomEvent('broker_reviews_updated', { detail: { newReview: res?.data?.review } }));
       if (onReviewSubmitted) onReviewSubmitted(res?.data?.review);
     } catch (err) {
       toast.error('Submission Failed', err.message || 'Could not submit review.');
@@ -187,7 +201,7 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
         text: prev[reviewId]?.text || '',
         responder:
           prev[reviewId]?.responder ||
-          (user?.username ? `${user.username} (${broker.name} Official)` : `${broker.name} Official Team`),
+          (user?.username ? `${user.username} (${currentBroker?.name || "Broker"} Official)` : `${currentBroker?.name || "Broker"} Official Team`),
         isSubmitting: false,
       },
     }));
@@ -209,7 +223,7 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
     try {
       await reviewService.replyToReview(reviewId, {
         responseComment: box.text.trim(),
-        responderName: box.responder?.trim() || `${broker.name} Support Team`,
+        responderName: box.responder?.trim() || `${currentBroker?.name || "Broker"} Support Team`,
       });
 
       toast.success('Official Reply Posted!', 'Your broker response is now published.');
@@ -288,7 +302,7 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
           <div className="broker-reviews-header">
             <div className="broker-reviews-broker-info">
               {currentBroker?.logo ? (
-                <img src={currentBroker.logo} alt={currentBroker.name} className="brm-logo-img" />
+                <img src={currentBroker.logo} alt={currentBroker?.name || "Broker"} className="brm-logo-img" />
               ) : (
                 <div className="brm-logo-placeholder">
                   {currentBroker?.name ? currentBroker.name.slice(0, 2).toUpperCase() : 'TS'}
@@ -479,17 +493,23 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                   </div>
                 </div>
 
-                {/* Step 1: Select Broker to Review (if opened globally) */}
-                {!broker && allBrokersList.length > 0 && (
+                {/* Step 1: Select Broker to Review */}
+                {!broker && (
                   <div className="brm-form-row" style={{ marginBottom: "16px" }}>
                     <label className="brm-field-label">
-                      <Building2 size={13} color="#fc5d21" /> 1. Select the Broker You Want to Review *
+                      <Building2 size={13} color="#00b67a" /> 1. Select the Broker You Want to Review *
                     </label>
                     <select
                       className="brm-select-broker"
-                      value={currentBroker?._id || ""}
+                      value={currentBroker?.slug || currentBroker?.id || currentBroker?._id || ""}
                       onChange={(e) => {
-                        const found = allBrokersList.find((b) => String(b._id) === String(e.target.value));
+                        const targetKey = String(e.target.value).toLowerCase();
+                        const found = allBrokersList.find((b) => 
+                          (b.slug && b.slug.toLowerCase() === targetKey) ||
+                          (b.id && b.id.toLowerCase() === targetKey) ||
+                          (b._id && String(b._id).toLowerCase() === targetKey) ||
+                          (b.name && b.name.toLowerCase() === targetKey)
+                        );
                         if (found) {
                           setSelectedBroker(found);
                           loadReviews(found);
@@ -497,12 +517,14 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                       }}
                       required
                     >
-                      <option value="">-- Choose a Broker (e.g. Exness, XM, IC Markets) --</option>
-                      {allBrokersList.map((b) => (
-                        <option key={b._id} value={b._id}>
-                          {b.name} ({b.regulation || "Regulated"} • {b.rating || "4.8"}★)
-                        </option>
-                      ))}
+                      {allBrokersList.map((b) => {
+                        const keyVal = b.slug || b.id || b._id || b.name;
+                        return (
+                          <option key={keyVal} value={keyVal}>
+                            {b.name} ({b.regulation || "Regulated"} • {b.rating || "4.8"}★)
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                 )}
@@ -510,14 +532,14 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                 {/* Step 2: Trustpilot-Style 5 Big Star Rating Blocks */}
                 <div className="brm-trustpilot-stars-group">
                   <label className="brm-field-label">
-                    <Star size={13} color="#fc5d21" /> 2. Rate Your Overall Experience *
+                    <Star size={13} color="#00b67a" /> 2. Rate Your Overall Experience *
                   </label>
                   <div className="brm-trustpilot-boxes-row">
                     {[1, 2, 3, 4, 5].map((starVal) => {
                       const activeVal = hoverRating || rating;
                       const isSelected = activeVal >= starVal;
-                      const starColors = ["", "#ef4444", "#f97316", "#eab308", "#84cc16", "#10b981"];
-                      const activeColor = starColors[activeVal] || "#fc5d21";
+                      const starColors = ["", "#ff3722", "#ff8622", "#ffce00", "#73cf11", "#00b67a"];
+                      const activeColor = starColors[activeVal] || "#00b67a";
 
                       return (
                         <button
@@ -634,7 +656,7 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                   <textarea
                     rows={3}
                     className="brm-textarea"
-                    placeholder={`Tell other forex traders about your experience with ${broker.name} (order execution, slippage, deposits/withdrawals, customer support)...`}
+                    placeholder={`Tell other forex traders about your experience with ${currentBroker?.name || "this broker"} (order execution, slippage, deposits/withdrawals, customer support)...`}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     required
@@ -755,7 +777,7 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
               <div className="brm-empty-state">
                 <MessageSquare size={32} color="rgba(255,255,255,0.2)" />
                 <h4>No reviews found for this selection</h4>
-                <p>Be the first trader to share your genuine experience with {broker.name}!</p>
+                <p>Be the first trader to share your genuine experience with {currentBroker?.name || "this broker"}!</p>
                 <button
                   type="button"
                   className="brm-empty-cta"
@@ -772,21 +794,24 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                     {/* Prominent Trustpilot-style Broker & Rating Header */}
                     <div className="brm-rc-broker-bar">
                       <div className="brm-rc-broker-tag">
-                        <Building2 size={13} color="#fc5d21" />
+                        <Building2 size={13} color="#00b67a" />
                         <span>Review for <strong className="brm-rc-broker-name">{rev.brokerName || currentBroker?.name || "Forex Broker"}</strong></span>
                       </div>
-                      <div className="brm-rc-rating-badge">
-                        <div className="brm-rc-stars-row">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <Star
+                      <div className="brm-rc-trustpilot-stars">
+                        {[1, 2, 3, 4, 5].map((s) => {
+                          const isFilled = s <= Math.round(Number(rev.rating) || 5);
+                          const fillColor = Number(rev.rating) >= 4 ? '#00b67a' : Number(rev.rating) === 3 ? '#ffce00' : '#ff3722';
+                          return (
+                            <span
                               key={s}
-                              size={14}
-                              fill={s <= rev.rating ? "#fc5d21" : "none"}
-                              color="#fc5d21"
-                            />
-                          ))}
-                        </div>
-                        <span className="brm-rc-rating-number">{rev.rating}.0 / 5.0</span>
+                              className={`brm-tp-star-box-sm ${isFilled ? 'active' : ''}`}
+                              style={{ backgroundColor: isFilled ? fillColor : 'rgba(255, 255, 255, 0.12)' }}
+                            >
+                              <Star size={10} fill="#ffffff" color="#ffffff" strokeWidth={2.4} />
+                            </span>
+                          );
+                        })}
+                        <strong className="brm-rc-tp-score">{Number(rev.rating || 5).toFixed(1)} / 5.0</strong>
                       </div>
                     </div>
 
@@ -831,17 +856,6 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                             )}
                           </div>
                         </div>
-                      </div>
-
-                      <div className="brm-rc-stars">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star
-                            key={s}
-                            size={14}
-                            fill={s <= rev.rating ? '#fc5d21' : 'none'}
-                            color="#fc5d21"
-                          />
-                        ))}
                       </div>
                     </div>
 
@@ -901,7 +915,7 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                             <Building2 size={13} color="#fc5d21" />
                             <strong>Official Broker Response</strong>
                             <span className="brm-orb-name">
-                              — {rev.brokerResponse.responderName || `${broker.name} Support`}
+                              — {rev.brokerResponse.responderName || `${rev.brokerName || currentBroker?.name || "Broker"} Support`}
                             </span>
                           </div>
                           {rev.brokerResponse.respondedAt && (

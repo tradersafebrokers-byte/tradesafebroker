@@ -81,13 +81,15 @@ const DockNavLink = React.memo(({ link, mouseX }) => {
       {link.isReviewAction ? (
         <button
           type="button"
-          className="nav-link-item-btn"
+          className="nav-link-item-btn nav-link-review-dock-btn"
           onClick={() => {
             window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
           }}
           title="Write a Broker Review (Trustpilot style)"
         >
-          <Star size={12} fill="#fc5d21" color="#fc5d21" style={{ flexShrink: 0 }} />
+          <span className="dock-tp-star-icon">
+            <Star size={12} fill="#00b67a" color="#00b67a" style={{ flexShrink: 0 }} />
+          </span>
           <span>{link.label}</span>
         </button>
       ) : link.href.startsWith('/') && !link.href.startsWith('/#') ? (
@@ -547,6 +549,22 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
             </motion.div>
           </div>
 
+          {/* Trustpilot-Style "Write a Review" Navbar Action Button */}
+          <button
+            type="button"
+            className={`pipwise-nav-review-cta ${searchOpen ? 'is-search-hidden' : ''}`}
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
+            }}
+            title="Write a Broker Review (Trustpilot style)"
+            aria-label="Write a Broker Review"
+          >
+            <span className="nav-review-star-box" aria-hidden="true">
+              <Star size={11} fill="#ffffff" color="#ffffff" strokeWidth={2.4} />
+            </span>
+            <span className="nav-review-text">Write a Review</span>
+          </button>
+
           {/* Theme Toggle Button - Disappears completely on mobile when search is open or on small mobile when user is logged in */}
           <button
             type="button"
@@ -866,7 +884,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                     <button
                       key={link.label}
                       type="button"
-                      className="mobile-nav-link"
+                      className="mobile-nav-link mobile-nav-review-highlight"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
@@ -874,9 +892,13 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                       style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', font: 'inherit' }}
                     >
                       <div className="mobile-link-left">
-                        <Star size={17} fill="#fc5d21" color="#fc5d21" className="mobile-link-icon" />
-                        <span className="mobile-link-text">{link.label}</span>
-                        <span className="mobile-link-badge" style={{ background: 'rgba(252,93,33,0.15)', color: '#fc5d21' }}>⭐ Trust</span>
+                        <span className="mobile-tp-star-box">
+                          <Star size={12} fill="#ffffff" color="#ffffff" strokeWidth={2.4} />
+                        </span>
+                        <span className="mobile-link-text" style={{ fontWeight: 700 }}>Write a Broker Review</span>
+                        <span className="mobile-link-badge" style={{ background: 'rgba(0,182,122,0.18)', color: '#00b67a', border: '1px solid rgba(0,182,122,0.35)', fontWeight: 800 }}>
+                          ★ Trustpilot
+                        </span>
                       </div>
                       <ChevronRight size={14} className="mobile-link-chevron" />
                     </button>

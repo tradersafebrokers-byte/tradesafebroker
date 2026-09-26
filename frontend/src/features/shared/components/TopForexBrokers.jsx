@@ -309,11 +309,25 @@ const TopForexBrokers = ({ onSelectBroker }) => {
                   </div>
                 </div>
 
-                {/* Rating & Review Count */}
-                <div className="broker-card-rating-row">
-                  <span className="broker-star-icon" aria-hidden="true">★</span>
-                  <span className="broker-rating-num">{broker.rating}</span>
-                  <span className="broker-reviews-count">({broker.reviewsCount})</span>
+                {/* Rating & Review Count with Quick Review Button */}
+                <div className="broker-card-rating-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                    <span className="broker-star-icon" aria-hidden="true">★</span>
+                    <span className="broker-rating-num">{broker.rating}</span>
+                    <span className="broker-reviews-count">({broker.reviewsCount})</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="broker-card-quick-review-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { broker, openWrite: true } }));
+                    }}
+                    title={`Write a verified review for ${broker.name}`}
+                  >
+                    ★ Review
+                  </button>
                 </div>
 
                 {/* Highlight Badge Pill & Verified Badge */}
@@ -337,7 +351,7 @@ const TopForexBrokers = ({ onSelectBroker }) => {
                         gap: '3px',
                         letterSpacing: '0.02em',
                       }}
-                      title="PipWise Verified Partner & Genuine Broker"
+                      title="TradeSafeBrokers Verified Partner & Genuine Broker"
                     >
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
@@ -372,7 +386,7 @@ const TopForexBrokers = ({ onSelectBroker }) => {
 
                 {/* Dark CTA Button */}
                 <Link
-                  to="/brokers"
+                  to={`/reviews/${broker.slug || broker.id}`}
                   className="broker-card-cta-btn"
                   aria-label={`View review for ${broker.name}`}
                 >

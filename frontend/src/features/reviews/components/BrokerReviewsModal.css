@@ -1063,6 +1063,41 @@
   font-weight: 800;
 }
 
+.brm-rc-trustpilot-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 7px;
+}
+
+[data-theme='light'] .brm-rc-trustpilot-stars {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.brm-tp-star-box-sm {
+  width: 17px;
+  height: 17px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brm-rc-tp-score {
+  font-size: 12px;
+  font-weight: 800;
+  color: #00b67a;
+  margin-left: 4px;
+}
+
+[data-theme='light'] .brm-rc-tp-score {
+  color: #065f46;
+}
+
 .brm-rc-rating-badge {
   display: inline-flex;
   align-items: center;
@@ -1087,7 +1122,7 @@
 .brm-rc-rating-number {
   font-size: 12.5px;
   font-weight: 800;
-  color: #fc5d21;
+  color: #00b67a;
 }
 
 /* --------------------------------------------------------------------------

@@ -3367,6 +3367,29 @@ input {
     margin-bottom: 0.85rem;
 }
 
+.broker-card-quick-review-btn {
+    background: rgba(0, 182, 122, 0.12);
+    border: 1px solid rgba(0, 182, 122, 0.35);
+    border-radius: 999px;
+    color: #00b67a;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.broker-card-quick-review-btn:hover {
+    background: #00b67a;
+    color: #ffffff;
+    border-color: #00b67a;
+    transform: scale(1.04);
+}
+
 .broker-star-icon {
     color: #f59e0b;
     font-size: 0.94rem;
@@ -4510,6 +4533,162 @@ input {
     color: #9ca3af;
 }
 
+.pw-card-broker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pw-broker-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    background: rgba(0, 182, 122, 0.1);
+    border: 1px solid rgba(0, 182, 122, 0.3);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.pw-broker-badge-pill strong {
+    color: #00b67a;
+    font-weight: 700;
+}
+
+.pw-broker-icon {
+    color: #00b67a;
+    flex-shrink: 0;
+}
+
+.pw-trustpilot-stars-cluster {
+    display: inline-flex;
+    align-items: center;
+    gap: 2.5px;
+    flex-shrink: 0;
+}
+
+.pw-tp-star-box {
+    width: 15px;
+    height: 15px;
+    border-radius: 2.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #00b67a;
+}
+
+.pw-tp-score-text {
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #00b67a;
+    margin-left: 3px;
+}
+
+.pw-testimonial-card-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 0.35rem;
+    line-height: 1.35;
+}
+
+.pw-check-icon-footer {
+    color: #10b981;
+}
+
+.pw-deposit-tag {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Trustpilot Header CTA Bar on Homepage */
+.pw-testimonials-cta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    width: fit-content;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pw-trustpilot-score-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #e2e8f0;
+}
+
+.pw-tp-brand-logo {
+    color: #00b67a;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.pw-tp-stars-row {
+    display: flex;
+    align-items: center;
+    gap: 2.5px;
+}
+
+.pw-tp-star-box-lg {
+    width: 20px;
+    height: 20px;
+    background: #00b67a;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pw-tp-score-label {
+    font-size: 0.82rem;
+    color: #cbd5e1;
+}
+
+.pw-tp-score-label strong {
+    color: #ffffff;
+}
+
+.pw-write-review-hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #00b67a 0%, #059669 100%);
+    border: none;
+    border-radius: 999px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 7px 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 182, 122, 0.4);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pw-write-review-hero-btn:hover {
+    transform: translateY(-1.5px) scale(1.03);
+    box-shadow: 0 6px 20px rgba(0, 182, 122, 0.6);
+}
+
 @media (max-width: 640px) {
     .pw-testimonials-section {
         padding: 3.5rem 0 5rem;
@@ -4517,6 +4696,12 @@ input {
 
     .pw-br-desktop {
         display: none;
+    }
+
+    .pw-testimonials-cta-bar {
+        border-radius: 16px;
+        padding: 12px 14px;
+        gap: 0.8rem;
     }
 
     .pw-testimonial-card {
@@ -5206,7 +5391,7 @@ input {
 }
 
 .nav-link-item-btn:hover {
-  color: #fc5d21;
+  color: #00b67a;
 }
 
 [data-theme='light'] .nav-link-item-btn {
@@ -5214,5 +5399,147 @@ input {
 }
 
 [data-theme='light'] .nav-link-item-btn:hover {
-  color: #fc5d21;
+  color: #00b67a;
+}
+
+/* --------------------------------------------------------------------------
+   Trustpilot-Style High-Visibility Navbar Action Button & Dock Badges
+   -------------------------------------------------------------------------- */
+.pipwise-nav-review-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(0, 182, 122, 0.16) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border: 1.5px solid rgba(0, 182, 122, 0.48);
+  border-radius: 999px;
+  padding: 4px 13px 4px 5px;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 16px -2px rgba(0, 182, 122, 0.3);
+  position: relative;
+  z-index: 10;
+}
+
+.pipwise-nav-review-cta:hover {
+  background: linear-gradient(135deg, #00b67a 0%, #059669 100%);
+  border-color: #00b67a;
+  color: #ffffff;
+  transform: translateY(-1.5px) scale(1.02);
+  box-shadow: 0 4px 20px rgba(0, 182, 122, 0.55);
+}
+
+.pipwise-nav-review-cta:active {
+  transform: scale(0.97);
+}
+
+.pipwise-nav-review-cta.is-search-hidden {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border-width: 0;
+}
+
+.nav-review-star-box {
+  width: 22px;
+  height: 22px;
+  background: #00b67a;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.pipwise-nav-review-cta:hover .nav-review-star-box {
+  background: #ffffff;
+  transform: scale(1.08);
+}
+
+.pipwise-nav-review-cta:hover .nav-review-star-box svg {
+  fill: #00b67a !important;
+  color: #00b67a !important;
+}
+
+.nav-review-text {
+  letter-spacing: -0.01em;
+}
+
+[data-theme='light'] .pipwise-nav-review-cta {
+  background: linear-gradient(135deg, rgba(0, 182, 122, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%);
+  border-color: rgba(0, 182, 122, 0.5);
+  color: #065f46;
+  box-shadow: 0 2px 10px rgba(0, 182, 122, 0.2);
+}
+
+[data-theme='light'] .pipwise-nav-review-cta:hover {
+  background: linear-gradient(135deg, #00b67a 0%, #059669 100%);
+  color: #ffffff;
+}
+
+/* Dock Review Link Highlight */
+.nav-link-review-dock-btn {
+  background: rgba(0, 182, 122, 0.08);
+  border: 1px solid rgba(0, 182, 122, 0.25);
+  border-radius: 8px;
+  padding: 3px 8px;
+}
+
+.nav-link-review-dock-btn:hover {
+  background: rgba(0, 182, 122, 0.18);
+  border-color: rgba(0, 182, 122, 0.5);
+  color: #00b67a;
+}
+
+.dock-tp-star-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mobile Menu TP Star Box */
+.mobile-tp-star-box {
+  width: 22px;
+  height: 22px;
+  background: #00b67a;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-nav-review-highlight {
+  background: rgba(0, 182, 122, 0.07) !important;
+  border-left: 3px solid #00b67a !important;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 640px) {
+  .pipwise-nav-review-cta {
+    padding: 4px 9px 4px 4px;
+    font-size: 0.76rem;
+  }
+  .nav-review-text {
+    display: inline-block;
+  }
+}
+
+@media (max-width: 480px) {
+  .pipwise-nav-review-cta {
+    padding: 4px 8px;
+  }
+  .nav-review-text {
+    font-size: 0.72rem;
+  }
 }
