@@ -5,6 +5,7 @@ import SeoHead from '../features/shared/components/SeoHead.jsx';
 import AuthModal from '../features/auth/components/AuthModal.jsx';
 import useAuth from '../features/auth/hooks/useAuth.js';
 import ToastContainer from '../features/shared/components/toast/ToastContainer.jsx';
+import SupportReplyPopup from '../features/contact/components/SupportReplyPopup.jsx';
 import AppRoutes from './app.routes.jsx';
 
 function App() {
@@ -116,6 +117,7 @@ function App() {
       />
       <AuthModal />
       <ToastContainer />
+      {!isAdminRoute && <SupportReplyPopup />}
     </div>
   );
 }

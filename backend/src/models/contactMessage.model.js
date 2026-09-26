@@ -55,11 +55,10 @@ const contactMessageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-contactMessageSchema.pre('save', function (next) {
+contactMessageSchema.pre('save', function () {
   if (!this.ticketId) {
     this.ticketId = `TSB-${Math.floor(100000 + Math.random() * 900000)}`;
   }
-  next();
 });
 
 export const ContactMessage = mongoose.model('ContactMessage', contactMessageSchema);

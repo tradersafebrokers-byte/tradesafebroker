@@ -1466,6 +1466,21 @@ export default function AdminDashboard() {
           )
         );
 
+        // Broadcast reply to all website tabs so the fixed bottom popup pops up instantly
+        try {
+          if (typeof BroadcastChannel !== 'undefined') {
+            const ch = new BroadcastChannel('tsb_support_channel');
+            ch.postMessage({ type: 'NEW_REPLY', reply: updated });
+            ch.close();
+          }
+          localStorage.setItem(
+            'tsb_latest_admin_reply_event',
+            JSON.stringify({ reply: updated, time: Date.now() })
+          );
+        } catch (bErr) {
+          console.warn('Cross-tab reply broadcast notice:', bErr);
+        }
+
         showToast(`Reply sent successfully to ${updated.email || 'user'}!`);
         closeReplyModal();
       } catch (err) {

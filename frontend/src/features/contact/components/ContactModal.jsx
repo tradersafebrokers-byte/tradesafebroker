@@ -60,11 +60,40 @@ export const ContactModal = ({ isOpen, onClose }) => {
     setSubmitting(true);
 
     try {
-      await apiClient.post('/contact', {
+      const res = await apiClient.post('/contact', {
         name: name.trim(),
         email: email.trim(),
         message: message.trim(),
       });
+
+      // Cache ticket ID and inquiry details for real-time staff reply notification
+      const ticketData = res?.data || res;
+      if (ticketData) {
+        try {
+          const existing = JSON.parse(localStorage.getItem('tsb_submitted_tickets') || '[]');
+          const newEntry = {
+            id: ticketData._id,
+            ticketId: ticketData.ticketId || `TSB-${String(ticketData._id || "").slice(-6).toUpperCase()}`,
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            message: message.trim(),
+            submittedAt: new Date().toISOString(),
+          };
+          const filtered = existing.filter((t) => t.ticketId !== newEntry.ticketId && t.id !== newEntry.id);
+          filtered.unshift(newEntry);
+          localStorage.setItem('tsb_submitted_tickets', JSON.stringify(filtered.slice(0, 30)));
+          localStorage.setItem('tsb_user_email', email.trim().toLowerCase());
+
+          window.dispatchEvent(new CustomEvent('tsb_ticket_created', { detail: newEntry }));
+          if (typeof BroadcastChannel !== 'undefined') {
+            const ch = new BroadcastChannel('tsb_support_channel');
+            ch.postMessage({ type: 'TICKET_CREATED', ticket: newEntry });
+            ch.close();
+          }
+        } catch (storageErr) {
+          console.warn('Could not cache ticket locally:', storageErr);
+        }
+      }
 
       setIsSubmitted(true);
 

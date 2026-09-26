@@ -6,14 +6,17 @@ import {
   replyContactMessage,
   getFooterSettings,
   updateFooterSettings,
+  getUserReplies,
 } from '../controllers/contact.controller.js';
-import { verifyJWT, requireAdmin } from '../middlewares/auth.middleware.js';
-import { authLimiter } from '../middlewares/rateLimiter.middleware.js';
+import { verifyJWT, requireAdmin, optionalVerifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
 // Public: Submit contact form message
-router.route('/').post(authLimiter, submitContactMessage);
+router.route('/').post(submitContactMessage);
+
+// Public / User: Check replied inquiries for client toast & fixed popup
+router.route('/replies').get(optionalVerifyJWT, getUserReplies);
 
 // Public: Get current footer link visibility settings
 router.route('/footer-settings').get(getFooterSettings);

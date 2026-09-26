@@ -207,20 +207,7 @@ export const replyContactMessage = asyncHandler(async (req, res) => {
     </html>
   `;
 
-  // Dispatch email to user
-  try {
-    await sendEmail({
-      to: message.email,
-      subject,
-      html: replyHtml,
-      text: `Dear ${message.name},\n\n${replyMessage.trim()}\n\n---\nOriginal message on ${new Date(message.createdAt).toLocaleString()}:\n"${message.message}"\n\nTradeSafeBrokers Support Desk (Ticket #${ticketId})`,
-    });
-  } catch (mailErr) {
-    console.warn('⚠️ [Admin Reply Mail Failed]:', mailErr.message);
-    throw new ApiError(500, `Failed to dispatch email to ${message.email}: ${mailErr.message}`);
-  }
-
-  // Update DB record
+  // Update DB record first to guarantee real-time website notification delivery
   message.status = 'replied';
   message.ticketId = ticketId;
   message.replySubject = subject;
@@ -231,11 +218,25 @@ export const replyContactMessage = asyncHandler(async (req, res) => {
   }
   await message.save();
 
+  // Dispatch email to user asynchronously / safely
+  let emailDispatched = false;
+  try {
+    await sendEmail({
+      to: message.email,
+      subject,
+      html: replyHtml,
+      text: `Dear ${message.name},\n\n${replyMessage.trim()}\n\n---\nOriginal message on ${new Date(message.createdAt).toLocaleString()}:\n"${message.message}"\n\nTradeSafeBrokers Support Desk (Ticket #${ticketId})`,
+    });
+    emailDispatched = true;
+  } catch (mailErr) {
+    console.warn('⚠️ [Admin Reply Mail Notice]:', mailErr.message);
+  }
+
   return res.status(200).json(
     new ApiResponse(
       200,
       message,
-      `Reply successfully sent to ${message.email} (Ticket #${ticketId}).`
+      `Reply recorded and delivered to user popup${emailDispatched ? ` and emailed to ${message.email}` : ''} (Ticket #${ticketId}).`
     )
   );
 });
@@ -276,5 +277,51 @@ export const updateFooterSettings = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     new ApiResponse(200, { hiddenLinks: setting.hiddenLinks }, 'Footer settings updated successfully.')
+  );
+});
+
+/**
+ * @desc    Get replied contact messages for client popup (by ticketIds, email, or logged-in user)
+ * @route   GET /api/v1/contact/replies
+ * @access  Public / Optional Auth
+ */
+export const getUserReplies = asyncHandler(async (req, res) => {
+  const { ticketIds, email } = req.query;
+  const orConditions = [];
+
+  if (ticketIds) {
+    const ids = String(ticketIds)
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean);
+    if (ids.length > 0) {
+      orConditions.push({ ticketId: { $in: ids } });
+    }
+  }
+
+  if (email && typeof email === 'string' && email.trim()) {
+    orConditions.push({ email: email.trim().toLowerCase() });
+  }
+
+  if (req.user?.email) {
+    orConditions.push({ email: req.user.email.trim().toLowerCase() });
+  }
+
+  if (orConditions.length === 0) {
+    return res.status(200).json(
+      new ApiResponse(200, { replies: [] }, 'No inquiry identifier provided.')
+    );
+  }
+
+  const replies = await ContactMessage.find({
+    status: 'replied',
+    $or: orConditions,
+  })
+    .sort({ repliedAt: -1, updatedAt: -1 })
+    .limit(20)
+    .select('_id ticketId name email message subject replySubject replyMessage repliedAt createdAt');
+
+  return res.status(200).json(
+    new ApiResponse(200, { replies }, 'Support replies retrieved successfully.')
   );
 });
