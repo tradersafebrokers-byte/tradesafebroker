@@ -75,6 +75,20 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
     }
   }, [isOpen, initialWriteReview]);
 
+  // Lock body scroll and prevent background shifting when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const origOverflow = document.body.style.overflow;
+      const origOverscroll = document.body.style.overscrollBehavior;
+      document.body.style.overflow = 'hidden';
+      document.body.style.overscrollBehavior = 'none';
+      return () => {
+        document.body.style.overflow = origOverflow;
+        document.body.style.overscrollBehavior = origOverscroll;
+      };
+    }
+  }, [isOpen]);
+
   // "Write Review" form state
   const [isWritingReview, setIsWritingReview] = useState(false);
   const [reviewRole, setReviewRole] = useState('trader'); // 'trader' | 'broker'

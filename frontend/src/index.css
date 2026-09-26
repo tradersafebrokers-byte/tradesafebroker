@@ -415,7 +415,8 @@ input {
     will-change: transform;
 }
 
-.nav-link-item a {
+.nav-link-item a,
+.nav-link-item-btn {
     position: relative;
     font-size: 0.85rem;
     font-weight: 500;
@@ -427,19 +428,27 @@ input {
     text-decoration: none;
     transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: inherit;
 }
 
-.nav-link-item a:hover {
+.nav-link-item a:hover,
+.nav-link-item-btn:hover {
     color: #ffffff;
 }
 
-.nav-link-item a span {
+.nav-link-item a span,
+.nav-link-item-btn span {
     position: relative;
     display: inline-block;
 }
 
 /* Smooth left-to-right coral animated underline */
-.nav-link-item a span::after {
+.nav-link-item a span::after,
+.nav-link-item-btn span::after {
     content: '';
     position: absolute;
     bottom: -3px;
@@ -455,7 +464,8 @@ input {
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
 }
 
-.nav-link-item a:hover span::after {
+.nav-link-item a:hover span::after,
+.nav-link-item-btn:hover span::after {
     transform: scaleX(1);
     opacity: 1;
 }
@@ -465,7 +475,8 @@ input {
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
 }
 
-.nav-link-item a:hover .nav-chevron-icon {
+.nav-link-item a:hover .nav-chevron-icon,
+.nav-link-item-btn:hover .nav-chevron-icon {
     color: var(--brand-green);
     transform: translateY(1.5px) rotate(180deg);
 }
@@ -5374,138 +5385,6 @@ input {
 /* --------------------------------------------------------------------------
    Navbar Write a Review Action Link Styles
    -------------------------------------------------------------------------- */
-.nav-link-item-btn {
-  background: transparent;
-  border: none;
-  color: var(--nav-text, #cbd5e1);
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.15s ease;
-  white-space: nowrap;
-}
-
-.nav-link-item-btn:hover {
-  color: #00b67a;
-}
-
-[data-theme='light'] .nav-link-item-btn {
-  color: #334155;
-}
-
-[data-theme='light'] .nav-link-item-btn:hover {
-  color: #00b67a;
-}
-
-/* --------------------------------------------------------------------------
-   Trustpilot-Style High-Visibility Navbar Action Button & Dock Badges
-   -------------------------------------------------------------------------- */
-.pipwise-nav-review-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: linear-gradient(135deg, rgba(0, 182, 122, 0.16) 0%, rgba(16, 185, 129, 0.1) 100%);
-  border: 1.5px solid rgba(0, 182, 122, 0.48);
-  border-radius: 999px;
-  padding: 4px 13px 4px 5px;
-  color: #f8fafc;
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 16px -2px rgba(0, 182, 122, 0.3);
-  position: relative;
-  z-index: 10;
-}
-
-.pipwise-nav-review-cta:hover {
-  background: linear-gradient(135deg, #00b67a 0%, #059669 100%);
-  border-color: #00b67a;
-  color: #ffffff;
-  transform: translateY(-1.5px) scale(1.02);
-  box-shadow: 0 4px 20px rgba(0, 182, 122, 0.55);
-}
-
-.pipwise-nav-review-cta:active {
-  transform: scale(0.97);
-}
-
-.pipwise-nav-review-cta.is-search-hidden {
-  opacity: 0;
-  pointer-events: none;
-  width: 0;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-  border-width: 0;
-}
-
-.nav-review-star-box {
-  width: 22px;
-  height: 22px;
-  background: #00b67a;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.pipwise-nav-review-cta:hover .nav-review-star-box {
-  background: #ffffff;
-  transform: scale(1.08);
-}
-
-.pipwise-nav-review-cta:hover .nav-review-star-box svg {
-  fill: #00b67a !important;
-  color: #00b67a !important;
-}
-
-.nav-review-text {
-  letter-spacing: -0.01em;
-}
-
-[data-theme='light'] .pipwise-nav-review-cta {
-  background: linear-gradient(135deg, rgba(0, 182, 122, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%);
-  border-color: rgba(0, 182, 122, 0.5);
-  color: #065f46;
-  box-shadow: 0 2px 10px rgba(0, 182, 122, 0.2);
-}
-
-[data-theme='light'] .pipwise-nav-review-cta:hover {
-  background: linear-gradient(135deg, #00b67a 0%, #059669 100%);
-  color: #ffffff;
-}
-
-/* Dock Review Link Highlight */
-.nav-link-review-dock-btn {
-  background: rgba(0, 182, 122, 0.08);
-  border: 1px solid rgba(0, 182, 122, 0.25);
-  border-radius: 8px;
-  padding: 3px 8px;
-}
-
-.nav-link-review-dock-btn:hover {
-  background: rgba(0, 182, 122, 0.18);
-  border-color: rgba(0, 182, 122, 0.5);
-  color: #00b67a;
-}
-
-.dock-tp-star-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Mobile Menu TP Star Box */
 .mobile-tp-star-box {
   width: 22px;
@@ -5523,23 +5402,4 @@ input {
   border-left: 3px solid #00b67a !important;
   border-radius: 8px;
   margin-bottom: 4px;
-}
-
-@media (max-width: 640px) {
-  .pipwise-nav-review-cta {
-    padding: 4px 9px 4px 4px;
-    font-size: 0.76rem;
-  }
-  .nav-review-text {
-    display: inline-block;
-  }
-}
-
-@media (max-width: 480px) {
-  .pipwise-nav-review-cta {
-    padding: 4px 8px;
-  }
-  .nav-review-text {
-    font-size: 0.72rem;
-  }
 }

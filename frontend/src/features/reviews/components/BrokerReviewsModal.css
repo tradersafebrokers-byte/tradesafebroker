@@ -14,6 +14,11 @@
   justify-content: center;
   padding: 16px;
   overflow-y: auto;
+  overflow-x: hidden !important;
+  box-sizing: border-box;
+  width: 100vw;
+  max-width: 100%;
+  touch-action: pan-y;
 }
 
 .broker-reviews-modal {
@@ -21,6 +26,9 @@
   max-width: 680px;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden !important;
+  box-sizing: border-box;
+  overscroll-behavior: contain;
   background: #0d0d0f;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 20px;
@@ -40,12 +48,14 @@
 
 .broker-reviews-glow {
   position: absolute;
-  top: -60px;
-  right: -60px;
-  width: 200px;
-  height: 200px;
+  top: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
   background: radial-gradient(circle, rgba(252, 93, 33, 0.12) 0%, transparent 70%);
   pointer-events: none;
+  overflow: hidden;
+  border-top-right-radius: 20px;
 }
 
 /* Header */
@@ -56,6 +66,9 @@
   margin-bottom: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 12px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 [data-theme='light'] .broker-reviews-header {
@@ -66,6 +79,8 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
+  flex: 1;
 }
 
 .brm-logo-img {
@@ -75,6 +90,7 @@
   object-fit: cover;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .brm-logo-placeholder {
@@ -89,6 +105,7 @@
   font-weight: 800;
   font-size: 15px;
   color: #fc5d21;
+  flex-shrink: 0;
 }
 
 .brm-name-row {
@@ -96,6 +113,7 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .brm-title {
@@ -104,6 +122,8 @@
   color: #f8fafc;
   margin: 0;
   letter-spacing: -0.01em;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 [data-theme='light'] .brm-title {
@@ -229,6 +249,8 @@
   flex-direction: column;
   justify-content: center;
   gap: 10px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 [data-theme='light'] .brm-category-bars {
@@ -241,11 +263,13 @@
   grid-template-columns: 140px 1fr 45px;
   align-items: center;
   gap: 10px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 @media (max-width: 480px) {
   .brm-cat-row {
-    grid-template-columns: 110px 1fr 40px;
+    grid-template-columns: 105px 1fr 38px;
     gap: 6px;
   }
 }
@@ -381,6 +405,9 @@
   padding: 16px;
   margin-bottom: 20px;
   box-shadow: 0 8px 24px -6px rgba(252, 93, 33, 0.08);
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .brm-write-header {
@@ -485,9 +512,11 @@
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 14px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 560px) {
   .brm-category-sliders-grid {
     grid-template-columns: 1fr;
   }
@@ -706,6 +735,11 @@
   border-radius: 14px;
   padding: 16px;
   transition: border-color 0.18s ease;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .brm-review-card:hover {
@@ -812,6 +846,8 @@
   font-weight: 700;
   color: #f8fafc;
   margin: 0 0 6px 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 [data-theme='light'] .brm-rc-title {
@@ -823,6 +859,8 @@
   line-height: 1.55;
   color: #cbd5e1;
   margin: 0 0 10px 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 [data-theme='light'] .brm-rc-comment {
@@ -908,6 +946,9 @@
   border-radius: 10px;
   padding: 12px;
   position: relative;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .brm-orb-header {
@@ -915,6 +956,8 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .brm-orb-title {
@@ -923,6 +966,7 @@
   gap: 6px;
   font-size: 11.5px;
   color: #fc5d21;
+  flex-wrap: wrap;
 }
 
 .brm-orb-name {
@@ -940,6 +984,8 @@
   line-height: 1.5;
   color: #f1f5f9;
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 [data-theme='light'] .brm-orb-body {
@@ -953,6 +999,9 @@
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 10px;
   padding: 12px;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .brm-irb-header {
@@ -1034,6 +1083,9 @@
   margin-bottom: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   gap: 10px;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 [data-theme='light'] .brm-rc-broker-bar {
@@ -1050,6 +1102,11 @@
   padding: 4px 10px;
   border-radius: 7px;
   border: 1px solid rgba(252, 93, 33, 0.25);
+  box-sizing: border-box;
+  max-width: 100%;
+  flex-wrap: wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 [data-theme='light'] .brm-rc-broker-tag {
@@ -1071,6 +1128,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 3px 8px;
   border-radius: 7px;
+  flex-shrink: 0;
 }
 
 [data-theme='light'] .brm-rc-trustpilot-stars {
@@ -1134,6 +1192,8 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 14px 16px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 [data-theme='light'] .brm-trustpilot-stars-group {
@@ -1146,6 +1206,7 @@
   align-items: center;
   gap: 8px;
   margin: 10px 0 10px 0;
+  flex-wrap: wrap;
 }
 
 .brm-trustpilot-star-box {
@@ -1160,6 +1221,7 @@
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 0;
+  flex-shrink: 0;
 }
 
 .brm-trustpilot-star-box:hover {
@@ -1175,6 +1237,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .brm-trustpilot-score-tag {
@@ -1202,6 +1265,8 @@
   font-size: 13.5px;
   font-weight: 600;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   cursor: pointer;
   outline: none;
 }
@@ -1210,4 +1275,55 @@
   background: #ffffff;
   border-color: #cbd5e1;
   color: #0f172a;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile & Responsive Viewport Overflow Protection
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .broker-reviews-overlay {
+    padding: 10px 8px;
+    align-items: flex-start;
+  }
+
+  .broker-reviews-modal {
+    padding: 16px 12px;
+    border-radius: 16px;
+    max-height: 93vh;
+    margin: auto 0;
+  }
+
+  .broker-reviews-glow {
+    width: 120px;
+    height: 120px;
+  }
+
+  .brm-trustpilot-star-box {
+    width: 38px;
+    height: 38px;
+  }
+
+  .brm-trustpilot-boxes-row {
+    gap: 6px;
+  }
+
+  .brm-title {
+    font-size: 15px;
+  }
+
+  .brm-rec-buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 380px) {
+  .brm-trustpilot-star-box {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brm-rc-broker-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
