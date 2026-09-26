@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShieldCheck,
@@ -31,6 +32,26 @@ export const KycModal = ({ isOpen, onClose, onKycUpdated }) => {
   const [backImage, setBackImage] = useState('');
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Body scroll lock and Escape key listener to close modal reliably
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   // Pre-fill existing data if user already submitted
   useEffect(() => {
@@ -138,12 +159,12 @@ export const KycModal = ({ isOpen, onClose, onKycUpdated }) => {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const kycStatus = user?.kycStatus || 'not_submitted';
   const isVerified = user?.isKycVerified || false;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       <motion.div
         className="kyc-modal-overlay"
@@ -151,7 +172,11 @@ export const KycModal = ({ isOpen, onClose, onKycUpdated }) => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.15 }}
-        onClick={onClose}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose?.();
+          }
+        }}
       >
         <motion.div
           className="kyc-modal-card"
@@ -168,22 +193,26 @@ export const KycModal = ({ isOpen, onClose, onKycUpdated }) => {
           <div className="kyc-modal-header">
             <div className="kyc-header-left">
               <div className="kyc-shield-halo">
-                <ShieldCheck size={22} strokeWidth={2.4} />
+                <ShieldCheck size={20} strokeWidth={2.4} />
               </div>
               <div>
                 <h3 className="kyc-modal-title">Trader KYC Verification</h3>
                 <p className="kyc-modal-subtitle">
-                  Verify with your Government ID Card to earn your official Verified Trader badge
+                  Verify your Government ID to earn the Verified Trader badge
                 </p>
               </div>
             </div>
             <button
               className="kyc-close-btn"
-              onClick={onClose}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose?.();
+              }}
               type="button"
               aria-label="Close modal"
             >
-              <X size={15} />
+              <X size={16} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -406,7 +435,11 @@ export const KycModal = ({ isOpen, onClose, onKycUpdated }) => {
                 <button
                   type="button"
                   className="kyc-cancel-btn"
-                  onClick={onClose}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClose?.();
+                  }}
                 >
                   Cancel
                 </button>
@@ -440,7 +473,11 @@ export const KycModal = ({ isOpen, onClose, onKycUpdated }) => {
                 <button
                   type="button"
                   className="kyc-submit-btn"
-                  onClick={onClose}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClose?.();
+                  }}
                 >
                   Close Window
                 </button>
@@ -449,7 +486,8 @@ export const KycModal = ({ isOpen, onClose, onKycUpdated }) => {
           </form>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

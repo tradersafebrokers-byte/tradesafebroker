@@ -5,8 +5,8 @@
 .kyc-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 99999;
-  background: rgba(0, 0, 0, 0.75);
+  z-index: 999999 !important;
+  background: rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex;
@@ -14,6 +14,8 @@
   justify-content: center;
   padding: 16px;
   overflow-y: auto;
+  pointer-events: auto !important;
+  touch-action: pan-y;
 }
 
 .kyc-modal-card {
@@ -29,6 +31,7 @@
   color: #f8fafc;
   position: relative;
   font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  pointer-events: auto !important;
 }
 
 [data-theme='light'] .kyc-modal-card {
@@ -97,17 +100,19 @@
 }
 
 .kyc-close-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
   color: #94a3b8;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  pointer-events: auto !important;
   transition: all 0.18s ease;
+  flex-shrink: 0;
 }
 
 .kyc-close-btn:hover {
@@ -251,12 +256,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-}
-
-@media (max-width: 520px) {
-  .kyc-upload-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .kyc-upload-cell-label {
@@ -475,3 +474,162 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE KYC MODAL COMPACT STYLING
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .kyc-modal-overlay {
+    padding: 10px;
+    align-items: center;
+  }
+
+  .kyc-modal-card {
+    padding: 14px 14px 16px 14px;
+    border-radius: 14px;
+    max-height: 86vh;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+  }
+
+  .kyc-modal-header {
+    margin-bottom: 10px;
+  }
+
+  .kyc-header-left {
+    gap: 9px;
+  }
+
+  .kyc-shield-halo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .kyc-shield-halo svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .kyc-modal-title {
+    font-size: 14.5px;
+    margin-bottom: 1px;
+  }
+
+  .kyc-modal-subtitle {
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+
+  .kyc-close-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+  }
+
+  .kyc-status-banner {
+    padding: 7px 10px;
+    margin-bottom: 9px;
+    font-size: 11px;
+    gap: 8px;
+  }
+
+  .kyc-form {
+    gap: 9px;
+  }
+
+  .kyc-section-block {
+    padding: 9px 10px;
+    border-radius: 9px;
+  }
+
+  .kyc-section-title {
+    font-size: 9.5px;
+    margin-bottom: 7px;
+    letter-spacing: 0.04em;
+  }
+
+  .kyc-form-grid {
+    gap: 7px;
+  }
+
+  .kyc-input-group {
+    gap: 3px;
+  }
+
+  .kyc-label {
+    font-size: 10px;
+  }
+
+  .kyc-input {
+    padding: 6px 9px;
+    font-size: 12px;
+    border-radius: 7px;
+  }
+
+  .kyc-upload-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px;
+  }
+
+  .kyc-upload-cell-label {
+    font-size: 9.5px;
+    margin-bottom: 3px;
+  }
+
+  .kyc-dropzone {
+    min-height: 68px;
+    border-radius: 8px;
+  }
+
+  .kyc-dropzone-empty {
+    padding: 7px 4px;
+  }
+
+  .kyc-dropzone-icon {
+    width: 16px;
+    height: 16px;
+    margin-bottom: 2px;
+  }
+
+  .kyc-dropzone-text {
+    font-size: 10.5px;
+  }
+
+  .kyc-dropzone-sub {
+    display: none;
+  }
+
+  .kyc-preview-container {
+    height: 68px;
+  }
+
+  .kyc-consent-box {
+    padding: 7px 9px;
+    gap: 7px;
+    border-radius: 8px;
+  }
+
+  .kyc-consent-text {
+    font-size: 9.5px;
+    line-height: 1.35;
+  }
+
+  .kyc-actions-row {
+    margin-top: 2px;
+    gap: 8px;
+  }
+
+  .kyc-cancel-btn {
+    padding: 7px 12px;
+    font-size: 11.5px;
+    border-radius: 7px;
+  }
+
+  .kyc-submit-btn {
+    padding: 7px 15px;
+    font-size: 11.5px;
+    border-radius: 7px;
+  }
+}
+

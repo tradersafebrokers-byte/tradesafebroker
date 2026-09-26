@@ -303,7 +303,8 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
     : (isNavHovered ? hoveredMaxWidth : baseMaxWidth);
 
   return (
-    <header className={`pipwise-nav-floating-wrapper ${isScrolled ? 'is-scrolled' : ''}`}>
+    <>
+      <header className={`pipwise-nav-floating-wrapper ${isScrolled ? 'is-scrolled' : ''}`}>
       <motion.nav
         ref={navRef}
         className={`pipwise-nav-floating-bar ${searchOpen ? 'is-search-expanded' : ''} ${isScrolled ? 'is-scrolled' : ''}`}
@@ -976,33 +977,38 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                           ? 'pending'
                           : user?.kycStatus === 'rejected'
                           ? 'rejected'
-                          : ''
+                          : 'action'
                       }`}
                       onClick={() => {
                         setMobileMenuOpen(false);
                         setKycModalOpen(true);
                       }}
                     >
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        {user?.isKycVerified || user?.kycStatus === 'verified' ? (
-                          <>
-                            <ShieldCheck size={14} /> KYC Verified
-                          </>
-                        ) : user?.kycStatus === 'pending' ? (
-                          <>
-                            <Clock size={14} /> KYC Under Review
-                          </>
-                        ) : user?.kycStatus === 'rejected' ? (
-                          <>
-                            <ShieldAlert size={14} /> Re-upload KYC ID
-                          </>
-                        ) : (
-                          <>
-                            <ShieldCheck size={14} /> Complete Your KYC
-                          </>
-                        )}
-                      </span>
-                      <ArrowRight size={13} />
+                      <div className="mobile-kyc-btn-content">
+                        <div className="mobile-kyc-btn-icon-wrap">
+                          {user?.isKycVerified || user?.kycStatus === 'verified' ? (
+                            <ShieldCheck size={14} strokeWidth={2.5} />
+                          ) : user?.kycStatus === 'pending' ? (
+                            <Clock size={14} strokeWidth={2.5} />
+                          ) : user?.kycStatus === 'rejected' ? (
+                            <ShieldAlert size={14} strokeWidth={2.5} />
+                          ) : (
+                            <ShieldCheck size={14} strokeWidth={2.5} />
+                          )}
+                        </div>
+                        <span className="mobile-kyc-btn-title">
+                          {user?.isKycVerified || user?.kycStatus === 'verified'
+                            ? 'KYC Verified'
+                            : user?.kycStatus === 'pending'
+                            ? 'KYC Under Review'
+                            : user?.kycStatus === 'rejected'
+                            ? 'Re-upload KYC ID'
+                            : 'Complete Your KYC'}
+                        </span>
+                      </div>
+                      <div className="mobile-kyc-btn-arrow">
+                        <ArrowRight size={13} strokeWidth={2.5} />
+                      </div>
                     </button>
                   )}
                 </div>
@@ -1036,16 +1042,17 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Trader KYC Modal */}
-      <KycModal
-        isOpen={kycModalOpen}
-        onClose={() => setKycModalOpen(false)}
-        onKycUpdated={() => {
-          verifySession();
-        }}
-      />
     </header>
+
+    {/* Trader KYC Modal (Mounted outside header) */}
+    <KycModal
+      isOpen={kycModalOpen}
+      onClose={() => setKycModalOpen(false)}
+      onKycUpdated={() => {
+        verifySession();
+      }}
+    />
+  </>
   );
 };
 

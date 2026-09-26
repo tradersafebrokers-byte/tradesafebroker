@@ -526,39 +526,149 @@
 
   /* Mobile menu drawer KYC button enhancement */
   .mobile-drawer-kyc-btn {
-    margin-top: 4px;
+    margin-top: 6px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 7px 12px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, rgba(252, 93, 33, 0.16) 0%, rgba(252, 93, 33, 0.05) 100%);
-    border: 1px solid rgba(252, 93, 33, 0.35);
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(252, 93, 33, 0.16) 0%, rgba(252, 93, 33, 0.08) 100%);
+    border: 1px solid rgba(252, 93, 33, 0.38);
+    color: #ff9d66;
     cursor: pointer;
     font-family: inherit;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
   }
 
+  .mobile-drawer-kyc-btn:hover {
+    background: rgba(252, 93, 33, 0.22);
+    border-color: rgba(252, 93, 33, 0.55);
+  }
+
+  .mobile-drawer-kyc-btn:active {
+    transform: scale(0.99);
+  }
+
+  .mobile-kyc-btn-content {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .mobile-kyc-btn-icon-wrap {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(252, 93, 33, 0.18);
+    color: #fc5d21;
+    flex-shrink: 0;
+  }
+
+  .mobile-kyc-btn-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: inherit;
+  }
+
+  .mobile-kyc-btn-arrow {
+    display: flex;
+    align-items: center;
+    color: inherit;
+    opacity: 0.85;
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-drawer-kyc-btn:hover .mobile-kyc-btn-arrow {
+    transform: translateX(2px);
+  }
+
+  /* Verified State */
   .mobile-drawer-kyc-btn.verified {
     background: rgba(16, 185, 129, 0.12);
     border-color: rgba(16, 185, 129, 0.35);
+    color: #34d399;
+  }
+  .mobile-drawer-kyc-btn.verified .mobile-kyc-btn-icon-wrap {
+    background: rgba(16, 185, 129, 0.18);
     color: #10b981;
   }
 
+  /* Pending State */
   .mobile-drawer-kyc-btn.pending {
     background: rgba(245, 158, 11, 0.12);
     border-color: rgba(245, 158, 11, 0.35);
+    color: #fbbf24;
+  }
+  .mobile-drawer-kyc-btn.pending .mobile-kyc-btn-icon-wrap {
+    background: rgba(245, 158, 11, 0.18);
     color: #f59e0b;
   }
 
+  /* Rejected State */
   .mobile-drawer-kyc-btn.rejected {
     background: rgba(239, 68, 68, 0.12);
     border-color: rgba(239, 68, 68, 0.35);
+    color: #f87171;
+  }
+  .mobile-drawer-kyc-btn.rejected .mobile-kyc-btn-icon-wrap {
+    background: rgba(239, 68, 68, 0.18);
     color: #ef4444;
+  }
+
+  /* Light Theme Overrides - High Contrast & Crisp */
+  [data-theme='light'] .mobile-drawer-kyc-btn {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #c2410c;
+    box-shadow: 0 1px 3px rgba(234, 88, 12, 0.08);
+  }
+  [data-theme='light'] .mobile-drawer-kyc-btn:hover {
+    background: #ffedd5;
+    border-color: #fb923c;
+    color: #9a3412;
+  }
+  [data-theme='light'] .mobile-drawer-kyc-btn .mobile-kyc-btn-icon-wrap {
+    background: rgba(234, 88, 12, 0.12);
+    color: #ea580c;
+  }
+
+  [data-theme='light'] .mobile-drawer-kyc-btn.verified {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #047857;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.08);
+  }
+  [data-theme='light'] .mobile-drawer-kyc-btn.verified .mobile-kyc-btn-icon-wrap {
+    background: rgba(16, 185, 129, 0.15);
+    color: #059669;
+  }
+
+  [data-theme='light'] .mobile-drawer-kyc-btn.pending {
+    background: #fffbeb;
+    border-color: #fde68a;
+    color: #b45309;
+    box-shadow: 0 1px 3px rgba(245, 158, 11, 0.08);
+  }
+  [data-theme='light'] .mobile-drawer-kyc-btn.pending .mobile-kyc-btn-icon-wrap {
+    background: rgba(245, 158, 11, 0.15);
+    color: #d97706;
+  }
+
+  [data-theme='light'] .mobile-drawer-kyc-btn.rejected {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.08);
+  }
+  [data-theme='light'] .mobile-drawer-kyc-btn.rejected .mobile-kyc-btn-icon-wrap {
+    background: rgba(239, 68, 68, 0.15);
+    color: #dc2626;
   }
 }
 
