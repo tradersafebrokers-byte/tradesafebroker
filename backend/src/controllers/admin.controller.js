@@ -255,6 +255,33 @@ export const updateBrokerStatus = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Update broker details (Full admin edit)
+ * @route   PUT /api/v1/admin/brokers/:id
+ * @access  Private (Admin only)
+ */
+export const updateAdminBroker = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const updateData = { ...req.body };
+
+  // Safeguard against modifying internal MongoDB _id
+  delete updateData._id;
+
+  const broker = await Broker.findByIdAndUpdate(
+    id,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  );
+
+  if (!broker) {
+    throw new ApiError(404, 'Broker not found');
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, { broker }, `Broker "${broker.name}" updated successfully`)
+  );
+});
+
+/**
  * @desc    Delete broker by ID
  * @route   DELETE /api/v1/admin/brokers/:id
  * @access  Private (Admin only)

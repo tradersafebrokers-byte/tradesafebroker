@@ -9,6 +9,7 @@ import {
   deleteAdminBroker,
   toggleBrokerVerification,
   updateBrokerStatus,
+  updateAdminBroker,
   getAllAdminReviews,
   deleteAdminReview,
   updateReviewStatus,
@@ -53,6 +54,8 @@ router.get('/brokers', getAllAdminBrokers);
 router.delete('/brokers/:id', deleteAdminBroker);
 router.patch('/brokers/:id/verify', toggleBrokerVerification);
 router.patch('/brokers/:id/status', updateBrokerStatus);
+router.put('/brokers/:id', updateAdminBroker);
+router.patch('/brokers/:id', updateAdminBroker);
 
 // Review Management
 router.get('/reviews', getAllAdminReviews);

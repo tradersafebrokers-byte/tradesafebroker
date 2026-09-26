@@ -57,6 +57,13 @@ export const adminService = {
   },
 
   /**
+   * Full admin update of broker details (name, minDeposit, leverage, spreads, rating, regulation, etc.)
+   */
+  async updateBroker(id, data) {
+    return await apiClient.put(`/admin/brokers/${id}`, data);
+  },
+
+  /**
    * Delete broker by ID
    */
   async deleteBroker(id) {

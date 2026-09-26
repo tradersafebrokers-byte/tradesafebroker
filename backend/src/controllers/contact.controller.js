@@ -40,7 +40,7 @@ export const getContactMessages = asyncHandler(async (req, res) => {
   const messages = await ContactMessage.find().sort({ createdAt: -1 });
 
   return res.status(200).json(
-    new ApiResponse(200, messages, 'Contact messages retrieved successfully.')
+    new ApiResponse(200, { messages, count: messages.length }, 'Contact messages retrieved successfully.')
   );
 });
 

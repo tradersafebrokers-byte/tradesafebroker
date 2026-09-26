@@ -42,6 +42,7 @@ import {
   ZoomIn,
   Sparkles,
   Mail,
+  Pencil,
 } from 'lucide-react';
 import useAuth from '../features/auth/hooks/useAuth.js';
 import adminService from '../features/admin/services/admin.service.js';
@@ -117,7 +118,7 @@ const DeleteConfirmModal = React.memo(({ modalData, onClose, onConfirm }) => {
                 : modalData.type === 'user'
                 ? 'This trader account will be permanently erased. All authentication tokens and sessions will be invalidated immediately.'
                 : modalData.type === 'broker'
-                ? 'This broker listing, metadata, and all associated community reviews will be permanently removed from PipWise.'
+                ? 'This broker listing, metadata, and all associated community reviews will be permanently removed from TradeSafeBrokers.'
                 : 'This review will be permanently deleted and excluded from public broker metrics.'}
             </p>
 
@@ -262,7 +263,7 @@ const BrokerInspectModal = React.memo(({ broker, onClose, onApprove, onReject })
                 <div className="d2-inspect-cell">
                   <span className="d2-cell-label">License Number</span>
                   <span className="d2-cell-val" style={{ fontFamily: 'monospace' }}>
-                    {broker.licenseNumber || 'Verified by PipWise Compliance'}
+                    {broker.licenseNumber || 'Verified by TradeSafeBrokers Compliance'}
                   </span>
                 </div>
                 <div className="d2-inspect-cell">
@@ -368,6 +369,235 @@ const BrokerInspectModal = React.memo(({ broker, onClose, onApprove, onReject })
           </div>
         </motion.div>
       </motion.div>
+    </AnimatePresence>
+  );
+});
+
+// BROKER EDIT MODAL (FULL ADMIN CONTROLS FOR SPREADS, DEPOSIT, LEVERAGE, REGULATION, ETC.)
+const BrokerEditModal = React.memo(({ broker, onClose, onSave, saving }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    rating: 4.8,
+    trustScore: 90,
+    minDeposit: '',
+    spread: '',
+    maxLeverage: '',
+    regulation: '',
+    platforms: '',
+    officialWebsite: '',
+    description: '',
+    status: 'approved',
+  });
+
+  useEffect(() => {
+    if (broker) {
+      setFormData({
+        name: broker.name || '',
+        rating: broker.rating || 4.8,
+        trustScore: broker.trustScore || 90,
+        minDeposit: broker.minDeposit || '',
+        spread: broker.spread || '',
+        maxLeverage: broker.maxLeverage || '',
+        regulation: broker.regulation || (Array.isArray(broker.regulatorsList) ? broker.regulatorsList.join(', ') : ''),
+        platforms: Array.isArray(broker.platforms) ? broker.platforms.join(', ') : (broker.platforms || ''),
+        officialWebsite: broker.officialWebsite || broker.websiteUrl || '',
+        description: broker.description || broker.tagline || '',
+        status: broker.status || 'approved',
+      });
+    }
+  }, [broker]);
+
+  if (!broker) return null;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <AnimatePresence>
+      <div className="d2-modal-overlay" onClick={onClose}>
+        <motion.div
+          className="d2-edit-modal-card"
+          initial={{ opacity: 0, scale: 0.95, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 12 }}
+          transition={{ duration: 0.16 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="d2-edit-modal-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Pencil size={18} color="#fc5d21" />
+              <h3>Edit Broker Details: {broker.name}</h3>
+            </div>
+            <button className="d2-inspect-close-btn" onClick={onClose} aria-label="Close modal">
+              <X size={18} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+            <div className="d2-edit-modal-body">
+              <div className="d2-edit-form-grid">
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Broker Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                    required
+                  />
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Listing Status</label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="d2-edit-select"
+                  >
+                    <option value="approved">Approved &amp; Live</option>
+                    <option value="pending">Pending Approval</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Minimum Deposit (e.g. ₹850 ($10))</label>
+                  <input
+                    type="text"
+                    name="minDeposit"
+                    value={formData.minDeposit}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                    placeholder="₹850 ($10)"
+                  />
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Typical Spreads (e.g. From 0.1 pips)</label>
+                  <input
+                    type="text"
+                    name="spread"
+                    value={formData.spread}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                    placeholder="From 0.1 pips"
+                  />
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Max Leverage (e.g. 1:1000 / 1:500)</label>
+                  <input
+                    type="text"
+                    name="maxLeverage"
+                    value={formData.maxLeverage}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                    placeholder="1:1000"
+                  />
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Regulatory Licenses (comma-separated)</label>
+                  <input
+                    type="text"
+                    name="regulation"
+                    value={formData.regulation}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                    placeholder="FCA, CySEC, ASIC, FSA"
+                  />
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Rating (1.0 to 5.0)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="1.0"
+                    max="5.0"
+                    name="rating"
+                    value={formData.rating}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                  />
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Trust Score (1 to 100)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    name="trustScore"
+                    value={formData.trustScore}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                  />
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Trading Platforms (e.g. MT4, MT5, cTrader)</label>
+                  <input
+                    type="text"
+                    name="platforms"
+                    value={formData.platforms}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                    placeholder="MT4, MT5, WebTrader"
+                  />
+                </div>
+
+                <div className="d2-edit-field">
+                  <label className="d2-edit-label">Official Website URL</label>
+                  <input
+                    type="url"
+                    name="officialWebsite"
+                    value={formData.officialWebsite}
+                    onChange={handleChange}
+                    className="d2-edit-input"
+                    placeholder="https://example.com"
+                  />
+                </div>
+
+                <div className="d2-edit-field full-width">
+                  <label className="d2-edit-label">Description / Summary</label>
+                  <textarea
+                    rows={3}
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="d2-edit-textarea"
+                    placeholder="Overview of broker trading conditions, execution speed, and account options..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="d2-edit-modal-footer">
+              <button type="button" className="d2-modal-cancel-btn" onClick={onClose}>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="d2-banner-btn"
+                disabled={saving}
+                style={{ background: '#fc5d21', borderColor: '#fc5d21', color: '#ffffff' }}
+              >
+                {saving ? 'Saving Changes...' : 'Save Broker Changes'}
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </div>
     </AnimatePresence>
   );
 });
@@ -659,8 +889,10 @@ export default function AdminDashboard() {
   const [selectedKyc, setSelectedKyc] = useState(null);
   const [kycRejectReason, setKycRejectReason] = useState('');
 
-  // Broker Application Inspection State
+  // Broker Application Inspection & Edit States
   const [inspectingBroker, setInspectingBroker] = useState(null);
+  const [editingBroker, setEditingBroker] = useState(null);
+  const [savingBroker, setSavingBroker] = useState(false);
 
   // User Contact Messages & Footer Links Management States
   const [messagesList, setMessagesList] = useState([]);
@@ -759,14 +991,34 @@ export default function AdminDashboard() {
         }
       }
 
-      // Load Contact Messages
-      if (contactRes.status === 'fulfilled' && Array.isArray(contactRes.value?.data?.data)) {
-        setMessagesList(contactRes.value.data.data);
+      // Load Contact Messages (supports raw array, { messages }, or { data })
+      if (contactRes.status === 'fulfilled') {
+        const val = contactRes.value;
+        const payload = val?.data !== undefined ? val.data : val;
+        let list = [];
+        if (Array.isArray(payload)) {
+          list = payload;
+        } else if (Array.isArray(payload?.messages)) {
+          list = payload.messages;
+        } else if (Array.isArray(payload?.data)) {
+          list = payload.data;
+        }
+        setMessagesList(list);
       }
 
       // Load Footer Link Visibility Settings
-      if (footerRes.status === 'fulfilled' && Array.isArray(footerRes.value?.data?.data?.hiddenLinks)) {
-        setHiddenFooterLinks(footerRes.value.data.data.hiddenLinks);
+      if (footerRes.status === 'fulfilled') {
+        const val = footerRes.value;
+        const payload = val?.data !== undefined ? val.data : val;
+        let hidden = [];
+        if (Array.isArray(payload?.hiddenLinks)) {
+          hidden = payload.hiddenLinks;
+        } else if (Array.isArray(payload?.data?.hiddenLinks)) {
+          hidden = payload.data.hiddenLinks;
+        } else if (Array.isArray(payload)) {
+          hidden = payload;
+        }
+        setHiddenFooterLinks(hidden);
       }
     } catch (err) {
       console.error('Error fetching admin metrics:', err);
@@ -776,6 +1028,25 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+  // Update Broker Details (Admin Edit)
+  const handleSaveBroker = useCallback(async (updatedData) => {
+    if (!editingBroker?._id) return;
+    try {
+      setSavingBroker(true);
+      const res = await adminService.updateBroker(editingBroker._id, updatedData);
+      const updated = res.data?.broker || res.broker || updatedData;
+      setBrokersList((prev) =>
+        prev.map((b) => (b._id === editingBroker._id ? { ...b, ...updated } : b))
+      );
+      setEditingBroker(null);
+      showToast(`Broker "${updated.name || editingBroker.name}" updated successfully`);
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message || 'Failed to update broker');
+    } finally {
+      setSavingBroker(false);
+    }
+  }, [editingBroker, showToast]);
 
   const handleDeleteMessage = async (msgId) => {
     try {
@@ -1310,13 +1581,19 @@ export default function AdminDashboard() {
 
   return (
     <div className={`d2-canvas ${theme === 'dark' ? 'd2-theme-dark' : ''}`}>
-      {/* QUICK SWITCHER BUTTON TO PIPWISE PUBLIC SITE */}
+      {/* QUICK SWITCHER BUTTON TO TRADESAFEBROKERS PUBLIC SITE */}
       <Link
         to="/"
         className="d2-dashboard-switcher"
-        title="Return to PipWise Public Portal"
+        title="Return to TradeSafeBrokers Public Portal"
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
       >
-        <span>← PipWise Home</span>
+        <span style={{ display: 'inline-flex', alignItems: 'flex-end', gap: '2px', height: '14px' }}>
+          <span style={{ width: '2.5px', height: '9px', background: '#fc5d21', borderRadius: '1px' }} />
+          <span style={{ width: '2.5px', height: '14px', background: '#10b981', borderRadius: '1px' }} />
+          <span style={{ width: '2.5px', height: '7px', background: '#fc5d21', borderRadius: '1px' }} />
+        </span>
+        <span>TradeSafe<span style={{ color: '#fc5d21', fontWeight: 800 }}>Brokers</span> Admin</span>
       </Link>
 
       <div className="d2-container">
@@ -1678,7 +1955,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <h1 className="d2-greeting-question">
-                        PipWise Real-Time
+                        TradeSafeBrokers
                         <br />
                         Command Center
                       </h1>
@@ -2113,7 +2390,7 @@ export default function AdminDashboard() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="d2-premium-title">PipWise Security Gateway</h3>
+                        <h3 className="d2-premium-title">TradeSafeBrokers Security Gateway</h3>
                         <p className="d2-premium-desc">
                           Only approved brokers are displayed to public visitors. Pending applications stay in admin staging until verified.
                         </p>
@@ -2308,6 +2585,18 @@ export default function AdminDashboard() {
                             >
                               <Eye size={12} strokeWidth={2.4} />
                               <span>Inspect Details</span>
+                            </button>
+
+                            {/* EDIT BROKER DETAILS BUTTON */}
+                            <button
+                              type="button"
+                              className="d2-btn-inspect"
+                              onClick={() => setEditingBroker(broker)}
+                              title="Edit broker details (spreads, deposit, leverage, regulation, etc.)"
+                              style={{ background: 'rgba(252, 93, 33, 0.12)', color: '#fc5d21', borderColor: 'rgba(252, 93, 33, 0.35)', fontWeight: 700 }}
+                            >
+                              <Pencil size={12} strokeWidth={2.4} />
+                              <span>Edit Details</span>
                             </button>
 
                             {/* APPROVE BUTTON (IF PENDING OR REJECTED) */}
@@ -2911,19 +3200,23 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Sub-Tabs: Inquiries vs Footer Links */}
-                  <div className="d2-filter-bar">
-                    <div className="d2-filter-tabs">
+                  <div className="d2-filter-bar" style={{ marginBottom: '18px' }}>
+                    <div className="d2-filter-tabs-custom">
                       <button
-                        className={`d2-filter-pill ${messagesSubTab === 'inquiries' ? 'active' : ''}`}
+                        type="button"
+                        className={`d2-filter-pill-btn ${messagesSubTab === 'inquiries' ? 'active' : ''}`}
                         onClick={() => setMessagesSubTab('inquiries')}
                       >
-                        User Inquiries ({messagesList.length})
+                        <Mail size={14} />
+                        <span>User Inquiries ({messagesList.length})</span>
                       </button>
                       <button
-                        className={`d2-filter-pill ${messagesSubTab === 'footer' ? 'active' : ''}`}
+                        type="button"
+                        className={`d2-filter-pill-btn ${messagesSubTab === 'footer' ? 'active' : ''}`}
                         onClick={() => setMessagesSubTab('footer')}
                       >
-                        Footer Links Manager ({hiddenFooterLinks.length > 0 ? `${hiddenFooterLinks.length} Hidden` : 'All Active'})
+                        <SlidersHorizontal size={14} />
+                        <span>Footer Links Manager ({hiddenFooterLinks.length > 0 ? `${hiddenFooterLinks.length} Hidden` : 'All Active'})</span>
                       </button>
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8' }}>
@@ -2936,28 +3229,18 @@ export default function AdminDashboard() {
                   {messagesSubTab === 'inquiries' ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                       {filteredMessages.length === 0 ? (
-                        <div className="d2-empty-state" style={{ padding: '48px 20px', textAlign: 'center', background: 'var(--d2-card-bg, #ffffff)', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>
-                          <Mail size={40} color="#94a3b8" style={{ margin: '0 auto 12px' }} />
-                          <h3 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 6px' }}>No Inquiries Yet</h3>
-                          <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0' }}>
-                            When users submit the Contact Support &amp; Desk form on the website, user inquiries will appear here.
+                        <div className="d2-inquiry-empty-box">
+                          <div className="d2-inquiry-empty-icon-wrap">
+                            <Mail size={28} />
+                          </div>
+                          <h3>No Inquiries Yet</h3>
+                          <p>
+                            When users submit questions or partnership inquiries via the Contact Support &amp; Desk form on the website, they will appear here in real-time.
                           </p>
                         </div>
                       ) : (
                         filteredMessages.map((msg) => (
-                          <div
-                            key={msg._id}
-                            style={{
-                              background: 'var(--d2-card-bg, #ffffff)',
-                              border: '1px solid var(--d2-border, #e2e8f0)',
-                              borderRadius: '16px',
-                              padding: '20px',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '12px',
-                              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                            }}
-                          >
+                          <div key={msg._id} className="d2-inquiry-card">
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div
@@ -2972,6 +3255,7 @@ export default function AdminDashboard() {
                                     justifyContent: 'center',
                                     fontWeight: 800,
                                     fontSize: '17px',
+                                    flexShrink: 0,
                                   }}
                                 >
                                   {msg.name ? msg.name.charAt(0).toUpperCase() : 'U'}
@@ -2995,24 +3279,13 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                            <div
-                              style={{
-                                background: 'rgba(15, 23, 42, 0.03)',
-                                padding: '14px 16px',
-                                borderRadius: '10px',
-                                fontSize: '13.5px',
-                                lineHeight: '1.6',
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                                borderLeft: '3px solid #fc5d21',
-                              }}
-                            >
+                            <div className="d2-inquiry-msg-box">
                               {msg.message}
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '4px' }}>
                               <a
-                                href={`mailto:${msg.email}?subject=PipWise Support: Inquiry Reply&body=Hi ${msg.name},%0D%0A%0D%0AThank you for reaching out to PipWise Support Desk.`}
+                                href={`mailto:${msg.email}?subject=TradeSafeBrokers Support: Inquiry Reply&body=Hi ${msg.name},%0D%0A%0D%0AThank you for contacting TradeSafeBrokers Support Desk.`}
                                 className="d2-banner-btn"
                                 style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                               >
@@ -3034,10 +3307,10 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     /* Footer Links Management */
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <div
                         style={{
-                          background: 'rgba(252, 93, 33, 0.06)',
+                          background: 'rgba(252, 93, 33, 0.08)',
                           border: '1px solid rgba(252, 93, 33, 0.25)',
                           borderRadius: '12px',
                           padding: '14px 18px',
@@ -3049,16 +3322,7 @@ export default function AdminDashboard() {
                       </div>
 
                       {ALL_FOOTER_SECTIONS.map((sec) => (
-                        <div
-                          key={sec.id}
-                          style={{
-                            background: 'var(--d2-card-bg, #ffffff)',
-                            border: '1px solid var(--d2-border, #e2e8f0)',
-                            borderRadius: '16px',
-                            padding: '20px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                          }}
-                        >
+                        <div key={sec.id} className="d2-footer-manage-section">
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                             <h3 style={{ fontSize: '15px', fontWeight: 800, margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                               {sec.title}
@@ -3074,18 +3338,7 @@ export default function AdminDashboard() {
                               return (
                                 <div
                                   key={link.label}
-                                  style={{
-                                    border: isHidden ? '1px dashed #ef4444' : '1px solid var(--d2-border, #e2e8f0)',
-                                    background: isHidden ? 'rgba(239, 68, 68, 0.04)' : 'var(--d2-card-bg, #ffffff)',
-                                    borderRadius: '10px',
-                                    padding: '12px 14px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    gap: '10px',
-                                    opacity: isHidden ? 0.75 : 1,
-                                    transition: 'all 0.2s',
-                                  }}
+                                  className={`d2-footer-manage-link ${isHidden ? 'is-hidden' : ''}`}
                                 >
                                   <div style={{ minWidth: 0, flex: 1 }}>
                                     <div
@@ -3157,7 +3410,7 @@ export default function AdminDashboard() {
                     <div className="d2-view-banner-text">
                       <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <BarChart3 size={20} color="#595ef2" />
-                        <span>PipWise Platform &amp; Directory Analytics</span>
+                        <span>TradeSafeBrokers Platform &amp; Directory Analytics</span>
                       </h2>
                       <p>Aggregated real data across broker listings, trader engagement, and broker statuses</p>
                     </div>
@@ -3313,7 +3566,7 @@ export default function AdminDashboard() {
                   <div className="d2-view-banner">
                     <div className="d2-view-banner-text">
                       <h2>Administrator Credentials & Security</h2>
-                      <p>Manage your PipWise admin profile, authentication tokens, and system preferences</p>
+                      <p>Manage your TradeSafeBrokers admin profile, authentication tokens, and system preferences</p>
                     </div>
                     <button
                       className="d2-banner-btn"
@@ -3336,7 +3589,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="d2-info-row">
                         <span className="d2-info-label">Email Address</span>
-                        <span className="d2-info-value">{user?.email || 'admin@pipwise.com'}</span>
+                        <span className="d2-info-value">{user?.email || 'admin@tradesafebrokers.com'}</span>
                       </div>
                       <div className="d2-info-row">
                         <span className="d2-info-label">Role Privilege</span>
@@ -3387,6 +3640,14 @@ export default function AdminDashboard() {
         onClose={() => setInspectingBroker(null)}
         onApprove={handleApproveBroker}
         onReject={handleRejectBroker}
+      />
+
+      {/* BROKER EDIT DETAILS MODAL */}
+      <BrokerEditModal
+        broker={editingBroker}
+        onClose={() => setEditingBroker(null)}
+        onSave={handleSaveBroker}
+        saving={savingBroker}
       />
 
       {/* TRADER KYC ID CARD INSPECTION MODAL */}
