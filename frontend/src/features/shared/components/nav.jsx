@@ -133,8 +133,10 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
   const profileDropdownRef = useRef(null);
 
   useEffect(() => {
+    if (!profileDropdownOpen) return;
+
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && profileDropdownOpen) {
+      if (e.key === 'Escape') {
         setProfileDropdownOpen(false);
       }
     };
@@ -143,13 +145,18 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
         setProfileDropdownOpen(false);
       }
     };
-    if (profileDropdownOpen) {
+
+    const timer = setTimeout(() => {
       window.addEventListener('keydown', handleKeyDown);
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }, 40);
+
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [profileDropdownOpen]);
 
@@ -297,7 +304,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
           maxWidth: isMobile ? '100%' : targetMaxWidth,
         }}
         animate={
-          heroComplete
+          profileDropdownOpen || heroComplete
             ? {
               clipPath: 'none',
               opacity: 1,
@@ -311,6 +318,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
               maxWidth: isMobile ? '100%' : targetMaxWidth,
             }
         }
+        style={{ overflow: 'visible' }}
         transition={
           isMobile
             ? { duration: 0 }
@@ -575,11 +583,19 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
               </span>
             </button>
           ) : (
-            <div className="pipwise-profile-container" ref={profileDropdownRef}>
+            <div
+              className="pipwise-profile-container"
+              ref={profileDropdownRef}
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
                 className={`pipwise-profile-trigger-btn ${profileDropdownOpen ? 'is-active' : ''} ${user?.role === 'admin' ? 'is-admin' : ''}`}
-                onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setProfileDropdownOpen((prev) => !prev);
+                }}
                 aria-label="User Profile & Settings"
                 aria-expanded={profileDropdownOpen}
               >
@@ -612,6 +628,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.95 }}
                     transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {/* Header: Avatar + User Details */}
                     <div className="profile-dropdown-header">

@@ -243,11 +243,13 @@ input {
     align-items: center;
     padding: 0 1.25rem;
     pointer-events: none;
+    overflow: visible !important;
 }
 
 .pipwise-nav-floating-bar {
     pointer-events: auto;
     position: relative;
+    overflow: visible !important;
     width: 100%;
     max-width: 1120px;
     margin: 0 auto;
