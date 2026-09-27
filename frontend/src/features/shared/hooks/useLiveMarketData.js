@@ -120,7 +120,7 @@ export function useLiveMarketData() {
         setIsLive(true);
       }
     } catch {
-      // Fallback: Frankfurter for EUR/USD
+      // Fallback 1: Frankfurter for EUR/USD
       try {
         const altRes = await fetch("https://api.frankfurter.dev/v1/latest?base=EUR&symbols=USD");
         if (altRes.ok) {
@@ -129,6 +129,23 @@ export function useLiveMarketData() {
             updateEur(altData.rates.USD, "+0.28");
             setIsLive(true);
           }
+        }
+      } catch {}
+
+      // Fallback 2: fawazahmed0 currency API (has EUR + Gold/XAU, free, no key)
+      try {
+        const cdnRes = await fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json");
+        if (cdnRes.ok) {
+          const cdnData = await cdnRes.json();
+          const eurRate = cdnData?.usd?.eur;
+          const xauRate = cdnData?.usd?.xau;
+          if (eurRate) {
+            updateEur(1 / eurRate, "+0.22");
+          }
+          if (xauRate) {
+            updateGold(1 / xauRate, "+0.85");
+          }
+          setIsLive(true);
         }
       } catch {}
     }

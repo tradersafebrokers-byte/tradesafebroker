@@ -289,6 +289,11 @@ input {
     border-radius: 12px;
 }
 
+.pipwise-nav-floating-bar.is-search-expanded {
+    clip-path: none !important;
+    overflow: visible !important;
+}
+
 [data-theme='dark'] .pipwise-nav-floating-bar {
     background: #191b20;
     border: 1px solid rgba(255, 255, 255, 0.09);
@@ -1067,8 +1072,20 @@ input {
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
     will-change: transform, opacity;
-    contain: layout style;
+    pointer-events: auto;
     color: #f8fafc;
+}
+
+/* Invisible bridge over the 10px gap to prevent cursor dead-zones */
+.pipwise-search-dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: transparent;
+    pointer-events: auto;
 }
 
 [data-theme='light'] .pipwise-search-dropdown-menu {

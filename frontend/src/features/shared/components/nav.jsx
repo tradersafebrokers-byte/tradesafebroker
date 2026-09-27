@@ -192,11 +192,98 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isNavHovered, setIsNavHovered] = useState(false);
+  const [apiBrokers, setApiBrokers] = useState([]);
+
+  // Fetch brokers from API for comprehensive search (includes admin-added brokers)
+  useEffect(() => {
+    const fetchApiBrokers = async () => {
+      try {
+        const { default: apiClient } = await import('../../auth/services/api.client.js');
+        const res = await apiClient.get('/brokers');
+        const list = res?.data?.data?.brokers || res?.data?.brokers || res?.data || [];
+        if (Array.isArray(list)) {
+          setApiBrokers(list);
+        }
+      } catch {}
+    };
+    fetchApiBrokers();
+  }, []);
+
+  // Merge static + API brokers (deduplicate by id/slug)
+  const allBrokersForSearch = useMemo(() => {
+    const staticIds = new Set(ALL_BROKERS_DATA.map((b) => (b.slug || b.id || '').toLowerCase()));
+    const apiExtras = apiBrokers
+      .filter((b) => {
+        const key = (b.slug || b.id || b._id || '').toLowerCase();
+        return key && !staticIds.has(key);
+      })
+      .map((b) => ({
+        id: b.slug || b.id || b._id,
+        slug: b.slug || b.id || b._id,
+        name: b.name,
+        rank: b.rank || '',
+        rankNum: b.rankNum || 99,
+        rating: b.overallRating || b.rating || 4.0,
+        regulation: b.regulation || '',
+        minDeposit: b.minDeposit || (b.minDepositINR ? `₹${b.minDepositINR}` : ''),
+        categories: b.categories || [],
+        headquarters: b.headquarters || '',
+        features: b.features || [],
+        platforms: b.platforms || '',
+      }));
+    return [...ALL_BROKERS_DATA, ...apiExtras];
+  }, [apiBrokers]);
+
+  // Scoring function: prioritizes exact match, name startsWith, word startsWith, name includes, slug, rank
+  const scoreBroker = (b, q, cleanQ) => {
+    const name = (b.name || '').toLowerCase();
+    const slug = (b.slug || b.id || '').toLowerCase();
+    const rank = (b.rank || '').toLowerCase();
+    const rankNum = String(b.rankNum || '');
+
+    // 1. Exact match on name
+    if (name === q) return 1000;
+
+    // 2. Name starts with search query (e.g. "ex" -> Exness, "ic" -> IC Markets, "der" -> Deriv, "oct" -> Octa)
+    if (name.startsWith(q)) return 600;
+
+    // 3. Word in name starts with query (e.g. "markets" -> IC Markets, "forex" -> HFM)
+    const words = name.split(/[\s()\-]+/);
+    if (words.some((w) => w.startsWith(q))) return 500;
+
+    // 4. Name contains query
+    if (name.includes(q)) return 400;
+
+    // 5. Slug match
+    if (slug === q || slug.startsWith(q)) return 350;
+    if (slug.includes(q)) return 300;
+
+    // 6. Rank match (e.g. "1" or "#1" matches #1 Exness, "2" matches #2 XM)
+    if (cleanQ && (rank === q || rank === '#' + cleanQ || rankNum === cleanQ)) return 250;
+
+    // 7. Regulation match (e.g. "fca", "cysec", "asic")
+    const reg = (b.regulation || '').toLowerCase();
+    if (reg.includes(q)) return 120;
+
+    // 8. Categories / Platforms
+    const cats = (b.categories || []).join(' ').toLowerCase();
+    if (cats.includes(q)) return 60;
+    const plats = (b.platforms || '').toLowerCase();
+    if (plats.includes(q)) return 60;
+
+    // 9. Headquarters / Features (lowest weight so they don't overpower broker names)
+    const hq = (b.headquarters || '').toLowerCase();
+    if (hq.includes(q)) return 30;
+    const features = (b.features || []).join(' ').toLowerCase();
+    if (features.includes(q)) return 20;
+
+    return 0;
+  };
 
   // Top suggested brokers when search opens without query
   const suggestedBrokers = useMemo(() => {
-    return ALL_BROKERS_DATA.slice(0, 5);
-  }, []);
+    return allBrokersForSearch.slice(0, 5);
+  }, [allBrokersForSearch]);
 
   // Compute live search matches and related brokers
   const { searchMatches, relatedBrokers } = useMemo(() => {
@@ -208,24 +295,26 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
       };
     }
 
-    const matches = ALL_BROKERS_DATA.filter((b) => {
-      const name = (b.name || '').toLowerCase();
-      const reg = (b.regulation || '').toLowerCase();
-      const cats = (b.categories || []).join(' ').toLowerCase();
-      const hq = (b.headquarters || '').toLowerCase();
-      const features = (b.features || []).join(' ').toLowerCase();
-      return name.includes(q) || reg.includes(q) || cats.includes(q) || hq.includes(q) || features.includes(q);
-    });
+    const cleanQ = q.replace(/^#/, '');
 
-    // Related brokers: brokers not in matches, prioritizing similar or top picks
+    const scored = allBrokersForSearch
+      .map((b) => ({
+        broker: b,
+        score: scoreBroker(b, q, cleanQ),
+      }))
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score || (a.broker.rankNum || 99) - (b.broker.rankNum || 99));
+
+    const matches = scored.map((item) => item.broker).slice(0, 8);
+
     const matchIds = new Set(matches.map((m) => m.id || m.slug));
-    const related = ALL_BROKERS_DATA.filter((b) => !matchIds.has(b.id || b.slug)).slice(0, 3);
+    const related = allBrokersForSearch.filter((b) => !matchIds.has(b.id || b.slug)).slice(0, 4);
 
     return {
       searchMatches: matches,
       relatedBrokers: related,
     };
-  }, [searchQuery, suggestedBrokers]);
+  }, [searchQuery, suggestedBrokers, allBrokersForSearch]);
 
   const handleSelectBroker = (b) => {
     setSearchOpen(false);
@@ -267,8 +356,13 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
   const searchInputRef = useRef(null);
 
   useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
+    if (searchOpen) {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+      if (navRef.current) {
+        navRef.current.style.clipPath = 'none';
+      }
     }
   }, [searchOpen]);
 
@@ -389,7 +483,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
           maxWidth: isMobile ? '100%' : targetMaxWidth,
         }}
         animate={
-          profileDropdownOpen || heroComplete
+          profileDropdownOpen || searchOpen || heroComplete
             ? {
               clipPath: 'none',
               opacity: 1,
@@ -424,7 +518,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
             }
         }
         onAnimationComplete={() => {
-          if (heroComplete && navRef.current) {
+          if ((heroComplete || searchOpen) && navRef.current) {
             navRef.current.style.clipPath = 'none';
           }
         }}
@@ -635,10 +729,9 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                       <div className="search-dropdown-list">
                         {suggestedBrokers.map((b) => (
                           <button
-                            key={b.id || b.name}
+                            key={b.id || b.slug || b.name}
                             type="button"
                             className="search-dropdown-item"
-                            onPointerDown={(e) => e.preventDefault()}
                             onClick={() => handleSelectBroker(b)}
                           >
                             <div className="search-item-left">
@@ -682,7 +775,6 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                             key={chip.label}
                             type="button"
                             className="quick-tag-chip"
-                            onPointerDown={(e) => e.preventDefault()}
                             onClick={() => {
                               setSearchQuery(chip.q);
                               if (searchInputRef.current) {
@@ -696,7 +788,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                       </div>
                     </div>
                   ) : (
-                    /* Active Search State: Matching + Related Brokers */
+                    /* Active Search State: Matching Brokers */
                     <div className="search-dropdown-active-state">
                       {searchMatches.length > 0 ? (
                         <>
@@ -708,10 +800,9 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                           <div className="search-dropdown-list">
                             {searchMatches.map((b) => (
                               <button
-                                key={b.id || b.name}
+                                key={b.id || b.slug || b.name}
                                 type="button"
                                 className="search-dropdown-item"
-                                onPointerDown={(e) => e.preventDefault()}
                                 onClick={() => handleSelectBroker(b)}
                               >
                                 <div className="search-item-left">
@@ -740,69 +831,24 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                               </button>
                             ))}
                           </div>
-
-                          {/* Related Brokers Section */}
-                          {relatedBrokers.length > 0 && (
-                            <div className="search-dropdown-related-section">
-                              <div className="search-dropdown-header search-related-header">
-                                <span>Related Brokers &amp; Alternatives</span>
-                              </div>
-                              <div className="search-dropdown-list">
-                                {relatedBrokers.map((b) => (
-                                  <button
-                                    key={b.id || b.name}
-                                    type="button"
-                                    className="search-dropdown-item related-item"
-                                    onPointerDown={(e) => e.preventDefault()}
-                                    onClick={() => handleSelectBroker(b)}
-                                  >
-                                    <div className="search-item-left">
-                                      <div className="search-item-avatar related-avatar">
-                                        {(b.name || 'B')[0].toUpperCase()}
-                                      </div>
-                                      <div className="search-item-text">
-                                        <div className="search-item-title-row">
-                                          <span className="search-item-name">{b.name}</span>
-                                          <span className="search-item-pill-related">Similar</span>
-                                        </div>
-                                        <span className="search-item-sub">
-                                          {b.regulation} • Min {b.minDeposit}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <div className="search-item-right">
-                                      <span className="search-item-tp-stars" title={`${b.rating} rating`}>
-                                        <Star size={10} fill="#ffffff" color="#ffffff" />
-                                        <span>{b.rating}</span>
-                                      </span>
-                                      <span className="search-item-action-tag">
-                                        View →
-                                      </span>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </>
                       ) : (
                         /* No Exact Match -> Show Related Brokers fallback */
                         <div className="search-dropdown-no-match">
                           <div className="search-dropdown-empty">
-                            <p>No exact match for "{searchQuery}"</p>
+                            <p>No brokers found matching "{searchQuery}"</p>
                           </div>
 
                           <div className="search-dropdown-header search-related-header">
-                            <span>Related Top Brokers to Explore:</span>
+                            <span>Suggested Top Brokers to Explore:</span>
                           </div>
 
                           <div className="search-dropdown-list">
                             {relatedBrokers.map((b) => (
                               <button
-                                key={b.id || b.name}
+                                key={b.id || b.slug || b.name}
                                 type="button"
                                 className="search-dropdown-item"
-                                onPointerDown={(e) => e.preventDefault()}
                                 onClick={() => handleSelectBroker(b)}
                               >
                                 <div className="search-item-left">

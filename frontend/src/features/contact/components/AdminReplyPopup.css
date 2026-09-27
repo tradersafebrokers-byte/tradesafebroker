@@ -1,0 +1,304 @@
+/* ═══════════════════════════════════════════════════════════════
+   Admin Reply Notification Popup
+   Fixed bottom-right, professional dark glassmorphic design
+   ═══════════════════════════════════════════════════════════════ */
+
+.admin-reply-popup {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  width: 400px;
+  max-width: calc(100vw - 32px);
+  background: rgba(15, 23, 42, 0.97);
+  border: 1px solid rgba(252, 93, 33, 0.25);
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 1px rgba(252, 93, 33, 0.08),
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(252, 93, 33, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ── Header ── */
+.arp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.arp-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.arp-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(252, 93, 33, 0.12);
+  color: #fc5d21;
+  flex-shrink: 0;
+}
+
+.arp-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.arp-header-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: -0.2px;
+}
+
+.arp-ticket-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fc5d21;
+  background: rgba(252, 93, 33, 0.1);
+  border: 1px solid rgba(252, 93, 33, 0.2);
+  padding: 1px 7px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.arp-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.arp-close-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+/* ── Navigation Row (multiple replies) ── */
+.arp-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.arp-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.arp-nav-btn:hover:not(:disabled) {
+  background: rgba(252, 93, 33, 0.12);
+  border-color: rgba(252, 93, 33, 0.3);
+  color: #fc5d21;
+}
+
+.arp-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.arp-nav-count {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* ── Body ── */
+.arp-body {
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.arp-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.arp-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.arp-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* Reply Card */
+.arp-reply-card {
+  background: rgba(252, 93, 33, 0.06);
+  border: 1px solid rgba(252, 93, 33, 0.15);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.arp-reply-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fc5d21;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+
+.arp-reply-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #e2e8f0;
+  margin: 0;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* Original Message Card */
+.arp-original-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid rgba(148, 163, 184, 0.3);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 12px;
+}
+
+.arp-original-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+
+.arp-original-text {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* Date Row */
+.arp-date-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #475569;
+  padding-top: 2px;
+}
+
+/* ── Actions ── */
+.arp-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.arp-mark-read-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  justify-content: center;
+}
+
+.arp-mark-read-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.arp-mark-read-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.arp-mark-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.arp-mark-all-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+}
+
+.arp-mark-all-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .admin-reply-popup {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+  }
+
+  .arp-body {
+    max-height: 240px;
+  }
+}

@@ -8,6 +8,7 @@ import ToastContainer from '../features/shared/components/toast/ToastContainer.j
 import SupportReplyPopup from '../features/contact/components/SupportReplyPopup.jsx';
 import BrokerReviewsModal from '../features/reviews/components/BrokerReviewsModal.jsx';
 import AppRoutes from './app.routes.jsx';
+import AdminReplyPopup from '../features/contact/components/AdminReplyPopup.jsx';
 
 function App() {
   const { verifySession } = useAuth();
@@ -79,9 +80,16 @@ function App() {
     }
   }, [isHome, heroComplete, onHeroFinished]);
 
-  // Scroll to top on route change
+  // Disable browser's built-in scroll restoration so we control it
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  // Instantly scroll to top on every route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [location.pathname]);
 
   const toggleTheme = useCallback(() => {
@@ -137,6 +145,7 @@ function App() {
       <AuthModal />
       <ToastContainer />
       {!isAdminRoute && <SupportReplyPopup />}
+      {!isAdminRoute && <AdminReplyPopup />}
       <BrokerReviewsModal
         isOpen={globalReviewModal.isOpen}
         broker={globalReviewModal.broker}

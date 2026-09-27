@@ -25,6 +25,7 @@ export const submitContactMessage = asyncHandler(async (req, res) => {
     email: email.trim().toLowerCase(),
     message: message.trim(),
     status: 'unread',
+    userId: req.user?._id || null,
   });
 
   // Automated Ticket Confirmation & Auto-Reply Dispatch
@@ -277,6 +278,63 @@ export const updateFooterSettings = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     new ApiResponse(200, { hiddenLinks: setting.hiddenLinks }, 'Footer settings updated successfully.')
+  );
+});
+
+/**
+ * @desc    Get unread admin replies for the logged-in user
+ * @route   GET /api/v1/contact/my-replies
+ * @access  Private (Authenticated users)
+ */
+export const getMyReplies = asyncHandler(async (req, res) => {
+  // Find replies linked by userId
+  const replies = await ContactMessage.find({
+    userId: req.user._id,
+    status: 'replied',
+    isReadByUser: false,
+  }).sort({ repliedAt: -1 });
+
+  // Also check by email as fallback for messages sent before userId tracking
+  const emailReplies = await ContactMessage.find({
+    email: req.user.email,
+    userId: null,
+    status: 'replied',
+    isReadByUser: false,
+  }).sort({ repliedAt: -1 });
+
+  const allReplies = [...replies, ...emailReplies];
+
+  return res.status(200).json(
+    new ApiResponse(200, { replies: allReplies }, 'Your admin replies fetched successfully.')
+  );
+});
+
+/**
+ * @desc    Mark an admin reply as read by the user
+ * @route   PATCH /api/v1/contact/:id/mark-read
+ * @access  Private (Authenticated users)
+ */
+export const markReplyAsRead = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const message = await ContactMessage.findById(id);
+
+  if (!message) {
+    throw new ApiError(404, 'Message not found.');
+  }
+
+  // Verify ownership by userId or email
+  if (
+    message.userId?.toString() !== req.user._id.toString() &&
+    message.email !== req.user.email
+  ) {
+    throw new ApiError(403, 'Not authorized to mark this message.');
+  }
+
+  message.isReadByUser = true;
+  await message.save();
+
+  return res.status(200).json(
+    new ApiResponse(200, { id }, 'Reply marked as read.')
   );
 });
 
