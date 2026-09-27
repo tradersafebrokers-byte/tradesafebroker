@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   User,
   ArrowRight,
+  Search,
 } from 'lucide-react';
 import useAuth from '../../auth/hooks/useAuth.js';
 import { useToast } from './toast/ToastContext.jsx';
@@ -294,10 +295,10 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleClickOutside);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('pointerdown', handleClickOutside);
     };
   }, [searchOpen]);
 
@@ -484,8 +485,8 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
         {/* Right Section: Search Icon, Theme Toggle, Login, Get Started */}
         <motion.div
           className="pipwise-nav-right"
-          initial={{ opacity: 0, x: 16 }}
-          animate={heroComplete ? { opacity: 1, x: 0 } : { opacity: 0, x: 16 }}
+          initial={isMobile ? false : { opacity: 0, x: 16 }}
+          animate={isMobile ? { opacity: 1 } : (heroComplete ? { opacity: 1, x: 0 } : { opacity: 0, x: 16 })}
           transition={{ duration: 0.55, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
         >
           {/* Expanding Inline Search Bar extending to the Left with Bouncy Spring Animation */}
@@ -499,14 +500,20 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
               transition={bouncySpring}
               whileTap={!searchOpen ? { scale: 0.92 } : undefined}
               onClick={() => {
-                if (!searchOpen) setSearchOpen(true);
+                if (!searchOpen) {
+                  setSearchOpen(true);
+                  setMobileMenuOpen(false);
+                }
               }}
             >
               <button
                 type="button"
                 className="search-pill-icon-btn"
                 onClick={() => {
-                  if (!searchOpen) setSearchOpen(true);
+                  if (!searchOpen) {
+                    setSearchOpen(true);
+                    setMobileMenuOpen(false);
+                  }
                 }}
                 aria-label="Search"
                 title={searchOpen ? '' : 'Search (Click to open)'}
@@ -621,11 +628,12 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
               {searchOpen && (
                 <motion.div
                   className="pipwise-search-dropdown-menu"
-                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  initial={isMobile ? { opacity: 0, y: -4 } : { opacity: 0, y: 8, scale: 0.96 }}
+                  animate={isMobile ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, scale: 1 }}
+                  exit={isMobile ? { opacity: 0, y: -4 } : { opacity: 0, y: 6, scale: 0.96 }}
                   transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                   onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
                 >
                   {!searchQuery.trim() ? (
                     /* Initial State: Suggested Brokers & Quick Tags */
@@ -641,6 +649,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                             key={b.id || b.name}
                             type="button"
                             className="search-dropdown-item"
+                            onPointerDown={(e) => e.preventDefault()}
                             onClick={() => handleSelectBroker(b)}
                           >
                             <div className="search-item-left">
@@ -684,6 +693,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                             key={chip.label}
                             type="button"
                             className="quick-tag-chip"
+                            onPointerDown={(e) => e.preventDefault()}
                             onClick={() => {
                               setSearchQuery(chip.q);
                               if (searchInputRef.current) {
@@ -712,6 +722,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                                 key={b.id || b.name}
                                 type="button"
                                 className="search-dropdown-item"
+                                onPointerDown={(e) => e.preventDefault()}
                                 onClick={() => handleSelectBroker(b)}
                               >
                                 <div className="search-item-left">
@@ -753,6 +764,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                                     key={b.id || b.name}
                                     type="button"
                                     className="search-dropdown-item related-item"
+                                    onPointerDown={(e) => e.preventDefault()}
                                     onClick={() => handleSelectBroker(b)}
                                   >
                                     <div className="search-item-left">
@@ -801,6 +813,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                                 key={b.id || b.name}
                                 type="button"
                                 className="search-dropdown-item"
+                                onPointerDown={(e) => e.preventDefault()}
                                 onClick={() => handleSelectBroker(b)}
                               >
                                 <div className="search-item-left">
@@ -878,7 +891,12 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
           <button
             type="button"
             className="mobile-nav-toggle"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => {
+              if (!mobileMenuOpen) {
+                setSearchOpen(false);
+              }
+              setMobileMenuOpen(!mobileMenuOpen);
+            }}
             aria-label="Toggle navigation menu"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1146,6 +1164,22 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
           >
+            {/* Quick Search Shortcut inside Drawer */}
+            <div className="mobile-drawer-search-wrap">
+              <button
+                type="button"
+                className="mobile-drawer-search-btn"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setSearchOpen(true);
+                }}
+              >
+                <Search size={15} className="mobile-drawer-search-icon" />
+                <span className="mobile-drawer-search-text">Search broker to review...</span>
+                <span className="mobile-drawer-search-badge">Search</span>
+              </button>
+            </div>
+
             <div className="mobile-menu-links-list">
               {navLinks.map((link) => {
                 const IconComponent = link.Icon;
@@ -1250,16 +1284,8 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                         {user?.role === 'admin' ? (
                           <Link
                             to="/admin"
+                            className="mobile-dashboard-link"
                             onClick={() => setMobileMenuOpen(false)}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              color: '#ffffff',
-                              textDecoration: 'none',
-                              fontWeight: 700,
-                              fontSize: '0.92rem'
-                            }}
                           >
                             <LayoutDashboard size={13} color="#818cf8" />
                             <span>Dashboard</span>
