@@ -82,27 +82,16 @@ const DockNavLink = React.memo(({ link, mouseX }) => {
       {link.isReviewAction ? (
         <button
           type="button"
-          className="nav-link-item-btn"
+          className="nav-link-item-btn nav-link-review-dock-btn"
           onClick={() => {
             window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
           }}
-          title="Write a Broker Review"
+          title="Write a Broker Review (Trustpilot style)"
         >
-          <span>{link.label}</span>
-          <svg
-            className="nav-chevron-icon"
-            width="9"
-            height="9"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
+          <span className="dock-review-star-badge" aria-hidden="true">
+            <Star size={11} fill="#ffffff" color="#ffffff" strokeWidth={2.4} />
+          </span>
+          <span className="dock-review-label">{link.label}</span>
         </button>
       ) : link.href.startsWith('/') && !link.href.startsWith('/#') ? (
         <Link to={link.href}>
@@ -381,8 +370,9 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
     ? (isScrolled ? 1190 : 1230)
     : (isScrolled ? 1090 : 1160);
 
+  // When search is open, navbar maxWidth MUST be completely stable and never oscillate on hover
   const targetMaxWidth = searchOpen
-    ? (isNavHovered ? searchHoverMaxWidth : searchMaxWidth)
+    ? searchMaxWidth
     : (isNavHovered ? hoveredMaxWidth : baseMaxWidth);
 
   return (
@@ -497,7 +487,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
               animate={{
                 width: searchOpen ? (typeof window !== 'undefined' && window.innerWidth < 480 ? Math.min(window.innerWidth - 120, 230) : 256) : 36,
               }}
-              transition={bouncySpring}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
               whileTap={!searchOpen ? { scale: 0.92 } : undefined}
               onClick={() => {
                 if (!searchOpen) {
@@ -539,10 +529,9 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                 initial={false}
                 animate={{
                   opacity: searchOpen ? 1 : 0,
-                  x: searchOpen ? 0 : 8,
                 }}
                 transition={{
-                  duration: searchOpen ? 0.22 : 0.1,
+                  duration: 0.18,
                   ease: 'easeOut',
                 }}
                 style={{
@@ -1188,16 +1177,19 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                     <button
                       key={link.label}
                       type="button"
-                      className="mobile-nav-link"
+                      className="mobile-nav-link mobile-nav-review-highlight"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
                       }}
-                      style={{ width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', font: 'inherit' }}
+                      style={{ width: '100%', border: 'none', cursor: 'pointer', textAlign: 'left', font: 'inherit' }}
                     >
                       <div className="mobile-link-left">
-                        {IconComponent && <IconComponent size={17} className="mobile-link-icon" />}
+                        <span className="mobile-review-star-badge" aria-hidden="true">
+                          <Star size={11} fill="#ffffff" color="#ffffff" strokeWidth={2.4} />
+                        </span>
                         <span className="mobile-link-text">{link.label}</span>
+                        <span className="mobile-review-action-tag">Rate</span>
                       </div>
                       <ChevronRight size={14} className="mobile-link-chevron" />
                     </button>

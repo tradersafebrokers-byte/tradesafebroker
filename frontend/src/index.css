@@ -440,6 +440,101 @@ input {
     color: #ffffff;
 }
 
+/* Highlighted "Write a Review" with Trustpilot Star in Dock */
+.nav-link-review-dock-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 3px 9px 3px 4px !important;
+    border-radius: 9999px !important;
+    background: linear-gradient(135deg, rgba(0, 182, 122, 0.16) 0%, rgba(16, 185, 129, 0.08) 100%) !important;
+    border: 1px solid rgba(0, 182, 122, 0.45) !important;
+    color: #f8fafc !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 0 12px -2px rgba(0, 182, 122, 0.3) !important;
+}
+
+.nav-link-review-dock-btn:hover {
+    background: linear-gradient(135deg, #00b67a 0%, #059669 100%) !important;
+    border-color: #00b67a !important;
+    color: #ffffff !important;
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 4px 18px rgba(0, 182, 122, 0.5) !important;
+}
+
+[data-theme='light'] .nav-link-review-dock-btn {
+    background: linear-gradient(135deg, rgba(0, 182, 122, 0.12) 0%, rgba(16, 185, 129, 0.06) 100%) !important;
+    border-color: rgba(0, 182, 122, 0.45) !important;
+    color: #065f46 !important;
+    box-shadow: 0 2px 8px rgba(0, 182, 122, 0.15) !important;
+}
+
+[data-theme='light'] .nav-link-review-dock-btn:hover {
+    background: linear-gradient(135deg, #00b67a 0%, #059669 100%) !important;
+    color: #ffffff !important;
+}
+
+.dock-review-star-badge {
+    width: 20px;
+    height: 20px;
+    background: #00b67a;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.nav-link-review-dock-btn:hover .dock-review-star-badge {
+    background: #ffffff;
+    transform: scale(1.08);
+}
+
+.nav-link-review-dock-btn:hover .dock-review-star-badge svg {
+    fill: #00b67a !important;
+    color: #00b67a !important;
+}
+
+.dock-review-label {
+    letter-spacing: -0.01em;
+}
+
+/* Mobile Menu Star Badge */
+.mobile-review-star-badge {
+    width: 22px;
+    height: 22px;
+    background: #00b67a;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(0, 182, 122, 0.4);
+}
+
+.mobile-nav-review-highlight {
+    background: rgba(0, 182, 122, 0.07) !important;
+    border-left: 3px solid #00b67a !important;
+    border-radius: 10px !important;
+    margin: 2px 0 !important;
+}
+
+.mobile-review-action-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 1px 6px;
+    border-radius: 9999px;
+    background: rgba(0, 182, 122, 0.15);
+    color: #00b67a;
+    border: 1px solid rgba(0, 182, 122, 0.35);
+}
+
 .nav-link-item a span,
 .nav-link-item-btn span {
     position: relative;
@@ -939,6 +1034,7 @@ input {
     right: 0;
     width: 380px;
     max-width: calc(100vw - 32px);
+    min-height: 180px;
     max-height: 460px;
     overflow-y: auto;
     background: #0f1218;
@@ -950,6 +1046,10 @@ input {
     z-index: 99999;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, opacity;
+    contain: layout style;
     color: #f8fafc;
 }
 
