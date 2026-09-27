@@ -4,6 +4,7 @@ import {
   createReview,
   replyToReview,
   voteHelpful,
+  flagReview,
   deleteReview,
 } from '../controllers/review.controller.js';
 import { verifyJWT, optionalVerifyJWT } from '../middlewares/auth.middleware.js';
@@ -21,6 +22,9 @@ router.route('/:id/reply').post(optionalVerifyJWT, replyToReview);
 
 // Vote a review as helpful
 router.route('/:id/helpful').post(optionalVerifyJWT, voteHelpful);
+
+// Flag/report review for moderation
+router.route('/:id/flag').post(optionalVerifyJWT, flagReview);
 
 // Delete review (admin or author)
 router.route('/:id').delete(verifyJWT, deleteReview);

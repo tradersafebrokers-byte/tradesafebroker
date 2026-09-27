@@ -142,6 +142,18 @@ const reviewSchema = new mongoose.Schema(
         default: null,
       },
     },
+    flagged: {
+      type: Boolean,
+      default: false,
+    },
+    flagReason: {
+      type: String,
+      default: '',
+    },
+    flagCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

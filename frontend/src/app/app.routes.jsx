@@ -57,6 +57,10 @@ export const AppRoutes = React.memo(({ theme, heroComplete, setHeroComplete, onH
           element={<BrokerReviewPage theme={theme} />}
         />
         <Route
+          path="/broker/:slug"
+          element={<BrokerReviewPage theme={theme} />}
+        />
+        <Route
           path="/compare"
           element={<CompareBrokers theme={theme} />}
         />

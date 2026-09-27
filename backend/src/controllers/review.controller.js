@@ -338,6 +338,34 @@ export const voteHelpful = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Flag a review for moderation / report fake review
+ * @route   POST /api/v1/reviews/:id/flag
+ * @access  Public
+ */
+export const flagReview = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { reason = 'Reported by community member' } = req.body || {};
+
+  const review = await Review.findById(id);
+  if (!review) {
+    throw new ApiError(404, 'Review not found.');
+  }
+
+  review.flagged = true;
+  review.flagReason = reason;
+  review.flagCount = (review.flagCount || 0) + 1;
+  await review.save();
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { flagged: true, flagCount: review.flagCount },
+      'Review has been flagged for compliance review.'
+    )
+  );
+});
+
+/**
  * @desc    Delete a review
  * @route   DELETE /api/v1/reviews/:id
  * @access  Private (Admin or review author)

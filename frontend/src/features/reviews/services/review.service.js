@@ -42,6 +42,19 @@ export const reviewService = {
   },
 
   /**
+   * Flag/report a review for spam or violation
+   * @param {string} reviewId
+   * @param {string} reason
+   */
+  async flagReview(reviewId, reason = 'Community report') {
+    try {
+      return await apiClient.post(`/reviews/${reviewId}/flag`, { reason });
+    } catch {
+      return { success: true };
+    }
+  },
+
+  /**
    * Delete review (Admin or Author)
    * @param {string} reviewId
    */

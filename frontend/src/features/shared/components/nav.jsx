@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { ALL_BROKERS_DATA } from '../../brokers/data/brokersData.jsx';
 import {
   LogOut,
   Building2,
@@ -197,10 +198,43 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
     };
   }, [profileDropdownOpen]);
 
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isNavHovered, setIsNavHovered] = useState(false);
+
+  // Compute live search matches
+  const searchMatches = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase().trim();
+    return ALL_BROKERS_DATA.filter((b) => {
+      const name = (b.name || '').toLowerCase();
+      const reg = (b.regulation || '').toLowerCase();
+      const cats = (b.categories || []).join(' ').toLowerCase();
+      const hq = (b.headquarters || '').toLowerCase();
+      return name.includes(q) || reg.includes(q) || cats.includes(q) || hq.includes(q);
+    }).slice(0, 6);
+  }, [searchQuery]);
+
+  const handleSelectBroker = (b) => {
+    setSearchOpen(false);
+    setSearchQuery('');
+    navigate(`/reviews/${b.slug || b.id}`);
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (searchMatches.length > 0) {
+        handleSelectBroker(searchMatches[0]);
+      } else if (searchQuery.trim()) {
+        setSearchOpen(false);
+        navigate(`/brokers?search=${encodeURIComponent(searchQuery.trim())}`);
+        setSearchQuery('');
+      }
+    }
+  };
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth <= 768;
@@ -490,9 +524,10 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                   ref={searchInputRef}
                   type="text"
                   className="pipwise-inline-search-input"
-                  placeholder="Search brokers..."
+                  placeholder="Search broker to review..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                   tabIndex={searchOpen ? 0 : -1}
                 />
 
@@ -558,6 +593,74 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                 </div>
               </motion.div>
             </motion.div>
+
+            {/* Instant Trustpilot-style Broker Search Dropdown */}
+            <AnimatePresence>
+              {searchOpen && searchQuery.trim() && (
+                <motion.div
+                  className="pipwise-search-dropdown-menu"
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="search-dropdown-header">
+                    <span>Brokers ({searchMatches.length})</span>
+                    <span className="search-dropdown-tip">Click to review or ↵ Enter</span>
+                  </div>
+
+                  {searchMatches.length > 0 ? (
+                    <div className="search-dropdown-list">
+                      {searchMatches.map((b) => (
+                        <button
+                          key={b.id || b.name}
+                          type="button"
+                          className="search-dropdown-item"
+                          onClick={() => handleSelectBroker(b)}
+                        >
+                          <div className="search-item-left">
+                            <div className="search-item-avatar">
+                              {(b.name || 'B')[0].toUpperCase()}
+                            </div>
+                            <div className="search-item-text">
+                              <span className="search-item-name">{b.name}</span>
+                              <span className="search-item-sub">
+                                {b.regulation} • {b.minDeposit}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="search-item-right">
+                            <span className="search-item-tp-stars" title={`${b.rating} rating`}>
+                              <Star size={10} fill="#ffffff" color="#ffffff" />
+                              <span>{b.rating}</span>
+                            </span>
+                            <span className="search-item-action-tag">
+                              Review &amp; Details →
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="search-dropdown-empty">
+                      <p>No brokers found for "{searchQuery}"</p>
+                      <button
+                        type="button"
+                        className="search-dropdown-all-btn"
+                        onClick={() => {
+                          setSearchOpen(false);
+                          navigate('/brokers');
+                          setSearchQuery('');
+                        }}
+                      >
+                        Browse All Brokers
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Theme Toggle Button - Disappears completely on mobile when search is open or on small mobile when user is logged in */}

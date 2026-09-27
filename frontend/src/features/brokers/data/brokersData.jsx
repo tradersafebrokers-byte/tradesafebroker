@@ -181,6 +181,16 @@ export const ColorIG_Logo = () => (
   </svg>
 );
 
+export const ColorTauro_Logo = () => (
+  <svg viewBox="0 0 135 26" height="23" className="top-broker-svg" aria-label="Tauro Markets">
+    <circle cx="12" cy="13" r="9.5" fill="#fc5d21" />
+    <path d="M7 11h10M12 11v9" stroke="#ffffff" strokeWidth="2.4" strokeLinecap="round" />
+    <text x="28" y="18.5" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="800" letterSpacing="-0.2px" fill="currentColor">
+      TAURO
+    </text>
+  </svg>
+);
+
 // High-Popularity Brokers in India with INR (₹) Deposits & Local Payment Methods
 export const ALL_BROKERS_DATA = [
   {
@@ -566,6 +576,47 @@ export const ALL_BROKERS_DATA = [
     headquarters: 'New York, USA',
     categories: ['top-rated', 'low-deposit', 'tradingview', 'us-accepted'],
     affiliateUrl: 'https://www.oanda.com',
+  },
+  {
+    id: 'tauro-markets',
+    slug: 'tauro-markets',
+    rank: '#13',
+    rankNum: 13,
+    isFirst: false,
+    Logo: ColorTauro_Logo,
+    name: 'Tauro Markets',
+    rating: 4.8,
+    reviewsCount: '191 reviews',
+    trustScore: 96,
+    highlightBadge: 'Spot Forex • Crypto & Stock Trading',
+    badgeTheme: 'coral',
+    minDeposit: '₹850 ($10)',
+    minDepositINR: 850,
+    spread: 'From 0.2 pips',
+    spreadNum: 0.2,
+    maxLeverage: '1:500',
+    regulation: 'FSC Mauritius',
+    regulatorsList: ['FSC Mauritius (GB21026330)'],
+    platforms: 'MT5, WebTrader, Mobile App',
+    platformsList: ['MT5', 'Mobile App'],
+    payments: 'UPI, NetBanking, Crypto, Cards, Wire Transfer',
+    executionType: 'Direct Spot FX & STP',
+    accountTypes: 'Standard, Raw Spread, VIP',
+    features: ['Cutting-edge research and innovation', 'Spot forex and cryptocurrency services', 'Tier-1 client fund segregation', 'Dedicated in-house multilingual trading specialists'],
+    pros: ['Direct spot forex trading with tight spreads', 'Diverse multi-asset access including crypto and stocks', 'Rapid automated deposit processing'],
+    cons: ['Relatively new international footprint compared to 20-year legacy brokers'],
+    yearFounded: 2021,
+    headquarters: 'Ebene, Mauritius',
+    categories: ['spot-forex', 'crypto', 'stock-broker'],
+    businessCategories: ['Finance Broker', 'Cryptocurrency Service', 'Stock Broker'],
+    writtenByCompany: 'Tauro Markets is a leading provider, trend-setter and forerunner of spot forex trading, with a specialist in-house team that is constantly & consistently pushing the boundaries through cutting-edge research, innovation and development.',
+    contactInfo: {
+      address: 'Rue de la Démocratie, Office 306, 3rd Floor., 72001, Ebene, Mauritius',
+      phone: '+96522286001',
+      email: 'marketing@tauromarkets.com',
+      website: 'https://www.tauromarkets.com',
+    },
+    affiliateUrl: 'https://www.tauromarkets.com',
   }
 ];
 
