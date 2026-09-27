@@ -310,20 +310,31 @@ export default function BrokerReviewPage({ theme = 'dark' }) {
     return communityReviews.filter((r) => Math.round(Number(r.rating)) === Number(selectedRatingFilter));
   }, [communityReviews, selectedRatingFilter]);
 
-  // Render Trustpilot Signature Square Star Group
-  const renderTrustpilotStars = (ratingVal, size = 15, boxSize = 22) => {
-    const rounded = Math.round(Number(ratingVal) || 5);
+  const RATING_COLORS = ['', '#ff3722', '#ff8622', '#ffce00', '#73cf11', '#00b67a'];
+
+  // Render Square Star Group with dynamic rating colors
+  const renderRatingStars = (ratingVal, size = 15, boxSize = 22) => {
+    const rounded = Math.min(5, Math.max(1, Math.round(Number(ratingVal) || 5)));
+    const activeColor = RATING_COLORS[rounded] || '#00b67a';
     return (
       <div className="tp-stars-group" aria-label={`${ratingVal} out of 5 stars`}>
-        {[1, 2, 3, 4, 5].map((s) => (
-          <span
-            key={s}
-            className={`tp-star-box ${s <= rounded ? 'active' : 'inactive'}`}
-            style={{ width: `${boxSize}px`, height: `${boxSize}px` }}
-          >
-            <Star size={size} fill="#ffffff" color="#ffffff" strokeWidth={0} />
-          </span>
-        ))}
+        {[1, 2, 3, 4, 5].map((s) => {
+          const isActive = s <= rounded;
+          return (
+            <span
+              key={s}
+              className={`tp-star-box ${isActive ? 'active' : 'inactive'}`}
+              style={{
+                width: `${boxSize}px`,
+                height: `${boxSize}px`,
+                backgroundColor: isActive ? activeColor : undefined,
+                borderColor: isActive ? activeColor : undefined,
+              }}
+            >
+              <Star size={size} fill="#ffffff" color="#ffffff" strokeWidth={0} />
+            </span>
+          );
+        })}
       </div>
     );
   };
@@ -518,7 +529,7 @@ export default function BrokerReviewPage({ theme = 'dark' }) {
           <main className="brp-main-content">
 
             {/* ══════════════════════════════════════════════════════════
-                TRUSTPILOT-STYLE DIRECT REVIEWS & RATING HUB
+                TRADESAFE VERIFIED REVIEWS & RATING HUB
                 ══════════════════════════════════════════════════════════ */}
             <section className="tp-overview-hub">
               {/* 1. INTERACTIVE "WRITE A REVIEW" SECTION (PRE-SELECTED BROKER) */}
@@ -545,11 +556,16 @@ export default function BrokerReviewPage({ theme = 'dark' }) {
                   >
                     {[1, 2, 3, 4, 5].map((starNum) => {
                       const isFilled = starNum <= activeRatingScore;
+                      const activeColor = RATING_COLORS[activeRatingScore] || '#00b67a';
                       return (
                         <button
                           key={starNum}
                           type="button"
                           className={`tp-interactive-box ${isFilled ? 'filled' : ''}`}
+                          style={{
+                            backgroundColor: isFilled ? activeColor : undefined,
+                            borderColor: isFilled ? activeColor : undefined,
+                          }}
                           onMouseEnter={() => setFormHoverRating(starNum)}
                           onClick={() => {
                             setFormRating(starNum);
@@ -562,7 +578,10 @@ export default function BrokerReviewPage({ theme = 'dark' }) {
                       );
                     })}
                   </div>
-                  <span className="tp-rating-label-hint">
+                  <span
+                    className="tp-rating-label-hint"
+                    style={{ color: RATING_COLORS[activeRatingScore] || '#00b67a' }}
+                  >
                     {ratingLabels[activeRatingScore - 1]}
                   </span>
 
@@ -773,9 +792,9 @@ export default function BrokerReviewPage({ theme = 'dark' }) {
                             </div>
                           </div>
 
-                          {/* TRUSTPILOT GREEN RATING BOXES */}
+                          {/* VERIFIED COMMUNITY RATING BOXES */}
                           <div className="tp-rc-stars">
-                            {renderTrustpilotStars(rev.rating, 14, 20)}
+                            {renderRatingStars(rev.rating, 14, 20)}
                           </div>
                         </div>
 

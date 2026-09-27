@@ -86,7 +86,7 @@ const DockNavLink = React.memo(({ link, mouseX }) => {
           onClick={() => {
             window.dispatchEvent(new CustomEvent('open_review_modal', { detail: { openWrite: true } }));
           }}
-          title="Write a Broker Review (Trustpilot style)"
+          title="Write a Broker Review"
         >
           <span className="dock-review-star-badge" aria-hidden="true">
             <Star size={11} fill="#ffffff" color="#ffffff" strokeWidth={2.4} />
@@ -706,7 +706,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
               </motion.div>
             </motion.div>
 
-            {/* Instant Trustpilot-style Broker Search & Suggestions Dropdown */}
+            {/* Instant Broker Search & Suggestions Dropdown */}
             <AnimatePresence>
               {searchOpen && (
                 <motion.div

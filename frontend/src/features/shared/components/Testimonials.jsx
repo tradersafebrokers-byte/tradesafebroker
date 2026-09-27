@@ -72,7 +72,7 @@ const TestimonialCard = React.memo(({ item }) => (
       {item.depositMethod ? (
         <span className="pw-deposit-tag">{item.depositMethod}</span>
       ) : (
-        <span className="pw-supporter-tag">Trustpilot Verified</span>
+        <span className="pw-supporter-tag">TradeSafe Verified</span>
       )}
     </div>
   </div>
@@ -185,7 +185,7 @@ const Testimonials = React.memo(() => {
           className="pw-testimonials-cta-bar"
         >
           <div className="pw-trustpilot-score-strip">
-            <span className="pw-tp-brand-logo">★ Trustpilot</span>
+            <span className="pw-tp-brand-logo">★ TradeSafe</span>
             <div className="pw-tp-stars-row">
               {[1, 2, 3, 4, 5].map((s) => (
                 <span key={s} className="pw-tp-star-box-lg">
@@ -193,7 +193,7 @@ const Testimonials = React.memo(() => {
                 </span>
               ))}
             </div>
-            <span className="pw-tp-score-label">TrustScore <strong>4.9</strong> • 50,000+ Verified Trader Reviews</span>
+            <span className="pw-tp-score-label">TradeSafe Score <strong>4.9</strong> • 50,000+ Verified Trader Reviews</span>
           </div>
 
           <button

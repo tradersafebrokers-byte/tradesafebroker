@@ -1,5 +1,5 @@
 /**
- * Helper to ensure every broker has verified Trustpilot-style company details,
+ * Helper to ensure every broker has verified company details,
  * categories, contact information, and initial community reviews.
  */
 

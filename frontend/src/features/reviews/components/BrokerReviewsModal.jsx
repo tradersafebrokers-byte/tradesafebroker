@@ -361,8 +361,8 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                   <h3 className="brm-title">
                     {currentBroker ? `${currentBroker.name} Reviews & Ratings` : 'TradeSafeBrokers Trader Reviews'}
                   </h3>
-                  <span className="brm-verified-badge" title="Trustpilot-Verified Community Reviews">
-                    <CheckCircle2 size={11} strokeWidth={2.8} /> Trustpilot Verified Reviews
+                  <span className="brm-verified-badge" title="TradeSafe Verified Community Reviews">
+                    <CheckCircle2 size={11} strokeWidth={2.8} /> TradeSafe Verified Reviews
                   </span>
                 </div>
                 <div className="brm-sub">
@@ -847,8 +847,9 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                       </div>
                       <div className="brm-rc-trustpilot-stars">
                         {[1, 2, 3, 4, 5].map((s) => {
+                          const starColors = ["", "#ff3722", "#ff8622", "#ffce00", "#73cf11", "#00b67a"];
                           const isFilled = s <= Math.round(Number(rev.rating) || 5);
-                          const fillColor = Number(rev.rating) >= 4 ? '#00b67a' : Number(rev.rating) === 3 ? '#ffce00' : '#ff3722';
+                          const fillColor = starColors[Math.round(Number(rev.rating) || 5)] || '#00b67a';
                           return (
                             <span
                               key={s}

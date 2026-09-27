@@ -1004,11 +1004,11 @@
 }
 
 .tp-star-box.active {
-  background-color: #00b67a !important;
+  background-color: #00b67a;
 }
 
 .tp-star-box.inactive {
-  background-color: rgba(148, 163, 184, 0.22) !important;
+  background-color: rgba(148, 163, 184, 0.22);
 }
 
 /* 1. Interactive Write-a-Review Card (No dropdown required) */
@@ -1104,7 +1104,6 @@
 
 .tp-interactive-box:hover,
 .tp-interactive-box.filled {
-  background: #00b67a;
   transform: translateY(-2px);
 }
 
@@ -1112,6 +1111,7 @@
   font-size: 13.5px;
   font-weight: 700;
   color: #00b67a;
+  transition: color 0.15s ease;
 }
 
 .tp-write-open-btn {
