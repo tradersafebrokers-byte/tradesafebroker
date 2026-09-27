@@ -933,8 +933,10 @@ input {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 340px;
-    max-width: 90vw;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    max-height: 460px;
+    overflow-y: auto;
     background: #0f1218;
     background: linear-gradient(180deg, #151921 0%, #0c0e13 100%);
     border: 1px solid rgba(255, 255, 255, 0.12);
@@ -972,6 +974,11 @@ input {
     color: #64748b;
 }
 
+.search-header-accent {
+    color: #fc5d21;
+    font-weight: 800;
+}
+
 .search-dropdown-tip {
     font-size: 10px;
     text-transform: none;
@@ -984,8 +991,6 @@ input {
     flex-direction: column;
     gap: 3px;
     padding-top: 6px;
-    max-height: 320px;
-    overflow-y: auto;
 }
 
 .search-dropdown-item {
@@ -1023,8 +1028,8 @@ input {
 }
 
 .search-item-avatar {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 8px;
     background: linear-gradient(135deg, rgba(252, 93, 33, 0.25), rgba(252, 93, 33, 0.06));
     border: 1px solid rgba(252, 93, 33, 0.35);
@@ -1037,10 +1042,22 @@ input {
     flex-shrink: 0;
 }
 
+.search-item-avatar.related-avatar {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(59, 130, 246, 0.06));
+    border-color: rgba(59, 130, 246, 0.35);
+    color: #60a5fa;
+}
+
 .search-item-text {
     display: flex;
     flex-direction: column;
     min-width: 0;
+}
+
+.search-item-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .search-item-name {
@@ -1054,6 +1071,26 @@ input {
 
 [data-theme='light'] .search-item-name {
     color: #0f172a;
+}
+
+.search-item-pill-rank {
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(252, 93, 33, 0.15);
+    color: #fc5d21;
+    white-space: nowrap;
+}
+
+.search-item-pill-related {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    white-space: nowrap;
 }
 
 .search-item-sub {
@@ -1092,8 +1129,81 @@ input {
     letter-spacing: -0.01em;
 }
 
+/* Quick Search Tags for Initial State */
+.search-dropdown-quick-tags {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 10px 8px 4px;
+    margin-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+[data-theme='light'] .search-dropdown-quick-tags {
+    border-top-color: rgba(0, 0, 0, 0.07);
+}
+
+.quick-tags-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+[data-theme='light'] .quick-tags-label {
+    color: #64748b;
+}
+
+.quick-tag-chip {
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+[data-theme='light'] .quick-tag-chip {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    color: #334155;
+}
+
+.quick-tag-chip:hover {
+    background: rgba(252, 93, 33, 0.15);
+    border-color: rgba(252, 93, 33, 0.35);
+    color: #fc5d21;
+    transform: translateY(-1px);
+}
+
+/* Related Brokers Section */
+.search-dropdown-related-section {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+[data-theme='light'] .search-dropdown-related-section {
+    border-top-color: rgba(0, 0, 0, 0.07);
+}
+
+.search-related-header {
+    border-bottom: none;
+    padding-bottom: 2px;
+    font-size: 10.5px;
+    color: #94a3b8;
+}
+
+.search-dropdown-item.related-item {
+    opacity: 0.94;
+}
+
 .search-dropdown-empty {
-    padding: 20px 14px;
+    padding: 16px 12px 10px;
     text-align: center;
     color: #94a3b8;
     font-size: 12px;

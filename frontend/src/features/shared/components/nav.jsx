@@ -204,18 +204,39 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isNavHovered, setIsNavHovered] = useState(false);
 
-  // Compute live search matches
-  const searchMatches = useMemo(() => {
-    if (!searchQuery.trim()) return [];
+  // Top suggested brokers when search opens without query
+  const suggestedBrokers = useMemo(() => {
+    return ALL_BROKERS_DATA.slice(0, 5);
+  }, []);
+
+  // Compute live search matches and related brokers
+  const { searchMatches, relatedBrokers } = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return ALL_BROKERS_DATA.filter((b) => {
+    if (!q) {
+      return {
+        searchMatches: [],
+        relatedBrokers: suggestedBrokers,
+      };
+    }
+
+    const matches = ALL_BROKERS_DATA.filter((b) => {
       const name = (b.name || '').toLowerCase();
       const reg = (b.regulation || '').toLowerCase();
       const cats = (b.categories || []).join(' ').toLowerCase();
       const hq = (b.headquarters || '').toLowerCase();
-      return name.includes(q) || reg.includes(q) || cats.includes(q) || hq.includes(q);
-    }).slice(0, 6);
-  }, [searchQuery]);
+      const features = (b.features || []).join(' ').toLowerCase();
+      return name.includes(q) || reg.includes(q) || cats.includes(q) || hq.includes(q) || features.includes(q);
+    });
+
+    // Related brokers: brokers not in matches, prioritizing similar or top picks
+    const matchIds = new Set(matches.map((m) => m.id || m.slug));
+    const related = ALL_BROKERS_DATA.filter((b) => !matchIds.has(b.id || b.slug)).slice(0, 3);
+
+    return {
+      searchMatches: matches,
+      relatedBrokers: related,
+    };
+  }, [searchQuery, suggestedBrokers]);
 
   const handleSelectBroker = (b) => {
     setSearchOpen(false);
@@ -228,6 +249,8 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
       e.preventDefault();
       if (searchMatches.length > 0) {
         handleSelectBroker(searchMatches[0]);
+      } else if (relatedBrokers.length > 0) {
+        handleSelectBroker(relatedBrokers[0]);
       } else if (searchQuery.trim()) {
         setSearchOpen(false);
         navigate(`/brokers?search=${encodeURIComponent(searchQuery.trim())}`);
@@ -594,9 +617,9 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
               </motion.div>
             </motion.div>
 
-            {/* Instant Trustpilot-style Broker Search Dropdown */}
+            {/* Instant Trustpilot-style Broker Search & Suggestions Dropdown */}
             <AnimatePresence>
-              {searchOpen && searchQuery.trim() && (
+              {searchOpen && (
                 <motion.div
                   className="pipwise-search-dropdown-menu"
                   initial={{ opacity: 0, y: 8, scale: 0.96 }}
@@ -605,57 +628,207 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                   transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="search-dropdown-header">
-                    <span>Brokers ({searchMatches.length})</span>
-                    <span className="search-dropdown-tip">Click to review or ↵ Enter</span>
-                  </div>
+                  {!searchQuery.trim() ? (
+                    /* Initial State: Suggested Brokers & Quick Tags */
+                    <div className="search-dropdown-initial-state">
+                      <div className="search-dropdown-header">
+                        <span className="search-header-accent">🔥 Suggested Brokers</span>
+                        <span className="search-dropdown-tip">Select to review or compare</span>
+                      </div>
 
-                  {searchMatches.length > 0 ? (
-                    <div className="search-dropdown-list">
-                      {searchMatches.map((b) => (
-                        <button
-                          key={b.id || b.name}
-                          type="button"
-                          className="search-dropdown-item"
-                          onClick={() => handleSelectBroker(b)}
-                        >
-                          <div className="search-item-left">
-                            <div className="search-item-avatar">
-                              {(b.name || 'B')[0].toUpperCase()}
+                      <div className="search-dropdown-list">
+                        {suggestedBrokers.map((b) => (
+                          <button
+                            key={b.id || b.name}
+                            type="button"
+                            className="search-dropdown-item"
+                            onClick={() => handleSelectBroker(b)}
+                          >
+                            <div className="search-item-left">
+                              <div className="search-item-avatar">
+                                {(b.name || 'B')[0].toUpperCase()}
+                              </div>
+                              <div className="search-item-text">
+                                <div className="search-item-title-row">
+                                  <span className="search-item-name">{b.name}</span>
+                                  {b.rank && <span className="search-item-pill-rank">{b.rank}</span>}
+                                </div>
+                                <span className="search-item-sub">
+                                  {b.regulation} • Min {b.minDeposit}
+                                </span>
+                              </div>
                             </div>
-                            <div className="search-item-text">
-                              <span className="search-item-name">{b.name}</span>
-                              <span className="search-item-sub">
-                                {b.regulation} • {b.minDeposit}
+                            <div className="search-item-right">
+                              <span className="search-item-tp-stars" title={`${b.rating} rating`}>
+                                <Star size={10} fill="#ffffff" color="#ffffff" />
+                                <span>{b.rating}</span>
+                              </span>
+                              <span className="search-item-action-tag">
+                                Review &amp; Details →
                               </span>
                             </div>
-                          </div>
-                          <div className="search-item-right">
-                            <span className="search-item-tp-stars" title={`${b.rating} rating`}>
-                              <Star size={10} fill="#ffffff" color="#ffffff" />
-                              <span>{b.rating}</span>
-                            </span>
-                            <span className="search-item-action-tag">
-                              Review &amp; Details →
-                            </span>
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Quick Popular Searches */}
+                      <div className="search-dropdown-quick-tags">
+                        <span className="quick-tags-label">Popular:</span>
+                        {[
+                          { label: 'Tauro Markets', q: 'Tauro' },
+                          { label: 'Exness', q: 'Exness' },
+                          { label: 'XM', q: 'XM' },
+                          { label: 'Raw Spreads', q: 'ECN' },
+                          { label: 'UPI Payouts', q: 'UPI' },
+                        ].map((chip) => (
+                          <button
+                            key={chip.label}
+                            type="button"
+                            className="quick-tag-chip"
+                            onClick={() => {
+                              setSearchQuery(chip.q);
+                              if (searchInputRef.current) {
+                                searchInputRef.current.focus();
+                              }
+                            }}
+                          >
+                            {chip.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   ) : (
-                    <div className="search-dropdown-empty">
-                      <p>No brokers found for "{searchQuery}"</p>
-                      <button
-                        type="button"
-                        className="search-dropdown-all-btn"
-                        onClick={() => {
-                          setSearchOpen(false);
-                          navigate('/brokers');
-                          setSearchQuery('');
-                        }}
-                      >
-                        Browse All Brokers
-                      </button>
+                    /* Active Search State: Matching + Related Brokers */
+                    <div className="search-dropdown-active-state">
+                      {searchMatches.length > 0 ? (
+                        <>
+                          <div className="search-dropdown-header">
+                            <span>Matching Brokers ({searchMatches.length})</span>
+                            <span className="search-dropdown-tip">Press ↵ Enter to open</span>
+                          </div>
+
+                          <div className="search-dropdown-list">
+                            {searchMatches.map((b) => (
+                              <button
+                                key={b.id || b.name}
+                                type="button"
+                                className="search-dropdown-item"
+                                onClick={() => handleSelectBroker(b)}
+                              >
+                                <div className="search-item-left">
+                                  <div className="search-item-avatar">
+                                    {(b.name || 'B')[0].toUpperCase()}
+                                  </div>
+                                  <div className="search-item-text">
+                                    <div className="search-item-title-row">
+                                      <span className="search-item-name">{b.name}</span>
+                                      {b.rank && <span className="search-item-pill-rank">{b.rank}</span>}
+                                    </div>
+                                    <span className="search-item-sub">
+                                      {b.regulation} • Min {b.minDeposit}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="search-item-right">
+                                  <span className="search-item-tp-stars" title={`${b.rating} rating`}>
+                                    <Star size={10} fill="#ffffff" color="#ffffff" />
+                                    <span>{b.rating}</span>
+                                  </span>
+                                  <span className="search-item-action-tag">
+                                    Review &amp; Details →
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Related Brokers Section */}
+                          {relatedBrokers.length > 0 && (
+                            <div className="search-dropdown-related-section">
+                              <div className="search-dropdown-header search-related-header">
+                                <span>Related Brokers &amp; Alternatives</span>
+                              </div>
+                              <div className="search-dropdown-list">
+                                {relatedBrokers.map((b) => (
+                                  <button
+                                    key={b.id || b.name}
+                                    type="button"
+                                    className="search-dropdown-item related-item"
+                                    onClick={() => handleSelectBroker(b)}
+                                  >
+                                    <div className="search-item-left">
+                                      <div className="search-item-avatar related-avatar">
+                                        {(b.name || 'B')[0].toUpperCase()}
+                                      </div>
+                                      <div className="search-item-text">
+                                        <div className="search-item-title-row">
+                                          <span className="search-item-name">{b.name}</span>
+                                          <span className="search-item-pill-related">Similar</span>
+                                        </div>
+                                        <span className="search-item-sub">
+                                          {b.regulation} • Min {b.minDeposit}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="search-item-right">
+                                      <span className="search-item-tp-stars" title={`${b.rating} rating`}>
+                                        <Star size={10} fill="#ffffff" color="#ffffff" />
+                                        <span>{b.rating}</span>
+                                      </span>
+                                      <span className="search-item-action-tag">
+                                        View →
+                                      </span>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        /* No Exact Match -> Show Related Brokers fallback */
+                        <div className="search-dropdown-no-match">
+                          <div className="search-dropdown-empty">
+                            <p>No exact match for "{searchQuery}"</p>
+                          </div>
+
+                          <div className="search-dropdown-header search-related-header">
+                            <span>Related Top Brokers to Explore:</span>
+                          </div>
+
+                          <div className="search-dropdown-list">
+                            {relatedBrokers.map((b) => (
+                              <button
+                                key={b.id || b.name}
+                                type="button"
+                                className="search-dropdown-item"
+                                onClick={() => handleSelectBroker(b)}
+                              >
+                                <div className="search-item-left">
+                                  <div className="search-item-avatar">
+                                    {(b.name || 'B')[0].toUpperCase()}
+                                  </div>
+                                  <div className="search-item-text">
+                                    <span className="search-item-name">{b.name}</span>
+                                    <span className="search-item-sub">
+                                      {b.regulation} • Min {b.minDeposit}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="search-item-right">
+                                  <span className="search-item-tp-stars" title={`${b.rating} rating`}>
+                                    <Star size={10} fill="#ffffff" color="#ffffff" />
+                                    <span>{b.rating}</span>
+                                  </span>
+                                  <span className="search-item-action-tag">
+                                    Review →
+                                  </span>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </motion.div>
