@@ -536,14 +536,14 @@ input {
 }
 
 .nav-link-item a span,
-.nav-link-item-btn span {
+.nav-link-item-btn:not(.nav-link-review-dock-btn) span {
     position: relative;
     display: inline-block;
 }
 
 /* Smooth left-to-right coral animated underline */
 .nav-link-item a span::after,
-.nav-link-item-btn span::after {
+.nav-link-item-btn:not(.nav-link-review-dock-btn) span::after {
     content: '';
     position: absolute;
     bottom: -3px;
@@ -560,9 +560,27 @@ input {
 }
 
 .nav-link-item a:hover span::after,
-.nav-link-item-btn:hover span::after {
+.nav-link-item-btn:not(.nav-link-review-dock-btn):hover span::after {
     transform: scaleX(1);
     opacity: 1;
+}
+
+/* Explicitly eliminate any underline or pseudo line on Write a Review button */
+.nav-link-review-dock-btn,
+.nav-link-review-dock-btn * {
+    text-decoration: none !important;
+}
+
+.nav-link-review-dock-btn span::after,
+.nav-link-review-dock-btn:hover span::after,
+.nav-link-review-dock-btn::after,
+.nav-link-review-dock-btn:hover::after {
+    display: none !important;
+    content: none !important;
+    opacity: 0 !important;
+    transform: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 .nav-chevron-icon {
