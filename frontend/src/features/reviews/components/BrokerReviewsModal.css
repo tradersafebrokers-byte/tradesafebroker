@@ -895,9 +895,19 @@
   justify-content: space-between;
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.brm-helpful-btn {
+.brm-rc-actions-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brm-helpful-btn,
+.brm-share-btn,
+.brm-flag-btn {
   background: transparent;
   border: none;
   color: #94a3b8;
@@ -907,14 +917,25 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 6px;
+  padding: 4px 7px;
   border-radius: 6px;
   transition: all 0.15s ease;
 }
 
 .brm-helpful-btn:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: #fc5d21;
+  color: #00b67a;
+}
+
+.brm-share-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #38bdf8;
+}
+
+.brm-flag-btn:hover,
+.brm-flag-btn.flagged {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
 }
 
 .brm-reply-trigger-btn {

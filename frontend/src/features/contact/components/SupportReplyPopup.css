@@ -1,627 +1,419 @@
 /* ==========================================================================
-   TradeSafeBrokers - Fixed Support Reply Popup & Thread Modal
-   Appears at bottom of screen when Admin replies to user contact inquiry.
-   Remains fixed across tabs until user opens or dismisses ("X").
+   TradeSafeBrokers - Clean White Minimal Support Reply Popup & Modal
+   Fixed at screen bottom across all tabs until user opens or dismisses.
+   Pure minimal white UI, no heavy boxy layout.
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Bottom Floating Popup Card (Fixed on screen across all website tabs)
+   1. Bottom Floating Popup (Fixed on screen across all website tabs)
    -------------------------------------------------------------------------- */
-.tsb-reply-bottom-container {
+.tsb-white-bottom-anchor {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 99998;
+  z-index: 999999;
   width: 100%;
-  max-width: 420px;
-  pointer-events: none; /* children enable pointer events */
+  max-width: 390px;
+  pointer-events: none;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.tsb-reply-card {
+@media (max-width: 600px) {
+  .tsb-white-bottom-anchor {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    max-width: calc(100% - 32px);
+  }
+}
+
+.tsb-white-reply-bar {
   pointer-events: auto;
   position: relative;
-  background: rgba(18, 22, 30, 0.96);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(252, 93, 33, 0.38);
-  border-top: 1px solid rgba(252, 93, 33, 0.6);
-  border-radius: 14px;
-  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  color: #f8fafc;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 14px 40px -6px rgba(15, 23, 42, 0.16), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
   padding: 16px 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
   overflow: hidden;
 }
 
-.tsb-reply-card:hover {
+.tsb-white-reply-bar:hover {
   transform: translateY(-3px);
-  border-color: rgba(252, 93, 33, 0.7);
-  box-shadow: 0 20px 48px -6px rgba(0, 0, 0, 0.75), 0 0 18px rgba(252, 93, 33, 0.25);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 18px 46px -4px rgba(15, 23, 42, 0.22);
 }
 
-/* Light Theme Override */
-[data-theme="light"] .tsb-reply-card {
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(252, 93, 33, 0.35);
-  border-top: 1px solid rgba(252, 93, 33, 0.55);
-  box-shadow: 0 16px 38px -6px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.04);
-  color: #0f172a;
-}
-
-[data-theme="light"] .tsb-reply-card:hover {
-  box-shadow: 0 22px 46px -6px rgba(15, 23, 42, 0.2), 0 0 20px rgba(252, 93, 33, 0.15);
-}
-
-/* Accent Glow Bar on top edge */
-.tsb-reply-glow-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #fc5d21 0%, #ff8a4c 50%, #10b981 100%);
-}
-
-/* Card Header */
-.tsb-reply-header {
+/* Top Row: Status Dot, Brand, Ticket, Close */
+.tsb-wrb-top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
 }
 
-.tsb-reply-header-left {
+.tsb-wrb-badge-group {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
+  gap: 7px;
 }
 
-.tsb-reply-avatar-wrap {
-  position: relative;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(252, 93, 33, 0.2), rgba(252, 93, 33, 0.08));
-  border: 1px solid rgba(252, 93, 33, 0.4);
+.tsb-wrb-ping-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  animation: tsb-ping-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes tsb-ping-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.45);
+  }
+}
+
+.tsb-wrb-brand {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.tsb-wrb-ticket {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 5px;
+  letter-spacing: 0.2px;
+}
+
+.tsb-wrb-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fc5d21;
-  flex-shrink: 0;
+  transition: all 0.15s ease;
 }
 
-.tsb-reply-online-ping {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #10b981;
-  border: 2px solid #12161e;
-  box-shadow: 0 0 6px #10b981;
-}
-
-[data-theme="light"] .tsb-reply-online-ping {
-  border-color: #ffffff;
-}
-
-.tsb-reply-title-wrap {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.tsb-reply-title {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #f8fafc;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 1.25;
-}
-
-[data-theme="light"] .tsb-reply-title {
+.tsb-wrb-close-btn:hover {
+  background: #f1f5f9;
   color: #0f172a;
 }
 
-.tsb-reply-ticket-badge {
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: rgba(252, 93, 33, 0.16);
-  color: #fc5d21;
-  border: 1px solid rgba(252, 93, 33, 0.3);
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-}
-
-.tsb-reply-meta-sub {
-  font-size: 11.5px;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 1px;
-}
-
-[data-theme="light"] .tsb-reply-meta-sub {
-  color: #64748b;
-}
-
-/* Close "X" Button */
-.tsb-reply-close-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-  padding: 0;
-}
-
-.tsb-reply-close-btn:hover {
-  background: rgba(239, 68, 68, 0.16);
-  border-color: rgba(239, 68, 68, 0.35);
-  color: #ef4444;
-  transform: scale(1.05);
-}
-
-[data-theme="light"] .tsb-reply-close-btn {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #64748b;
-}
-
-[data-theme="light"] .tsb-reply-close-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-}
-
-/* Card Snippet Preview */
-.tsb-reply-snippet-box {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 10px;
-  padding: 10px 12px;
+/* Content */
+.tsb-wrb-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
-[data-theme="light"] .tsb-reply-snippet-box {
-  background: #f8fafc;
-  border-color: #e2e8f0;
+.tsb-wrb-heading {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.35;
 }
 
-/* Admin reply preview */
-.tsb-reply-msg-preview {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
+.tsb-wrb-snippet {
   font-size: 13px;
-  line-height: 1.45;
-  color: #e2e8f0;
-}
-
-[data-theme="light"] .tsb-reply-msg-preview {
-  color: #1e293b;
-}
-
-.tsb-reply-icon-accent {
-  color: #10b981;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.tsb-reply-text-clamp {
+  line-height: 1.5;
+  color: #475569;
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  word-break: break-word;
 }
 
-/* User original message quote */
-.tsb-reply-user-quote {
-  font-size: 11.5px;
-  color: #94a3b8;
-  background: rgba(0, 0, 0, 0.2);
-  border-left: 2.5px solid #fc5d21;
-  border-radius: 0 6px 6px 0;
-  padding: 5px 8px;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-}
-
-[data-theme="light"] .tsb-reply-user-quote {
-  background: rgba(252, 93, 33, 0.05);
-  color: #64748b;
-}
-
-/* Card Action Bar */
-.tsb-reply-action-bar {
+/* Footer: Time & Link */
+.tsb-wrb-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding-top: 2px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
 }
 
-.tsb-reply-time-tag {
+.tsb-wrb-time {
   font-size: 11px;
-  color: #64748b;
-  display: flex;
+  color: #94a3b8;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.tsb-reply-open-pill {
+.tsb-wrb-open-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #10b981;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: gap 0.15s ease;
+}
+
+.tsb-white-reply-bar:hover .tsb-wrb-open-link {
+  gap: 7px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Clean White Minimal Modal Sheet (No Box Layout)
+   -------------------------------------------------------------------------- */
+.tsb-white-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.tsb-white-modal-sheet {
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.28);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.tsb-wm-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tsb-wm-ticket-tag {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 12px;
   font-weight: 700;
-  color: #fc5d21;
-  background: rgba(252, 93, 33, 0.1);
-  padding: 4px 10px;
-  border-radius: 20px;
-  border: 1px solid rgba(252, 93, 33, 0.25);
-  transition: all 0.15s ease;
-}
-
-.tsb-reply-card:hover .tsb-reply-open-pill {
-  background: #fc5d21;
-  color: #ffffff;
-  border-color: #fc5d21;
-}
-
-/* --------------------------------------------------------------------------
-   2. Full Conversation Modal Dialog
-   -------------------------------------------------------------------------- */
-.tsb-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 100000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  overflow-y: auto;
-}
-
-.tsb-modal-card {
-  position: relative;
-  background: #11151c;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 18px;
-  width: 100%;
-  max-width: 620px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  color: #f8fafc;
-  overflow: hidden;
-}
-
-[data-theme="light"] .tsb-modal-card {
-  background: #ffffff;
-  border-color: #e2e8f0;
-  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.05);
-  color: #0f172a;
-}
-
-/* Modal Header */
-.tsb-modal-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-[data-theme="light"] .tsb-modal-header {
-  border-color: #f1f5f9;
-  background: #f8fafc;
-}
-
-.tsb-modal-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.tsb-modal-icon-badge {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(252, 93, 33, 0.25), rgba(252, 93, 33, 0.08));
-  border: 1px solid rgba(252, 93, 33, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fc5d21;
-  flex-shrink: 0;
-}
-
-.tsb-modal-title {
-  font-size: 17px;
-  font-weight: 800;
-  margin: 0;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-[data-theme="light"] .tsb-modal-title {
-  color: #0f172a;
-}
-
-.tsb-modal-sub {
-  font-size: 12.5px;
-  color: #94a3b8;
-  margin: 2px 0 0 0;
-}
-
-[data-theme="light"] .tsb-modal-sub {
-  color: #64748b;
-}
-
-/* Modal Scrollable Body */
-.tsb-modal-body {
-  padding: 22px 24px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* User Message Box */
-.tsb-thread-user-box {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-[data-theme="light"] .tsb-thread-user-box {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-}
-
-.tsb-thread-user-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.tsb-thread-tag-user {
-  font-size: 11.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.tsb-thread-user-msg {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #cbd5e1;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-[data-theme="light"] .tsb-thread-user-msg {
-  color: #334155;
-}
-
-/* Admin Response Box */
-.tsb-thread-admin-box {
-  background: rgba(16, 185, 129, 0.04);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 12px;
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  position: relative;
-}
-
-[data-theme="light"] .tsb-thread-admin-box {
-  background: #f0fdf4;
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.tsb-thread-admin-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
-  padding-bottom: 10px;
-}
-
-.tsb-thread-tag-admin {
-  font-size: 12.5px;
-  font-weight: 700;
   color: #10b981;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  margin-bottom: 3px;
 }
 
-.tsb-thread-admin-subject {
-  font-size: 13px;
-  font-weight: 700;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-[data-theme="light"] .tsb-thread-admin-subject {
-  color: #475569;
-}
-
-.tsb-thread-admin-msg {
-  font-size: 14.5px;
-  line-height: 1.7;
-  color: #f1f5f9;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-[data-theme="light"] .tsb-thread-admin-msg {
+.tsb-wm-title {
+  font-size: 18px;
+  font-weight: 800;
   color: #0f172a;
+  margin: 0;
 }
 
-/* Modal Footer */
-.tsb-modal-footer {
-  padding: 16px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.015);
+.tsb-wm-close-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-[data-theme="light"] .tsb-modal-footer {
-  border-color: #f1f5f9;
-  background: #f8fafc;
-}
-
-.tsb-modal-footer-hint {
-  font-size: 12px;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.tsb-modal-footer-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.tsb-modal-btn-minimize {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #cbd5e1;
-  font-size: 12.5px;
-  font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 8px;
+  justify-content: center;
+  color: #64748b;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.tsb-modal-btn-minimize:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-}
-
-[data-theme="light"] .tsb-modal-btn-minimize {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #475569;
-}
-
-[data-theme="light"] .tsb-modal-btn-minimize:hover {
+.tsb-wm-close-btn:hover {
   background: #e2e8f0;
   color: #0f172a;
 }
 
-.tsb-modal-btn-dismiss {
-  background: #fc5d21;
-  border: 1px solid #fc5d21;
-  color: #ffffff;
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 8px 16px;
+/* Conversation Body */
+.tsb-wm-body {
+  padding: 22px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tsb-wm-msg-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.tsb-wm-avatar {
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.user-avatar {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.admin-avatar {
+  background: #ecfdf5;
+  color: #10b981;
+  border: 1px solid #a7f3d0;
+}
+
+.tsb-wm-msg-bubble {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-bubble {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+.admin-bubble {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 14px 18px;
+}
+
+.tsb-wm-msg-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.tsb-wm-admin-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.tsb-wm-admin-pill {
+  font-size: 9.5px;
+  font-weight: 800;
+  background: #10b981;
+  color: #ffffff;
+  padding: 1px 5px;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+.tsb-wm-subject {
+  font-size: 12px;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tsb-wm-msg-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #334155;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.admin-text {
+  color: #0f172a;
+}
+
+/* Modal Footer */
+.tsb-wm-footer {
+  padding: 14px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tsb-wm-footer-info {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+
+.tsb-wm-footer-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tsb-wm-btn-keep {
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tsb-wm-btn-keep:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.tsb-wm-btn-close {
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #10b981;
+  border: none;
+  color: #ffffff;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: all 0.15s ease;
-  box-shadow: 0 4px 12px rgba(252, 93, 33, 0.3);
+  gap: 5px;
+  transition: background 0.15s ease;
 }
 
-.tsb-modal-btn-dismiss:hover {
-  background: #e04b13;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(252, 93, 33, 0.4);
-}
-
-/* Mobile responsive adjustments */
-@media (max-width: 640px) {
-  .tsb-reply-bottom-container {
-    bottom: 16px;
-    right: 12px;
-    left: 12px;
-    width: auto;
-    max-width: none;
-  }
-
-  .tsb-modal-card {
-    max-height: 92vh;
-  }
-
-  .tsb-modal-header {
-    padding: 16px 18px;
-  }
-
-  .tsb-modal-body {
-    padding: 16px 18px;
-  }
-
-  .tsb-modal-footer {
-    padding: 14px 18px;
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .tsb-modal-footer-actions {
-    justify-content: stretch;
-  }
-
-  .tsb-modal-btn-minimize,
-  .tsb-modal-btn-dismiss {
-    flex: 1;
-    justify-content: center;
-  }
+.tsb-wm-btn-close:hover {
+  background: #059669;
 }

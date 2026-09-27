@@ -16,6 +16,8 @@ import {
   TrendingUp,
   AlertCircle,
   Award,
+  Flag,
+  Share2,
 } from 'lucide-react';
 import { reviewService } from '../services/review.service.js';
 import { brokerService } from '../../brokers/services/broker.service.js';
@@ -255,6 +257,38 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
         ...prev,
         [reviewId]: { ...prev[reviewId], isSubmitting: false },
       }));
+    }
+  };
+
+  const [flaggedReviews, setFlaggedReviews] = useState({});
+
+  // Flag review handler
+  const handleFlagReview = async (reviewId) => {
+    if (flaggedReviews[reviewId]) {
+      toast.info('Already Flagged', 'This review has already been reported.');
+      return;
+    }
+    setFlaggedReviews((prev) => ({ ...prev, [reviewId]: true }));
+    toast.success('Review Reported', 'Thank you! Our compliance team will inspect this review.');
+    try {
+      await reviewService.flagReview(reviewId, 'Reported by trader community');
+    } catch {
+      // Handled gracefully
+    }
+  };
+
+  // Share review handler
+  const handleShareReview = (reviewId) => {
+    const slug = currentBroker?.slug || currentBroker?.id || 'broker';
+    const url = `${window.location.origin}/reviews/${slug}#review-${reviewId}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        toast.success('Link Copied', 'Review link copied to clipboard!');
+      }).catch(() => {
+        toast.info('Review Link', url);
+      });
+    } else {
+      toast.info('Review Link', url);
     }
   };
 
@@ -895,16 +929,39 @@ export const BrokerReviewsModal = ({ isOpen, onClose, broker, initialWriteReview
                       </div>
                     )}
 
-                    {/* Footer Actions: Helpful button & Broker Reply trigger */}
+                    {/* Footer Actions: Useful (like), Share, Flag & Broker Reply trigger */}
                     <div className="brm-rc-actions-footer">
-                      <button
-                        type="button"
-                        className="brm-helpful-btn"
-                        onClick={() => handleVoteHelpful(rev._id)}
-                      >
-                        <ThumbsUp size={12} />
-                        <span>Helpful ({rev.helpfulVotes || 0})</span>
-                      </button>
+                      <div className="brm-rc-actions-left">
+                        <button
+                          type="button"
+                          className="brm-helpful-btn"
+                          onClick={() => handleVoteHelpful(rev._id)}
+                          title="Mark this review as useful"
+                        >
+                          <ThumbsUp size={12} />
+                          <span>Useful ({rev.helpfulVotes || 0})</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="brm-share-btn"
+                          onClick={() => handleShareReview(rev._id)}
+                          title="Share review"
+                        >
+                          <Share2 size={12} />
+                          <span>Share</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className={`brm-flag-btn ${flaggedReviews[rev._id] ? 'flagged' : ''}`}
+                          onClick={() => handleFlagReview(rev._id)}
+                          title="Report / flag this review"
+                        >
+                          <Flag size={12} />
+                          <span>{flaggedReviews[rev._id] ? 'Reported' : 'Flag'}</span>
+                        </button>
+                      </div>
 
                       {/* Real Forex App: Broker can reply to any review */}
                       <button
