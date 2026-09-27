@@ -40,7 +40,6 @@ const NAV_LINKS = [
   { label: 'Comparisons', href: '/compare', Icon: SlidersHorizontal },
   { label: 'Write a Review', isReviewAction: true, Icon: Star },
   { label: 'Join as Broker', href: '/join-broker', Icon: Briefcase, badge: 'Partner' },
-  { label: 'About', href: '/#about', Icon: Info },
 ];
 
 const DockNavLink = React.memo(({ link, mouseX }) => {

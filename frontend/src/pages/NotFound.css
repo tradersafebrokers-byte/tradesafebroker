@@ -1,0 +1,272 @@
+/* ==========================================================================
+   Clean White Minimal 404 Not Found Page
+   Simple, light, elegant typography with back button and quick navigation
+   ========================================================================== */
+
+.nf-page-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #ffffff;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.nf-main-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 20px 60px;
+  box-sizing: border-box;
+}
+
+.nf-content-card {
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Status Pill Tag */
+.nf-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.nf-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+}
+
+.nf-status-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* 404 Display Number */
+.nf-number {
+  font-size: 96px;
+  font-weight: 900;
+  line-height: 1;
+  margin: 4px 0 0;
+  color: #0f172a;
+  letter-spacing: -3px;
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (max-width: 480px) {
+  .nf-number {
+    font-size: 76px;
+  }
+}
+
+.nf-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.nf-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #64748b;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* Search Box */
+.nf-search-box {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 4px 6px 4px 14px;
+  margin-top: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.18s ease;
+}
+
+.nf-search-box:focus-within {
+  border-color: #fc5d21;
+  box-shadow: 0 0 0 3px rgba(252, 93, 33, 0.15);
+}
+
+.nf-search-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.nf-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  font-size: 13.5px;
+  color: #0f172a;
+  font-family: inherit;
+  outline: none;
+  min-width: 0;
+}
+
+.nf-search-input::placeholder {
+  color: #94a3b8;
+}
+
+.nf-search-btn {
+  background: #fc5d21;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.nf-search-btn:hover {
+  background: #e04b12;
+}
+
+/* Action Buttons (Go Back + Home) */
+.nf-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.nf-btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.nf-btn-back:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  transform: translateX(-2px);
+}
+
+.nf-btn-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  background: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.nf-btn-home:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.15);
+}
+
+/* Quick Navigation Links Section */
+.nf-quick-links-section {
+  width: 100%;
+  max-width: 480px;
+  margin-top: 14px;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.nf-quick-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.nf-pills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .nf-pills-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nf-pill-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 9px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  text-decoration: none;
+  transition: all 0.16s ease;
+}
+
+.nf-pill-link:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.nf-pill-arr {
+  color: #94a3b8;
+  transition: transform 0.15s ease;
+}
+
+.nf-pill-link:hover .nf-pill-arr {
+  transform: translateX(2px);
+  color: #0f172a;
+}

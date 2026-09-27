@@ -9,6 +9,7 @@ import ContactPage from '../pages/ContactPage.jsx';
 import AdminDashboard from '../pages/AdminDashboard.jsx';
 import AdminRoute from '../features/auth/components/AdminRoute.jsx';
 import BrokerReviewPage from '../pages/BrokerReviewPage.jsx';
+import NotFound from '../pages/NotFound.jsx';
 
 export const AppRoutes = React.memo(({ theme, heroComplete, setHeroComplete, onHeroFinished }) => {
   return (
@@ -96,8 +97,8 @@ export const AppRoutes = React.memo(({ theme, heroComplete, setHeroComplete, onH
           path="/support"
           element={<Navigate to="/contact" replace />}
         />
-        {/* Fallback to Home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 404 Not Found Page */}
+        <Route path="*" element={<NotFound theme={theme} />} />
       </Routes>
   );
 });
