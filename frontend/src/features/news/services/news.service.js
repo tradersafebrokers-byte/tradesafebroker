@@ -233,6 +233,15 @@ export const newsService = {
     } catch (error) {
       console.warn('Backend news fetch failed, falling back to local market news:', error.message);
       let filtered = [...FALLBACK_NEWS];
+      if (refresh) {
+        // Cycle the list so clicking refresh in fallback mode also brings fresh stories forward
+        const shifted = filtered.shift();
+        filtered.push(shifted);
+        filtered = filtered.map((a, i) => ({
+          ...a,
+          publishedAt: new Date(Date.now() - (i * 12 + 2) * 60 * 1000).toISOString(),
+        }));
+      }
       if (category && category !== 'all') {
         filtered = filtered.filter((a) => a.category === category);
       }

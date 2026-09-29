@@ -155,15 +155,10 @@ export const NewsPage = ({ theme = 'dark' }) => {
     });
   }, [articles, selectedCategory, searchQuery]);
 
-  // Top featured hero article
+  // Top featured hero article - dynamically tracks the newest breaking story
   const featuredArticle = useMemo(() => {
-    if (selectedCategory !== 'all') {
-      return filteredArticles[0] || null;
-    }
-    return (
-      filteredArticles.find((a) => a.isFeatured) || filteredArticles[0] || null
-    );
-  }, [filteredArticles, selectedCategory]);
+    return filteredArticles[0] || null;
+  }, [filteredArticles]);
 
   // Remaining articles
   const gridArticles = useMemo(() => {

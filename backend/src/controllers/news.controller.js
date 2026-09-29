@@ -437,6 +437,67 @@ const ensureInitialNewsSeeded = async () => {
 };
 
 /**
+ * Interleave stories from multiple news sources so the feed features a balanced mix
+ * of Forex, Indian Market, Crypto, and Global Macro. On forceRefresh, shift the order
+ * so the user immediately sees fresh different stories.
+ */
+export const diversifyAndInterleaveNews = (items = [], isForceRefresh = false) => {
+  if (!items || items.length === 0) return [];
+
+  // Group by source
+  const groups = new Map();
+  items.forEach((item) => {
+    const src = item.source || 'Market Intelligence';
+    if (!groups.has(src)) groups.set(src, []);
+    groups.get(src).push(item);
+  });
+
+  const sourceKeys = Array.from(groups.keys());
+  if (sourceKeys.length <= 1) {
+    if (isForceRefresh && items.length > 2) {
+      const copy = [...items];
+      const moved = copy.shift();
+      copy.push(moved);
+      return copy;
+    }
+    return items;
+  }
+
+  // On refresh, rotate starting feed wire and advance top story in each wire
+  if (isForceRefresh) {
+    const shiftCount = Math.floor(Math.random() * (sourceKeys.length - 1)) + 1;
+    for (let s = 0; s < shiftCount; s++) {
+      sourceKeys.push(sourceKeys.shift());
+    }
+    sourceKeys.forEach((k) => {
+      const arr = groups.get(k);
+      if (arr && arr.length > 1) {
+        const topItem = arr.shift();
+        arr.push(topItem);
+      }
+    });
+  }
+
+  const interleaved = [];
+  let added = true;
+  let round = 0;
+
+  while (added) {
+    added = false;
+    for (const key of sourceKeys) {
+      const list = groups.get(key);
+      if (list && list[round]) {
+        interleaved.push(list[round]);
+        added = true;
+      }
+    }
+    round++;
+  }
+
+  return interleaved;
+};
+
+/**
  * @desc    Get all published news articles with category filter, search, & pagination
  * @route   GET /api/v1/news
  * @access  Public
@@ -463,9 +524,9 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
     ];
   }
 
-  // 1. Fetch DB articles (includes user-submitted and admin-submitted posts)
+  // 1. Fetch DB articles (user-submitted and admin-submitted posts)
   const dbArticles = await News.find(query)
-    .sort({ isFeatured: -1, publishedAt: -1, createdAt: -1 })
+    .sort({ createdAt: -1 })
     .lean();
 
   // 2. Fetch live syndicated RSS news items
@@ -488,15 +549,21 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
     );
   }
 
-  // Merge: Featured DB articles first, then recent DB & syndicated articles sorted by publishedAt
-  const featuredDbArticles = dbArticles.filter((a) => a.isFeatured);
-  const nonFeaturedDbArticles = dbArticles.filter((a) => !a.isFeatured);
+  // 3. Interleave and diversify across all active news wires (ForexLive, Livemint, ET, Cointelegraph, CNBC, Yahoo)
+  const diversifiedSyndicated = diversifyAndInterleaveNews(syndicatedItems, isForceRefresh);
 
-  const combinedChronological = [...nonFeaturedDbArticles, ...syndicatedItems].sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
+  // Mark the #1 freshest breaking live story as featured for the hero display
+  if (diversifiedSyndicated.length > 0) {
+    diversifiedSyndicated[0].isFeatured = true;
+  }
 
-  const allMergedArticles = [...featuredDbArticles, ...combinedChronological];
+  // Real DB articles (user-submitted, admin posts) merged with live syndicated articles
+  let allMergedArticles = [];
+  if (diversifiedSyndicated.length > 0) {
+    allMergedArticles = [...diversifiedSyndicated, ...dbArticles];
+  } else {
+    allMergedArticles = dbArticles;
+  }
 
   // Pagination
   const pageNum = Math.max(1, parseInt(page, 10));
@@ -507,7 +574,7 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
 
   // Generate real-time live pulse ticker items dynamically from the freshest syndicated & DB headlines
   const breakingTicker = [];
-  const tickerCandidates = [...syndicatedItems, ...dbArticles].slice(0, 8);
+  const tickerCandidates = allMergedArticles.slice(0, 8);
   tickerCandidates.forEach((item, idx) => {
     breakingTicker.push({
       id: `tk-${idx}-${item._id}`,

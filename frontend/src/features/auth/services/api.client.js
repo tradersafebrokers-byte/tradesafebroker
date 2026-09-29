@@ -12,17 +12,16 @@ const getBaseUrl = () => {
     envUrl = 'https://tradesafebroker.onrender.com';
   }
 
-  // If running in production browser on tradesafebrokers.com, guarantee live backend target
-  if (
-    typeof window !== 'undefined' &&
-    window.location.hostname.includes('tradesafebrokers.com')
-  ) {
-    if (!envUrl || envUrl.includes('localhost') || envUrl.includes('pip-wise-9lox')) {
+  const isBrowser = typeof window !== 'undefined';
+  const isStrictLocalhost =
+    isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  // If running on any hosted domain (tradesafebrokers.com, vercel.app, etc.), guarantee live backend
+  if (isBrowser && !isStrictLocalhost) {
+    if (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1') || envUrl.includes('pip-wise-9lox')) {
       return 'https://tradesafebroker.onrender.com/api/v1';
     }
   }
-
-  if (!envUrl) return 'http://localhost:5001/api/v1';
 
   // If user accidentally entered "VITE_API_URL=https://..." in Vercel Value field
   if (typeof envUrl === 'string' && envUrl.includes('=')) {
@@ -30,7 +29,7 @@ const getBaseUrl = () => {
     envUrl = parts.slice(1).join('=');
   }
 
-  let clean = String(envUrl).trim().replace(/^['"]|['"]$/g, '').replace(/\/+$/, '');
+  let clean = String(envUrl || '').trim().replace(/^['"]|['"]$/g, '').replace(/\/+$/, '');
 
   // If user provided a domain without protocol, auto-prepend https://
   if (clean && !clean.startsWith('http://') && !clean.startsWith('https://')) {
