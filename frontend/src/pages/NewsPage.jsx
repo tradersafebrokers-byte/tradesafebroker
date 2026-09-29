@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Newspaper,
@@ -70,6 +71,7 @@ const getCategoryLabel = (catId) => {
 };
 
 export const NewsPage = ({ theme = 'dark' }) => {
+  const { slug } = useParams();
   const { showToast } = useToast();
   const { user, isAuthenticated } = useAuth();
   const [userNewsModalOpen, setUserNewsModalOpen] = useState(false);
@@ -82,6 +84,16 @@ export const NewsPage = ({ theme = 'dark' }) => {
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [activeArticleModal, setActiveArticleModal] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Auto-open article modal if URL contains :slug
+  useEffect(() => {
+    if (slug && articles.length > 0) {
+      const match = articles.find((a) => a.slug === slug || a._id === slug);
+      if (match) {
+        setActiveArticleModal(match);
+      }
+    }
+  }, [slug, articles]);
 
   // Fetch articles from service / backend
   const loadNews = useCallback(async (isSilent = false) => {
