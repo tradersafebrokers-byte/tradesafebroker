@@ -27,6 +27,7 @@ import {
 import useAuth from '../../auth/hooks/useAuth.js';
 import { useToast } from './toast/ToastContext.jsx';
 import KycModal from '../../kyc/components/KycModal.jsx';
+import UserNewsModal from '../../news/components/UserNewsModal.jsx';
 import VerifiedGoldBadge from './VerifiedGoldBadge.jsx';
 import './NavProfileDropdown.css';
 
@@ -148,6 +149,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
 
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [kycModalOpen, setKycModalOpen] = useState(false);
+  const [userNewsModalOpen, setUserNewsModalOpen] = useState(false);
   const profileDropdownRef = useRef(null);
   const profileTriggerRef = useRef(null);
 
@@ -1170,6 +1172,27 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                     </div>
                   )}
 
+                  {/* Post Market News & Analysis */}
+                  <div
+                    className="profile-dropdown-action-box"
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      setUserNewsModalOpen(true);
+                    }}
+                    title="Publish market analysis, trade setups, or news to the live wire"
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="kyc-icon-badge news">
+                      <Newspaper size={16} />
+                    </div>
+                    <div className="kyc-box-text">
+                      <div className="kyc-box-title">Post Market News</div>
+                      <div className="kyc-box-desc">Publish analysis &amp; live trade updates</div>
+                    </div>
+                    <ArrowRight size={13} className="kyc-arrow-icon" />
+                  </div>
+
                   <div className="profile-dropdown-divider" />
 
                   {/* Logout Option */}
@@ -1410,6 +1433,27 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                       </div>
                     </button>
                   )}
+
+                  {/* Mobile Post News Button */}
+                  <button
+                    type="button"
+                    className="mobile-drawer-kyc-btn action"
+                    style={{ marginTop: '8px' }}
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setUserNewsModalOpen(true);
+                    }}
+                  >
+                    <div className="mobile-kyc-btn-content">
+                      <div className="mobile-kyc-btn-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981' }}>
+                        <Newspaper size={14} strokeWidth={2.5} />
+                      </div>
+                      <span className="mobile-kyc-btn-title">Post Market News</span>
+                    </div>
+                    <div className="mobile-kyc-btn-arrow">
+                      <ArrowRight size={13} strokeWidth={2.5} />
+                    </div>
+                  </button>
                 </div>
               )}
             </div>
@@ -1449,6 +1493,16 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
       onClose={() => setKycModalOpen(false)}
       onKycUpdated={() => {
         verifySession();
+      }}
+    />
+
+    {/* Trader Market News / Analysis Modal */}
+    <UserNewsModal
+      isOpen={userNewsModalOpen}
+      onClose={() => setUserNewsModalOpen(false)}
+      user={user}
+      onSuccess={() => {
+        navigate('/news');
       }}
     />
   </>

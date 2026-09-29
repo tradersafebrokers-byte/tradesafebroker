@@ -2449,7 +2449,8 @@ input {
     justify-content: flex-end;
 }
 
-.pipwise-hero-mobile-transparency {
+.pipwise-hero-mobile-transparency,
+.pipwise-hero-mobile-market-cards {
     display: none;
 }
 
@@ -2862,6 +2863,194 @@ input {
         background: rgba(255, 255, 255, 0.06) !important;
         border: 1px solid rgba(255, 255, 255, 0.14) !important;
         color: #ffffff !important;
+    }
+
+    /* Mobile Live Market Cards (BTC/USD & Gold) */
+    .pipwise-hero-mobile-market-cards {
+        display: block !important;
+        width: 100% !important;
+        margin: 1.25rem 0 1.15rem 0 !important;
+    }
+
+    .mobile-market-cards-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    .mobile-market-card {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border-radius: 18px !important;
+        padding: 1.1rem 0.95rem 0.85rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        text-align: left !important;
+        overflow: hidden !important;
+        position: relative !important;
+        transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+    }
+
+    [data-theme='light'] .mobile-market-card {
+        background: #ffffff !important;
+        border: 1px solid rgba(226, 232, 240, 0.95) !important;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    [data-theme='dark'] .mobile-market-card {
+        background: rgba(18, 24, 38, 0.92) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .mobile-market-card .market-card-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-bottom: 0.35rem !important;
+    }
+
+    .mobile-market-card .market-pair-title {
+        font-size: 0.84rem !important;
+        font-weight: 700 !important;
+        color: var(--text-main) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .mobile-market-card .market-live-pill {
+        font-size: 0.62rem !important;
+        padding: 2px 6px !important;
+        gap: 4px !important;
+    }
+
+    .mobile-market-card .market-arrow-btn {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 0.72rem !important;
+        border-radius: 6px !important;
+        text-decoration: none !important;
+    }
+
+    .mobile-market-card .market-price-val {
+        font-size: clamp(1.25rem, 4.5vw, 1.55rem) !important;
+        font-weight: 800 !important;
+        color: var(--text-main) !important;
+        line-height: 1.15 !important;
+        letter-spacing: -0.02em !important;
+        margin-top: 0.15rem !important;
+    }
+
+    .mobile-market-card .market-change-badge {
+        font-size: 0.74rem !important;
+        font-weight: 700 !important;
+        margin-top: 0.18rem !important;
+    }
+
+    .mobile-market-card .sparkline-svg {
+        height: 34px !important;
+        margin-top: 0.4rem !important;
+        width: 100% !important;
+    }
+
+    /* Mobile Market Sessions Strip */
+    .mobile-market-badges-strip {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
+        overflow-x: auto !important;
+        padding-bottom: 2px !important;
+        scrollbar-width: none !important;
+    }
+
+    .mobile-market-badges-strip::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    .mobile-location-badge {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+        border-radius: 999px !important;
+        padding: 0.3rem 0.68rem 0.3rem 0.48rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.45rem !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+
+    [data-theme='light'] .mobile-location-badge {
+        background: #ffffff !important;
+        border-color: rgba(226, 232, 240, 0.95) !important;
+    }
+
+    [data-theme='dark'] .mobile-location-badge {
+        background: rgba(18, 24, 38, 0.92) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .mobile-location-badge .location-pin-dot {
+        width: 7px !important;
+        height: 7px !important;
+        border-radius: 50% !important;
+        background: #fc5d21 !important;
+        display: inline-block !important;
+    }
+
+    .mobile-location-badge .location-pin-dot.active {
+        background: #10b981 !important;
+        box-shadow: 0 0 6px #10b981 !important;
+    }
+
+    .mobile-location-badge .location-info {
+        display: flex !important;
+        flex-direction: column !important;
+        line-height: 1 !important;
+        text-align: left !important;
+    }
+
+    .mobile-location-badge .location-city {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        color: var(--text-main) !important;
+    }
+
+    .mobile-location-badge .location-desc {
+        font-size: 0.6rem !important;
+        color: var(--text-muted) !important;
+        font-weight: 500 !important;
+        margin-top: 1px !important;
+    }
+
+    @media (max-width: 400px) {
+        .mobile-market-cards-row {
+            gap: 8px !important;
+        }
+
+        .mobile-market-card {
+            padding: 0.9rem 0.75rem 0.7rem !important;
+            border-radius: 15px !important;
+        }
+
+        .mobile-market-card .market-pair-title {
+            font-size: 0.78rem !important;
+        }
+
+        .mobile-market-card .market-price-val {
+            font-size: 1.15rem !important;
+        }
+
+        .mobile-market-card .market-change-badge {
+            font-size: 0.68rem !important;
+        }
     }
 
     /* Mobile Transparency Card Positioned Under CTAs */

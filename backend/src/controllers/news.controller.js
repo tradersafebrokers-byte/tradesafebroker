@@ -189,6 +189,190 @@ The Euro traded cautiously against both the Swiss Franc (EUR/CHF) and Japanese Y
   },
 ];
 
+// In-memory cache for live syndicated market news
+const syndicatedNewsCache = {
+  items: [],
+  lastFetched: 0,
+  ttl: 8 * 60 * 1000, // 8 minutes cache
+  isFetching: false,
+};
+
+const stripHtml = (html = '') => {
+  return html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const extractImageUrl = (item, fallbackUrl) => {
+  if (item.enclosure?.link && typeof item.enclosure.link === 'string' && item.enclosure.link.startsWith('http')) {
+    return item.enclosure.link;
+  }
+  if (item.thumbnail && typeof item.thumbnail === 'string' && item.thumbnail.startsWith('http')) {
+    return item.thumbnail;
+  }
+  const desc = item.description || item.content || '';
+  const match = desc.match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (match && match[1] && match[1].startsWith('http')) {
+    return match[1];
+  }
+  return fallbackUrl;
+};
+
+const RSS_FEEDS = [
+  {
+    name: 'Livemint Markets',
+    category: 'indian-market',
+    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.livemint.com%2Frss%2Fmarkets',
+    fallbackImage: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&auto=format&fit=crop&q=80',
+    source: 'Livemint Markets',
+    author: {
+      name: 'Mint Markets Desk',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
+      role: 'Financial Market Wire',
+    },
+    defaultTags: ['Indian Market', 'Nifty', 'Sensex', 'Rupee', 'SEBI'],
+  },
+  {
+    name: 'Cointelegraph',
+    category: 'crypto',
+    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss',
+    fallbackImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
+    source: 'Cointelegraph Direct',
+    author: {
+      name: 'Cointelegraph Wire',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
+      role: 'Digital Assets Desk',
+    },
+    defaultTags: ['Bitcoin', 'Crypto', 'Blockchain', 'BTC', 'Altcoins'],
+  },
+  {
+    name: 'CNBC Finance',
+    category: 'forex',
+    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.cnbc.com%2Fid%2F10000664%2Fdevice%2Frss%2Frss.html',
+    fallbackImage: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
+    source: 'CNBC Finance Wire',
+    author: {
+      name: 'CNBC Global Markets',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
+      role: 'Macroeconomic Analyst',
+    },
+    defaultTags: ['Forex', 'US Dollar', 'Federal Reserve', 'Inflation', 'Global Macro'],
+  },
+];
+
+export const fetchLiveSyndicatedNews = async () => {
+  const now = Date.now();
+  if (
+    syndicatedNewsCache.items.length > 0 &&
+    now - syndicatedNewsCache.lastFetched < syndicatedNewsCache.ttl
+  ) {
+    return syndicatedNewsCache.items;
+  }
+
+  if (syndicatedNewsCache.isFetching && syndicatedNewsCache.items.length > 0) {
+    return syndicatedNewsCache.items;
+  }
+
+  syndicatedNewsCache.isFetching = true;
+
+  try {
+    const results = await Promise.allSettled(
+      RSS_FEEDS.map(async (feedConfig) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        try {
+          const res = await fetch(feedConfig.url, {
+            signal: controller.signal,
+            headers: { 'User-Agent': 'PipWiseNews/1.0' },
+          });
+          clearTimeout(timeoutId);
+          if (!res.ok) return [];
+          const data = await res.json();
+          if (!data || !Array.isArray(data.items)) return [];
+
+          return data.items.slice(0, 8).map((item, idx) => {
+            const rawTitle = stripHtml(item.title || '');
+            const rawDesc = stripHtml(item.description || item.content || '');
+            const summary = rawDesc.length > 280 ? rawDesc.substring(0, 277) + '...' : rawDesc || rawTitle;
+            const fullContent =
+              rawDesc.length > 100
+                ? `${rawDesc}\n\nKey Market Notes:\n• Real-time syndicate wire update dispatched by ${feedConfig.source}.\n• For complete live market coverage, visit original source: ${item.link || feedConfig.url}.`
+                : `${rawTitle}\n\n${rawDesc}\n\nDispatched via ${feedConfig.source} live terminal.`;
+
+            let slug = rawTitle
+              .toLowerCase()
+              .replace(/[^a-z0-9\s-]/g, '')
+              .trim()
+              .replace(/\s+/g, '-')
+              .slice(0, 90);
+            if (!slug) slug = `news-${Date.now()}-${idx}`;
+
+            const pubDate = item.pubDate ? new Date(item.pubDate) : new Date();
+
+            return {
+              _id: `syn-${slug.slice(0, 24)}-${idx}`,
+              title: rawTitle,
+              slug,
+              summary,
+              content: fullContent,
+              category: feedConfig.category,
+              tags:
+                Array.isArray(item.categories) && item.categories.length > 0
+                  ? item.categories.map((c) => String(c).trim()).filter(Boolean)
+                  : feedConfig.defaultTags,
+              imageUrl: extractImageUrl(item, feedConfig.fallbackImage),
+              source: feedConfig.source,
+              sourceUrl: item.link || '',
+              author: {
+                name: item.author ? stripHtml(item.author) : feedConfig.author.name,
+                avatar: feedConfig.author.avatar,
+                role: feedConfig.author.role,
+              },
+              isFeatured: false,
+              isPublished: true,
+              readTime: `${Math.max(2, Math.ceil(rawDesc.split(/\s+/).length / 120))} min read`,
+              views: Math.floor(Math.random() * 45) + 30,
+              publishedAt: pubDate,
+              isSyndicated: true,
+            };
+          });
+        } catch (err) {
+          clearTimeout(timeoutId);
+          return [];
+        }
+      })
+    );
+
+    const merged = [];
+    for (const r of results) {
+      if (r.status === 'fulfilled' && Array.isArray(r.value)) {
+        merged.push(...r.value);
+      }
+    }
+
+    if (merged.length > 0) {
+      merged.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+      syndicatedNewsCache.items = merged;
+      syndicatedNewsCache.lastFetched = now;
+    }
+  } catch (err) {
+    console.error('Error fetching live syndicated news:', err.message);
+  } finally {
+    syndicatedNewsCache.isFetching = false;
+  }
+
+  return syndicatedNewsCache.items;
+};
+
 /**
  * Seed initial market news if database collection is empty
  */
@@ -229,44 +413,83 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
     ];
   }
 
+  // 1. Fetch DB articles (includes user-submitted and admin-submitted posts)
+  const dbArticles = await News.find(query)
+    .sort({ isFeatured: -1, publishedAt: -1, createdAt: -1 })
+    .lean();
+
+  // 2. Fetch live syndicated RSS news items
+  let syndicatedItems = await fetchLiveSyndicatedNews();
+
+  // Filter syndicated items by category if provided
+  if (category && category !== 'all') {
+    syndicatedItems = syndicatedItems.filter((item) => item.category === category);
+  }
+
+  // Filter syndicated items by search keyword if provided
+  if (search && search.trim()) {
+    const s = search.trim().toLowerCase();
+    syndicatedItems = syndicatedItems.filter(
+      (item) =>
+        item.title.toLowerCase().includes(s) ||
+        item.summary.toLowerCase().includes(s) ||
+        (Array.isArray(item.tags) && item.tags.some((t) => t.toLowerCase().includes(s))) ||
+        item.source.toLowerCase().includes(s)
+    );
+  }
+
+  // Merge: Featured DB articles first, then recent DB & syndicated articles sorted by publishedAt
+  const featuredDbArticles = dbArticles.filter((a) => a.isFeatured);
+  const nonFeaturedDbArticles = dbArticles.filter((a) => !a.isFeatured);
+
+  const combinedChronological = [...nonFeaturedDbArticles, ...syndicatedItems].sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+  );
+
+  const allMergedArticles = [...featuredDbArticles, ...combinedChronological];
+
+  // Pagination
   const pageNum = Math.max(1, parseInt(page, 10));
   const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10)));
+  const totalCount = allMergedArticles.length;
   const skip = (pageNum - 1) * limitNum;
+  const pagedArticles = allMergedArticles.slice(skip, skip + limitNum);
 
-  const [articles, totalCount, featuredCount] = await Promise.all([
-    News.find(query)
-      .sort({ isFeatured: -1, publishedAt: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(limitNum)
-      .lean(),
-    News.countDocuments(query),
-    News.countDocuments({ isPublished: true, isFeatured: true }),
-  ]);
+  // Generate real-time live pulse ticker items dynamically from the freshest syndicated & DB headlines
+  const breakingTicker = [];
+  const tickerCandidates = [...syndicatedItems, ...dbArticles].slice(0, 8);
+  tickerCandidates.forEach((item, idx) => {
+    breakingTicker.push({
+      id: `tk-${idx}-${item._id}`,
+      text: item.title,
+      time: idx === 0 ? 'Just now' : `${idx * 4 + 2}m ago`,
+      slug: item.slug,
+    });
+  });
 
-  // Generate real-time live pulse ticker items for the breaking news ticker
-  const breakingTicker = [
-    { id: 'tk-1', text: 'BTC/USD breaks above $67,400 with 24h institutional volume topping $28B', time: 'Just now' },
-    { id: 'tk-2', text: 'USD/INR holds strong at 83.42 as RBI intervenes to balance capital flows', time: '4m ago' },
-    { id: 'tk-3', text: 'Gold (XAU/USD) tests $2,385 amid sustained Asian sovereign central bank buying', time: '12m ago' },
-    { id: 'tk-4', text: 'EUR/USD steadies at 1.0862 ahead of US core inflation prints', time: '19m ago' },
-    { id: 'tk-5', text: 'Crude Oil (WTI) fluctuates around $81.20 as OPEC+ signals voluntary supply discipline', time: '34m ago' },
-  ];
+  if (breakingTicker.length === 0) {
+    breakingTicker.push(
+      { id: 'tk-1', text: 'BTC/USD breaks above $67,400 with 24h institutional volume topping $28B', time: 'Just now' },
+      { id: 'tk-2', text: 'USD/INR holds strong at 83.42 as RBI intervenes to balance capital flows', time: '4m ago' },
+      { id: 'tk-3', text: 'Gold (XAU/USD) tests $2,385 amid sustained Asian sovereign central bank buying', time: '12m ago' }
+    );
+  }
 
   return res.status(200).json(
     new ApiResponse(
       200,
       {
-        articles,
+        articles: pagedArticles,
         pagination: {
           total: totalCount,
           page: pageNum,
           limit: limitNum,
           totalPages: Math.ceil(totalCount / limitNum),
-          hasNextPage: skip + articles.length < totalCount,
+          hasNextPage: skip + pagedArticles.length < totalCount,
           hasPrevPage: pageNum > 1,
         },
         breakingTicker,
-        featuredCount,
+        featuredCount: featuredDbArticles.length,
       },
       'News articles retrieved successfully'
     )
@@ -290,7 +513,18 @@ export const getNewsArticleBySlugOrId = asyncHandler(async (req, res) => {
     article = await News.findOne({ slug: slugOrId });
   }
 
+  // If not found in DB, check the in-memory syndicated cache!
   if (!article) {
+    const liveSyndicated = await fetchLiveSyndicatedNews();
+    const synMatch = liveSyndicated.find((item) => item.slug === slugOrId || item._id === slugOrId);
+    if (synMatch) {
+      const related = liveSyndicated
+        .filter((item) => item._id !== synMatch._id && item.category === synMatch.category)
+        .slice(0, 3);
+      return res.status(200).json(
+        new ApiResponse(200, { article: synMatch, relatedArticles: related }, 'Syndicated news article fetched successfully')
+      );
+    }
     throw new ApiError(404, 'News article not found');
   }
 
@@ -321,9 +555,9 @@ export const getNewsArticleBySlugOrId = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Admin: Create a new manual news article or blog post
+ * @desc    Create a news article or market analysis post (Admin or Registered Trader)
  * @route   POST /api/v1/news
- * @access  Private (Admin)
+ * @access  Private (Authenticated User or Admin)
  */
 export const createNewsArticle = asyncHandler(async (req, res) => {
   const {
@@ -365,34 +599,61 @@ export const createNewsArticle = asyncHandler(async (req, res) => {
     slug = `${slug}-${Math.random().toString(36).substring(2, 7)}`;
   }
 
+  const isAdmin = req.user?.role === 'admin';
+
+  const defaultCategoryImages = {
+    forex: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
+    'indian-market': 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&auto=format&fit=crop&q=80',
+    crypto: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
+    commodities: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?w=800&auto=format&fit=crop&q=80',
+    global: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80',
+    brokers: 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=800&auto=format&fit=crop&q=80',
+  };
+
+  const selectedCategory = category || 'forex';
+
+  const author = {
+    name: isAdmin
+      ? (authorName?.trim() || req.user?.fullName || req.user?.username || 'PipWise Editorial')
+      : (req.user?.username || req.user?.fullName || 'Community Trader'),
+    avatar:
+      req.user?.avatar ||
+      (isAdmin
+        ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
+        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'),
+    role: isAdmin ? (authorRole?.trim() || 'Market Strategist') : 'Community Trader',
+  };
+
   const article = await News.create({
     title: title.trim(),
     slug,
     summary: summary.trim(),
     content: content.trim(),
-    category: category || 'forex',
-    tags: Array.isArray(tags) ? tags : typeof tags === 'string' ? tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
-    imageUrl: imageUrl?.trim() || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
-    source: source?.trim() || 'PipWise Editorial',
+    category: selectedCategory,
+    tags: Array.isArray(tags)
+      ? tags
+      : typeof tags === 'string'
+      ? tags.split(',').map((t) => t.trim()).filter(Boolean)
+      : [],
+    imageUrl: imageUrl?.trim() || defaultCategoryImages[selectedCategory] || defaultCategoryImages.forex,
+    source: source?.trim() || (isAdmin ? 'PipWise Editorial' : 'PipWise Community Trader'),
     sourceUrl: sourceUrl?.trim() || '',
-    author: {
-      name: authorName?.trim() || req.user?.fullName || 'PipWise Research Desk',
-      avatar: req.user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-      role: authorRole?.trim() || 'Market Analyst',
-    },
-    isFeatured: Boolean(isFeatured),
-    isPublished: isPublished !== undefined ? Boolean(isPublished) : true,
+    author,
+    authorUserId: req.user?._id || null,
+    isCommunityPost: !isAdmin,
+    isFeatured: isAdmin ? Boolean(isFeatured) : false,
+    isPublished: isAdmin ? (isPublished !== undefined ? Boolean(isPublished) : true) : true,
     readTime: readTime?.trim() || `${Math.max(1, Math.ceil(content.split(/\s+/).length / 180))} min read`,
     publishedAt: new Date(),
   });
 
-  return res.status(201).json(new ApiResponse(201, article, 'News article created successfully'));
+  return res.status(201).json(new ApiResponse(201, article, 'News article published successfully'));
 });
 
 /**
- * @desc    Admin: Update an existing news article
+ * @desc    Update an existing news article (Admin or Original Author)
  * @route   PUT /api/v1/news/:id
- * @access  Private (Admin)
+ * @access  Private
  */
 export const updateNewsArticle = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -400,6 +661,13 @@ export const updateNewsArticle = asyncHandler(async (req, res) => {
   const article = await News.findById(id);
   if (!article) {
     throw new ApiError(404, 'News article not found');
+  }
+
+  const isAdmin = req.user?.role === 'admin';
+  const isAuthor = article.authorUserId && article.authorUserId.toString() === req.user?._id?.toString();
+
+  if (!isAdmin && !isAuthor) {
+    throw new ApiError(403, 'You are not authorized to update this article');
   }
 
   const {
@@ -432,11 +700,11 @@ export const updateNewsArticle = asyncHandler(async (req, res) => {
   if (imageUrl !== undefined) article.imageUrl = imageUrl.trim();
   if (source !== undefined) article.source = source.trim();
   if (sourceUrl !== undefined) article.sourceUrl = sourceUrl.trim();
-  if (isFeatured !== undefined) article.isFeatured = Boolean(isFeatured);
-  if (isPublished !== undefined) article.isPublished = Boolean(isPublished);
+  if (isAdmin && isFeatured !== undefined) article.isFeatured = Boolean(isFeatured);
+  if (isAdmin && isPublished !== undefined) article.isPublished = Boolean(isPublished);
   if (readTime !== undefined) article.readTime = readTime.trim();
 
-  if (authorName || authorRole) {
+  if (isAdmin && (authorName || authorRole)) {
     article.author = {
       ...article.author,
       ...(authorName ? { name: authorName.trim() } : {}),
@@ -450,9 +718,9 @@ export const updateNewsArticle = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Admin: Delete a news article
+ * @desc    Delete a news article (Admin or Original Author)
  * @route   DELETE /api/v1/news/:id
- * @access  Private (Admin)
+ * @access  Private
  */
 export const deleteNewsArticle = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -460,6 +728,13 @@ export const deleteNewsArticle = asyncHandler(async (req, res) => {
   const article = await News.findById(id);
   if (!article) {
     throw new ApiError(404, 'News article not found');
+  }
+
+  const isAdmin = req.user?.role === 'admin';
+  const isAuthor = article.authorUserId && article.authorUserId.toString() === req.user?._id?.toString();
+
+  if (!isAdmin && !isAuthor) {
+    throw new ApiError(403, 'You are not authorized to delete this article');
   }
 
   await News.findByIdAndDelete(id);

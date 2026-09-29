@@ -295,6 +295,90 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                 </Link>
               </div>
 
+              {/* Mobile Live Market Cards (BTC/USD & Gold) - Always visible on mobile */}
+              <div className="pipwise-hero-mobile-market-cards">
+                <div className="mobile-market-cards-row">
+                  {/* Card 1: BTC/USD */}
+                  <div className="mobile-market-card card-btc">
+                    <div className="market-card-header">
+                      <div className="market-pair-title-row">
+                        <span className="market-pair-title">{btc.symbol}</span>
+                        <span className="market-live-pill" title="Live Real-time Crypto Feed">
+                          <span className="market-live-dot" /> LIVE
+                        </span>
+                      </div>
+                      <Link to="/news" className="market-arrow-btn" title="View live crypto & trading news for BTC">↗</Link>
+                    </div>
+                    <div className={`market-price-val ${btc.flash ? `flash-${btc.flash}` : ""}`}>
+                      ${btc.price}
+                    </div>
+                    <div className={`market-change-badge ${btc.isPositive ? "positive" : "negative"}`}>
+                      {btc.change}% Today
+                    </div>
+                    <svg className="sparkline-svg" viewBox="0 0 160 38" fill="none">
+                      <path
+                        d={generateSparklinePath(btc.history, 160, 36)}
+                        stroke={btc.isPositive ? "var(--brand-green, #10b981)" : "#ef4444"}
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Card 2: Gold (XAU/USD) */}
+                  <div className="mobile-market-card card-gold">
+                    <div className="market-card-header">
+                      <div className="market-pair-title-row">
+                        <span className="market-pair-title">{gold.symbol}</span>
+                        <span className="market-live-pill" title="Live Real-time Spot Feed">
+                          <span className="market-live-dot" /> LIVE
+                        </span>
+                      </div>
+                      <Link to="/compare" className="market-arrow-btn" title="Compare broker spreads & execution for Gold">↗</Link>
+                    </div>
+                    <div className={`market-price-val ${gold.flash ? `flash-${gold.flash}` : ""}`}>
+                      {gold.price}
+                    </div>
+                    <div className={`market-change-badge ${gold.isPositive ? "positive" : "negative"}`}>
+                      {gold.change}% Today
+                    </div>
+                    <svg className="sparkline-svg" viewBox="0 0 180 38" fill="none">
+                      <path
+                        d={generateSparklinePath(gold.history, 180, 36)}
+                        stroke={gold.isPositive ? "var(--brand-green, #10b981)" : "#ef4444"}
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Location Sessions Badges on Mobile */}
+                <div className="mobile-market-badges-strip">
+                  <div className="mobile-location-badge">
+                    <span className="location-pin-dot active" />
+                    <div className="location-info">
+                      <span className="location-city">Tokyo</span>
+                      <span className="location-desc">TSE Active</span>
+                    </div>
+                  </div>
+                  <div className="mobile-location-badge">
+                    <span className="location-pin-dot active" />
+                    <div className="location-info">
+                      <span className="location-city">London</span>
+                      <span className="location-desc">LSE Active</span>
+                    </div>
+                  </div>
+                  <div className="mobile-location-badge">
+                    <span className="location-pin-dot" />
+                    <div className="location-info">
+                      <span className="location-city">New York</span>
+                      <span className="location-desc">NYSE Active</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Mobile Transparency Card (Rendered here right below CTAs on mobile) */}
               <div className="pipwise-hero-mobile-transparency">
                 <TransparencyCard />
@@ -419,7 +503,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   <svg className="sparkline-svg" viewBox="0 0 160 38" fill="none">
                     <path
                       d={generateSparklinePath(btc.history, 160, 36)}
-                      stroke="var(--brand-green)"
+                      stroke={btc.isPositive ? "var(--brand-green, #10b981)" : "#ef4444"}
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />
@@ -446,7 +530,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   <svg className="sparkline-svg" viewBox="0 0 180 38" fill="none">
                     <path
                       d={generateSparklinePath(gold.history, 180, 36)}
-                      stroke="var(--brand-green)"
+                      stroke={gold.isPositive ? "var(--brand-green, #10b981)" : "#ef4444"}
                       strokeWidth="2.5"
                       strokeLinecap="round"
                     />

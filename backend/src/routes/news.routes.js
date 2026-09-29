@@ -14,12 +14,14 @@ const router = Router();
 // Public routes
 router.get('/', getPublishedNews);
 
-// Admin-only management endpoints
+// Admin-only overview
 router.get('/admin/all', verifyJWT, requireAdmin, getAllAdminNews);
-router.post('/', verifyJWT, requireAdmin, createNewsArticle);
-router.put('/:id', verifyJWT, requireAdmin, updateNewsArticle);
-router.patch('/:id', verifyJWT, requireAdmin, updateNewsArticle);
-router.delete('/:id', verifyJWT, requireAdmin, deleteNewsArticle);
+
+// News creation & management (Admins can manage any; authenticated users can publish community analysis)
+router.post('/', verifyJWT, createNewsArticle);
+router.put('/:id', verifyJWT, updateNewsArticle);
+router.patch('/:id', verifyJWT, updateNewsArticle);
+router.delete('/:id', verifyJWT, deleteNewsArticle);
 
 // Public route for single article (placed after specific routes like /admin/all)
 router.get('/:slugOrId', getNewsArticleBySlugOrId);

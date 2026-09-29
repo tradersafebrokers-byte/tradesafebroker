@@ -15,7 +15,10 @@ import {
   X,
   Radio,
   SlidersHorizontal,
+  PenSquare,
 } from 'lucide-react';
+import useAuth from '../features/auth/hooks/useAuth.js';
+import UserNewsModal from '../features/news/components/UserNewsModal.jsx';
 import newsService, { FALLBACK_NEWS, FALLBACK_BREAKING_TICKER } from '../features/news/services/news.service.js';
 import { useToast } from '../features/shared/components/toast/ToastContext.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
@@ -68,6 +71,8 @@ const getCategoryLabel = (catId) => {
 
 export const NewsPage = ({ theme = 'dark' }) => {
   const { showToast } = useToast();
+  const { user, isAuthenticated } = useAuth();
+  const [userNewsModalOpen, setUserNewsModalOpen] = useState(false);
   const [articles, setArticles] = useState(FALLBACK_NEWS);
   const [breakingTicker, setBreakingTicker] = useState(FALLBACK_BREAKING_TICKER);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -219,6 +224,20 @@ export const NewsPage = ({ theme = 'dark' }) => {
             >
               <RefreshCw size={13} />
               <span>Refresh Now</span>
+            </button>
+            <button
+              className="news-btn-create-post"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  showToast('Please sign in or register to publish market analysis', 'info');
+                  return;
+                }
+                setUserNewsModalOpen(true);
+              }}
+              title="Share market analysis, price breakdown, or news"
+            >
+              <PenSquare size={13} />
+              <span>Post Analysis / News</span>
             </button>
           </div>
         </div>
@@ -516,6 +535,17 @@ export const NewsPage = ({ theme = 'dark' }) => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* User Market News / Analysis Submission Modal */}
+      <UserNewsModal
+        isOpen={userNewsModalOpen}
+        onClose={() => setUserNewsModalOpen(false)}
+        user={user}
+        onSuccess={() => {
+          loadNews();
+          showToast('Market analysis published to live wire!', 'success');
+        }}
+      />
 
       <Footer />
     </div>

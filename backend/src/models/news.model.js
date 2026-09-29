@@ -85,6 +85,17 @@ const newsSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    authorUserId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+      index: true,
+    },
+    isCommunityPost: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     publishedAt: {
       type: Date,
       default: Date.now,
