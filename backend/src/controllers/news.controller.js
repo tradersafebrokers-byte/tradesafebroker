@@ -21,7 +21,7 @@ For currency traders and Indian market participants:
     category: 'indian-market',
     tags: ['RBI', 'USD/INR', 'Forex Reserves', 'Indian Market', 'Interest Rates'],
     imageUrl: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&auto=format&fit=crop&q=80',
-    source: 'PipWise India Market Desk',
+    source: 'Market Intelligence Desk',
     author: {
       name: 'Aditya Sharma',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
@@ -75,7 +75,7 @@ Technical Outlook:
     category: 'forex',
     tags: ['Forex', 'EUR/USD', 'DXY', 'Federal Reserve', 'Inflation'],
     imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
-    source: 'PipWise Forex Desk',
+    source: 'Global Forex Desk',
     author: {
       name: 'Marcus Vance',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
@@ -141,7 +141,7 @@ Highlights of the regulatory guidance:
     slug: 'forex-brokers-record-raw-spread-tightness-ecn-speeds',
     summary:
       'Independent latency testing across 40+ Tier-1 regulated brokers reveals major technological upgrades in New York (NY4) and London (LD4) cross-connect infrastructure.',
-    content: `PipWise’s quarterly broker execution benchmark report has confirmed that average ECN execution latency has decreased by 24% year-over-year.
+    content: `Independent quarterly broker execution benchmark report has confirmed that average ECN execution latency has decreased by 24% year-over-year.
 
 Brokers utilizing Equinix LD4 (London) and NY4 (Secaucus, NJ) server colocation recorded tick execution times under 12 milliseconds during heavy market volatility windows.
 
@@ -152,7 +152,7 @@ Key takeaways for retail & algorithmic traders:
     category: 'brokers',
     tags: ['Brokers', 'ECN', 'Spreads', 'Execution Speed', 'MT5'],
     imageUrl: 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=800&auto=format&fit=crop&q=80',
-    source: 'PipWise Research Lab',
+    source: 'Broker Research Desk',
     author: {
       name: 'Aditya Sharma',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
@@ -193,7 +193,7 @@ The Euro traded cautiously against both the Swiss Franc (EUR/CHF) and Japanese Y
 const syndicatedNewsCache = {
   items: [],
   lastFetched: 0,
-  ttl: 8 * 60 * 1000, // 8 minutes cache
+  ttl: 2 * 60 * 1000, // 2 minutes cache
   isFetching: false,
 };
 
@@ -229,6 +229,19 @@ const extractImageUrl = (item, fallbackUrl) => {
 
 const RSS_FEEDS = [
   {
+    name: 'ForexLive',
+    category: 'forex',
+    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.forexlive.com%2Ffeed%2Fnews',
+    fallbackImage: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
+    source: 'ForexLive Direct',
+    author: {
+      name: 'ForexLive Desk',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
+      role: 'Global FX Strategist',
+    },
+    defaultTags: ['Forex', 'EUR/USD', 'USD/INR', 'Central Banks', 'Currency'],
+  },
+  {
     name: 'Livemint Markets',
     category: 'indian-market',
     url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.livemint.com%2Frss%2Fmarkets',
@@ -239,7 +252,20 @@ const RSS_FEEDS = [
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
       role: 'Financial Market Wire',
     },
-    defaultTags: ['Indian Market', 'Nifty', 'Sensex', 'Rupee', 'SEBI'],
+    defaultTags: ['Indian Market', 'Nifty', 'Sensex', 'Rupee', 'SEBI', 'RBI'],
+  },
+  {
+    name: 'Economic Times',
+    category: 'indian-market',
+    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Feconomictimes.indiatimes.com%2Fmarkets%2Frssfeeds%2F1977021501.cms',
+    fallbackImage: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&auto=format&fit=crop&q=80',
+    source: 'Economic Times Markets',
+    author: {
+      name: 'ET Markets Bureau',
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=100&auto=format&fit=crop&q=80',
+      role: 'Dalal Street Reporter',
+    },
+    defaultTags: ['Indian Economy', 'Sensex', 'RBI Policy', 'INR', 'FIIs'],
   },
   {
     name: 'Cointelegraph',
@@ -256,43 +282,66 @@ const RSS_FEEDS = [
   },
   {
     name: 'CNBC Finance',
-    category: 'forex',
+    category: 'global',
     url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.cnbc.com%2Fid%2F10000664%2Fdevice%2Frss%2Frss.html',
-    fallbackImage: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
+    fallbackImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80',
     source: 'CNBC Finance Wire',
     author: {
       name: 'CNBC Global Markets',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
       role: 'Macroeconomic Analyst',
     },
-    defaultTags: ['Forex', 'US Dollar', 'Federal Reserve', 'Inflation', 'Global Macro'],
+    defaultTags: ['Global Macro', 'US Dollar', 'Federal Reserve', 'Inflation', 'Treasury'],
+  },
+  {
+    name: 'Yahoo Finance',
+    category: 'commodities',
+    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffinance.yahoo.com%2Fnews%2Frssindex',
+    fallbackImage: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?w=800&auto=format&fit=crop&q=80',
+    source: 'Yahoo Finance Wire',
+    author: {
+      name: 'Yahoo Finance Bureau',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80',
+      role: 'Commodities & Macro Strategist',
+    },
+    defaultTags: ['Commodities', 'Gold', 'Crude Oil', 'Wall Street', 'Market Pulse'],
   },
 ];
 
-export const fetchLiveSyndicatedNews = async () => {
+export const fetchLiveSyndicatedNews = async (forceRefresh = false) => {
   const now = Date.now();
   if (
+    !forceRefresh &&
     syndicatedNewsCache.items.length > 0 &&
     now - syndicatedNewsCache.lastFetched < syndicatedNewsCache.ttl
   ) {
     return syndicatedNewsCache.items;
   }
 
-  if (syndicatedNewsCache.isFetching && syndicatedNewsCache.items.length > 0) {
+  if (syndicatedNewsCache.isFetching && syndicatedNewsCache.items.length > 0 && !forceRefresh) {
     return syndicatedNewsCache.items;
   }
 
   syndicatedNewsCache.isFetching = true;
+  if (forceRefresh) {
+    syndicatedNewsCache.items = [];
+    syndicatedNewsCache.lastFetched = 0;
+  }
 
   try {
     const results = await Promise.allSettled(
       RSS_FEEDS.map(async (feedConfig) => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const timeoutId = setTimeout(() => controller.abort(), 6500);
         try {
-          const res = await fetch(feedConfig.url, {
+          const reqUrl = forceRefresh ? `${feedConfig.url}&_nocache=${Date.now()}` : feedConfig.url;
+          const res = await fetch(reqUrl, {
             signal: controller.signal,
-            headers: { 'User-Agent': 'PipWiseNews/1.0' },
+            headers: {
+              'User-Agent': 'MarketWireNews/1.0',
+              'Cache-Control': 'no-cache',
+              Pragma: 'no-cache',
+            },
           });
           clearTimeout(timeoutId);
           if (!res.ok) return [];
@@ -395,7 +444,8 @@ const ensureInitialNewsSeeded = async () => {
 export const getPublishedNews = asyncHandler(async (req, res) => {
   await ensureInitialNewsSeeded();
 
-  const { category, search, page = 1, limit = 15 } = req.query;
+  const { category, search, page = 1, limit = 15, refresh } = req.query;
+  const isForceRefresh = refresh === 'true' || refresh === '1';
 
   const query = { isPublished: true };
 
@@ -419,7 +469,7 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
     .lean();
 
   // 2. Fetch live syndicated RSS news items
-  let syndicatedItems = await fetchLiveSyndicatedNews();
+  let syndicatedItems = await fetchLiveSyndicatedNews(isForceRefresh);
 
   // Filter syndicated items by category if provided
   if (category && category !== 'all') {
@@ -474,6 +524,10 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
       { id: 'tk-3', text: 'Gold (XAU/USD) tests $2,385 amid sustained Asian sovereign central bank buying', time: '12m ago' }
     );
   }
+
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
 
   return res.status(200).json(
     new ApiResponse(
@@ -614,7 +668,7 @@ export const createNewsArticle = asyncHandler(async (req, res) => {
 
   const author = {
     name: isAdmin
-      ? (authorName?.trim() || req.user?.fullName || req.user?.username || 'PipWise Editorial')
+      ? (authorName?.trim() || req.user?.fullName || req.user?.username || 'Editorial Desk')
       : (req.user?.username || req.user?.fullName || 'Community Trader'),
     avatar:
       req.user?.avatar ||
@@ -636,7 +690,7 @@ export const createNewsArticle = asyncHandler(async (req, res) => {
       ? tags.split(',').map((t) => t.trim()).filter(Boolean)
       : [],
     imageUrl: imageUrl?.trim() || defaultCategoryImages[selectedCategory] || defaultCategoryImages.forex,
-    source: source?.trim() || (isAdmin ? 'PipWise Editorial' : 'PipWise Community Trader'),
+    source: source?.trim() || (isAdmin ? 'Editorial Desk' : 'Community Trader Wire'),
     sourceUrl: sourceUrl?.trim() || '',
     author,
     authorUserId: req.user?._id || null,

@@ -41,9 +41,9 @@ const bouncySpring = {
 const NAV_LINKS = [
   { label: 'Brokers', href: '/brokers', Icon: Building2 },
   { label: 'Comparisons', href: '/compare', Icon: SlidersHorizontal },
-  { label: 'News', href: '/news', Icon: Newspaper },
   { label: 'Write a Review', isReviewAction: true, Icon: Star },
   { label: 'Join as Broker', href: '/join-broker', Icon: Briefcase, badge: 'Partner' },
+  { label: 'News', href: '/news', Icon: Newspaper },
 ];
 
 const DockNavLink = React.memo(({ link, mouseX }) => {

@@ -44,7 +44,7 @@ const newsSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      default: 'PipWise Newsroom',
+      default: 'Market Newsroom',
       trim: true,
     },
     sourceUrl: {
@@ -55,7 +55,7 @@ const newsSchema = new mongoose.Schema(
     author: {
       name: {
         type: String,
-        default: 'PipWise Research Desk',
+        default: 'Market Research Desk',
         trim: true,
       },
       avatar: {

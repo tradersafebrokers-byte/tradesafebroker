@@ -208,7 +208,7 @@ export default function AdminNewsModal({
                   name="source"
                   value={formData.source}
                   onChange={handleChange}
-                  placeholder="e.g. PipWise Newsroom / Reuters"
+                  placeholder="e.g. Global Financial Wire / Reuters"
                 />
               </div>
 

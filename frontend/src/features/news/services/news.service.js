@@ -18,7 +18,7 @@ For currency traders and Indian market participants:
     category: 'indian-market',
     tags: ['RBI', 'USD/INR', 'Forex Reserves', 'Indian Market', 'Interest Rates'],
     imageUrl: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&auto=format&fit=crop&q=80',
-    source: 'PipWise India Market Desk',
+    source: 'Market Intelligence Desk',
     author: {
       name: 'Aditya Sharma',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
@@ -76,7 +76,7 @@ Technical Outlook:
     category: 'forex',
     tags: ['Forex', 'EUR/USD', 'DXY', 'Federal Reserve', 'Inflation'],
     imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
-    source: 'PipWise Forex Desk',
+    source: 'Global Forex Desk',
     author: {
       name: 'Marcus Vance',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
@@ -148,7 +148,7 @@ Highlights of the regulatory guidance:
     slug: 'forex-brokers-record-raw-spread-tightness-ecn-speeds',
     summary:
       'Independent latency testing across 40+ Tier-1 regulated brokers reveals major technological upgrades in New York (NY4) and London (LD4) cross-connect infrastructure.',
-    content: `PipWise’s quarterly broker execution benchmark report has confirmed that average ECN execution latency has decreased by 24% year-over-year.
+    content: `Independent quarterly broker execution benchmark report has confirmed that average ECN execution latency has decreased by 24% year-over-year.
 
 Brokers utilizing Equinix LD4 (London) and NY4 (Secaucus, NJ) server colocation recorded tick execution times under 12 milliseconds during heavy market volatility windows.
 
@@ -159,7 +159,7 @@ Key takeaways for retail & algorithmic traders:
     category: 'brokers',
     tags: ['Brokers', 'ECN', 'Spreads', 'Execution Speed', 'MT5'],
     imageUrl: 'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=800&auto=format&fit=crop&q=80',
-    source: 'PipWise Research Lab',
+    source: 'Broker Research Desk',
     author: {
       name: 'Aditya Sharma',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
@@ -209,13 +209,17 @@ export const FALLBACK_BREAKING_TICKER = [
 
 export const newsService = {
   // Public news retrieval with filters
-  async getPublishedNews({ category = 'all', search = '', page = 1, limit = 15 } = {}) {
+  async getPublishedNews({ category = 'all', search = '', page = 1, limit = 15, refresh = false } = {}) {
     try {
       const params = new URLSearchParams();
       if (category && category !== 'all') params.append('category', category);
       if (search && search.trim()) params.append('search', search.trim());
       if (page) params.append('page', page);
       if (limit) params.append('limit', limit);
+      if (refresh) {
+        params.append('refresh', 'true');
+        params.append('_t', Date.now().toString());
+      }
 
       const res = await apiClient.get(`/news?${params.toString()}`);
       if (res.data?.data) {

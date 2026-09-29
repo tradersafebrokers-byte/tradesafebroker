@@ -96,7 +96,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
   }, [slug, articles]);
 
   // Fetch articles from service / backend
-  const loadNews = useCallback(async (isSilent = false) => {
+  const loadNews = useCallback(async (isSilent = false, isUserRefresh = false) => {
     if (!isSilent) setLoading(true);
     else setRefreshing(true);
 
@@ -104,6 +104,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
       const data = await newsService.getPublishedNews({
         category: selectedCategory,
         search: searchQuery,
+        refresh: isUserRefresh,
       });
 
       if (data?.articles && data.articles.length > 0) {
@@ -113,13 +114,18 @@ export const NewsPage = ({ theme = 'dark' }) => {
         setBreakingTicker(data.breakingTicker);
       }
       setLastUpdated(new Date());
+      if (isUserRefresh) {
+        showToast('Live news feed refreshed with latest market updates', 'success');
+      }
     } catch {
-      // Fallback handled in service
+      if (isUserRefresh) {
+        showToast('Updated with latest market news cache', 'info');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, showToast]);
 
   // Load news on category or search change
   useEffect(() => {
@@ -226,11 +232,12 @@ export const NewsPage = ({ theme = 'dark' }) => {
             </span>
             <button
               className={`news-refresh-btn ${refreshing ? 'is-spinning' : ''}`}
-              onClick={() => loadNews(true)}
+              onClick={() => loadNews(true, true)}
+              disabled={refreshing}
               title="Pull latest live market stories"
             >
               <RefreshCw size={13} />
-              <span>Refresh Now</span>
+              <span>{refreshing ? 'Refreshing...' : 'Refresh Now'}</span>
             </button>
             <button
               className="news-btn-create-post"
@@ -370,7 +377,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
                         className="author-avatar"
                       />
                       <div className="author-details">
-                        <span className="author-name">{featuredArticle.author?.name || 'PipWise Research'}</span>
+                        <span className="author-name">{featuredArticle.author?.name || 'Market Research Desk'}</span>
                         <span className="author-role">{featuredArticle.author?.role || 'Market Strategist'}</span>
                       </div>
                     </div>
@@ -502,7 +509,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
                     className="reader-avatar"
                   />
                   <div className="reader-author-info">
-                    <span className="reader-name">{activeArticleModal.author?.name || 'PipWise Analyst'}</span>
+                    <span className="reader-name">{activeArticleModal.author?.name || 'Market Analyst'}</span>
                     <span className="reader-source-time">
                       {activeArticleModal.source} • {formatTimeAgo(activeArticleModal.publishedAt)} • {activeArticleModal.readTime}
                     </span>

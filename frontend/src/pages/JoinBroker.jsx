@@ -30,7 +30,7 @@ import Footer from '../features/shared/components/Footer.jsx';
 import './JoinBroker.css';
 
 const PRESET_COLORS = [
-  '#fc5d21', // PipWise Coral/Orange
+  '#fc5d21', // TradeSafe Coral/Orange
   '#2EE8C2', // Cyan/Mint
   '#10b981', // Emerald
   '#0284c7', // Ocean Blue
@@ -257,7 +257,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
   const handleSubmit = async (e) => {
     e?.preventDefault();
     if (!isAuthenticated) {
-      toast.warning('Authentication Required', 'Please log in to register a broker on PipWise.');
+      toast.warning('Authentication Required', 'Please log in to register a broker on TradeSafe Brokers.');
       openLogin();
       return;
     }
@@ -317,7 +317,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
       } else {
         toast.success(
           'Broker Approved & Live!',
-          `"${formData.name}" is now officially registered and live in the PipWise broker directory.`
+          `"${formData.name}" is now officially registered and live in the TradeSafe Brokers directory.`
         );
       }
     } catch (err) {
@@ -383,7 +383,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
               </h1>
 
               <p className="gatekeeper-desc">
-                To protect Indian traders and maintain regulatory authenticity, broker registration and profile management is restricted to authorized corporate representatives with an active PipWise partner account.
+                To protect Indian traders and maintain regulatory authenticity, broker registration and profile management is restricted to authorized corporate representatives with an active TradeSafe Brokers partner account.
               </p>
 
               <div className="gatekeeper-actions">
@@ -438,7 +438,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
                   <div className="gatekeeper-feature-item">
                     <Sparkles size={18} strokeWidth={2} className="feature-clean-icon" />
                     <div className="feature-text-wrap">
-                      <h4 className="feature-item-title">PipWise Trust Seal</h4>
+                      <h4 className="feature-item-title">TradeSafe Trust Seal</h4>
                       <p className="feature-item-desc">Receive the Verified Partner badge to maximize trader trust and conversions.</p>
                     </div>
                   </div>
@@ -452,7 +452,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
                 </Link>
                 <span className="gatekeeper-security-badge">
                   <Lock size={12} strokeWidth={2} />
-                  <span>PipWise Compliance Framework</span>
+                  <span>TradeSafe Compliance Framework</span>
                 </span>
               </div>
             </motion.div>
@@ -501,7 +501,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
           </div>
 
           <h1 className="join-hero-title">
-            List Your Brokerage on PipWise
+            List Your Brokerage on TradeSafe Brokers
           </h1>
 
           <p className="join-hero-subtitle">
@@ -1235,7 +1235,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
               <span className="join-preview-tip">Updates in real time</span>
             </div>
 
-            {/* Preview Card matching PipWise styling */}
+            {/* Preview Card matching TradeSafe Brokers styling */}
             <div
               className="join-preview-card"
               style={{
@@ -1319,7 +1319,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
 
             {/* Trust Perks */}
             <div className="join-preview-perks">
-              <h5>Why Brokerages Choose PipWise:</h5>
+              <h5>Why Brokerages Choose TradeSafe Brokers:</h5>
               <ul>
                 <li>
                   <Check size={13} />
@@ -1379,7 +1379,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
                     </>
                   ) : (
                     <>
-                      Congratulations! <strong>{createdBrokerInfo?.name || formData.name}</strong> has been verified and published live on PipWise as rank <strong>{createdBrokerInfo?.rank || `#${nextRankNum}`}</strong>.
+                      Congratulations! <strong>{createdBrokerInfo?.name || formData.name}</strong> has been verified and published live on TradeSafe Brokers as rank <strong>{createdBrokerInfo?.rank || `#${nextRankNum}`}</strong>.
                     </>
                   )}
                 </p>
