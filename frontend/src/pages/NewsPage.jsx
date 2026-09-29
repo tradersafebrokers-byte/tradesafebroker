@@ -5,7 +5,6 @@ import {
   Newspaper,
   TrendingUp,
   RefreshCw,
-  Search,
   Clock,
   ArrowUpRight,
   Share2,
@@ -78,7 +77,6 @@ export const NewsPage = ({ theme = 'dark' }) => {
   const [articles, setArticles] = useState(FALLBACK_NEWS);
   const [breakingTicker, setBreakingTicker] = useState(FALLBACK_BREAKING_TICKER);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(new Date());
@@ -103,7 +101,6 @@ export const NewsPage = ({ theme = 'dark' }) => {
     try {
       const data = await newsService.getPublishedNews({
         category: selectedCategory,
-        search: searchQuery,
         refresh: isUserRefresh,
       });
 
@@ -125,9 +122,9 @@ export const NewsPage = ({ theme = 'dark' }) => {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedCategory, searchQuery, showToast]);
+  }, [selectedCategory, showToast]);
 
-  // Load news on category or search change
+  // Load news on category change
   useEffect(() => {
     loadNews();
   }, [loadNews]);
@@ -140,20 +137,11 @@ export const NewsPage = ({ theme = 'dark' }) => {
     return () => clearInterval(autoInterval);
   }, [loadNews]);
 
-  // Filtered list
+  // Filtered list by category
   const filteredArticles = useMemo(() => {
-    return articles.filter((item) => {
-      const matchesCat =
-        selectedCategory === 'all' || item.category === selectedCategory;
-      const matchesQuery =
-        !searchQuery.trim() ||
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.source?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tags?.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesCat && matchesQuery;
-    });
-  }, [articles, selectedCategory, searchQuery]);
+    if (selectedCategory === 'all') return articles;
+    return articles.filter((item) => item.category === selectedCategory);
+  }, [articles, selectedCategory]);
 
   // Top featured hero article - dynamically tracks the newest breaking story
   const featuredArticle = useMemo(() => {
@@ -253,7 +241,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
       </div>
 
       {/* ══════════════════════════════════════════════════════════ */}
-      {/* 3. SEARCH & CATEGORY BAR                                 */}
+      {/* 3. CATEGORY BAR                                           */}
       {/* ══════════════════════════════════════════════════════════ */}
       <div className="news-control-bar-wrapper">
         <div className="news-control-bar">
@@ -273,26 +261,6 @@ export const NewsPage = ({ theme = 'dark' }) => {
                 </button>
               );
             })}
-          </div>
-
-          {/* Search Box */}
-          <div className="news-search-box">
-            <Search size={15} className="news-search-icon" />
-            <input
-              type="text"
-              placeholder="Search news, RBI, DXY, Bitcoin, broker..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="news-search-input"
-            />
-            {searchQuery && (
-              <button
-                className="news-search-clear"
-                onClick={() => setSearchQuery('')}
-              >
-                <X size={14} />
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -315,16 +283,13 @@ export const NewsPage = ({ theme = 'dark' }) => {
             <div className="empty-icon-wrap">
               <Newspaper size={36} />
             </div>
-            <h3>No matching intelligence found</h3>
-            <p>We couldn’t find articles matching "{searchQuery}". Try selecting another category.</p>
+            <h3>No intelligence found</h3>
+            <p>We couldn’t find articles in this category. Select another category or view all news.</p>
             <button
               className="empty-reset-btn"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-              }}
+              onClick={() => setSelectedCategory('all')}
             >
-              Reset Filters
+              Show All Intelligence
             </button>
           </div>
         ) : (
