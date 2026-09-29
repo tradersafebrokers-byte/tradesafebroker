@@ -149,7 +149,7 @@ const generateSparklinePath = (points, width = 160, height = 36) => {
 };
 
 const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
-  const { eurusd, gold } = useLiveMarketData();
+  const { btc, gold } = useLiveMarketData();
   const [complete, setComplete] = useState(heroComplete);
 
   useEffect(() => {
@@ -399,26 +399,26 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   </svg>
                 </div>
 
-                {/* Floating Market Card - EUR/USD (Real-time Live WebSocket & API Stream) */}
+                {/* Floating Market Card - BTC/USD (Real-time Live WebSocket & API Stream) */}
                 <div className="market-card-eurusd">
                   <div className="market-card-header">
                     <div className="market-pair-title-row">
-                      <span className="market-pair-title">{eurusd.symbol}</span>
-                      <span className="market-live-pill" title="Live Real-time Interbank Feed">
+                      <span className="market-pair-title">{btc.symbol}</span>
+                      <span className="market-live-pill" title="Live Real-time Crypto Feed">
                         <span className="market-live-dot" /> LIVE
                       </span>
                     </div>
-                    <Link to="/compare" className="market-arrow-btn" title="Compare broker spreads & execution for EUR/USD">↗</Link>
+                    <Link to="/news" className="market-arrow-btn" title="View live crypto & trading news for BTC">↗</Link>
                   </div>
-                  <div className={`market-price-val ${eurusd.flash ? `flash-${eurusd.flash}` : ""}`}>
-                    {eurusd.price}
+                  <div className={`market-price-val ${btc.flash ? `flash-${btc.flash}` : ""}`}>
+                    ${btc.price}
                   </div>
-                  <div className={`market-change-badge ${eurusd.isPositive ? "positive" : "negative"}`}>
-                    {eurusd.change}% Today
+                  <div className={`market-change-badge ${btc.isPositive ? "positive" : "negative"}`}>
+                    {btc.change}% Today
                   </div>
                   <svg className="sparkline-svg" viewBox="0 0 160 38" fill="none">
                     <path
-                      d={generateSparklinePath(eurusd.history, 160, 36)}
+                      d={generateSparklinePath(btc.history, 160, 36)}
                       stroke="var(--brand-green)"
                       strokeWidth="2.5"
                       strokeLinecap="round"

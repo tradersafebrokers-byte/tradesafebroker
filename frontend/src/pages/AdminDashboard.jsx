@@ -46,12 +46,15 @@ import {
   Pencil,
   Send,
   CornerDownRight,
+  Newspaper,
 } from 'lucide-react';
 import useAuth from '../features/auth/hooks/useAuth.js';
 import adminService from '../features/admin/services/admin.service.js';
 import apiClient from '../features/auth/services/api.client.js';
+import newsService, { FALLBACK_NEWS } from '../features/news/services/news.service.js';
 import { ALL_FOOTER_SECTIONS } from '../features/shared/components/Footer.jsx';
 import AdminReplyModal from '../features/admin/components/AdminReplyModal.jsx';
+import AdminNewsModal from '../features/admin/components/AdminNewsModal.jsx';
 import VerifiedGoldBadge from '../features/shared/components/VerifiedGoldBadge.jsx';
 import {
   INITIAL_DEMO_TESTIMONIALS,
@@ -101,6 +104,8 @@ const DeleteConfirmModal = React.memo(({ modalData, onClose, onConfirm }) => {
                     ? 'Broker Directory Listing'
                     : modalData.type === 'message'
                     ? 'Contact Message / Inquiry'
+                    : modalData.type === 'news'
+                    ? 'News Article / Blog Post'
                     : 'Review Moderation'}
                 </span>
                 <h3>Confirm Permanent Deletion</h3>
@@ -124,6 +129,8 @@ const DeleteConfirmModal = React.memo(({ modalData, onClose, onConfirm }) => {
                 ? 'This trader account will be permanently erased. All authentication tokens and sessions will be invalidated immediately.'
                 : modalData.type === 'broker'
                 ? 'This broker listing, metadata, and all associated community reviews will be permanently removed from TradeSafeBrokers.'
+                : modalData.type === 'news'
+                ? 'This news article or blog post will be permanently removed from the website, news archives, and database.'
                 : 'This review will be permanently deleted and excluded from public broker metrics.'}
             </p>
 
@@ -909,6 +916,33 @@ export default function AdminDashboard() {
     sending: false,
   });
 
+  // News & Blogs Management States
+  const [newsList, setNewsList] = useState(FALLBACK_NEWS);
+  const [newsCounts, setNewsCounts] = useState({ total: FALLBACK_NEWS.length, published: 7, drafts: 0, featured: 2 });
+  const [newsFilter, setNewsFilter] = useState('all');
+  const [newsSearch, setNewsSearch] = useState('');
+  const [newsModal, setNewsModal] = useState({
+    isOpen: false,
+    mode: 'create',
+    article: null,
+  });
+  const [newsFormData, setNewsFormData] = useState({
+    title: '',
+    summary: '',
+    content: '',
+    category: 'forex',
+    tags: '',
+    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
+    source: 'PipWise Editorial Desk',
+    sourceUrl: '',
+    authorName: 'PipWise Analyst Desk',
+    authorRole: 'Senior Financial Strategist',
+    readTime: '3 min read',
+    isFeatured: false,
+    isPublished: true,
+  });
+  const [savingNews, setSavingNews] = useState(false);
+
   // Delete Confirmation Modal State
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
@@ -957,6 +991,7 @@ export default function AdminDashboard() {
         kycRes,
         contactRes,
         footerRes,
+        newsRes,
       ] = await Promise.allSettled([
         adminService.getStats(),
         adminService.getBrokers(),
@@ -967,6 +1002,7 @@ export default function AdminDashboard() {
         adminService.getKycSubmissions(),
         apiClient.get('/contact'),
         apiClient.get('/contact/footer-settings'),
+        apiClient.get('/news/admin/all'),
       ]);
 
       if (statsRes.status === 'fulfilled' && statsRes.value?.data) {
@@ -1029,6 +1065,19 @@ export default function AdminDashboard() {
           hidden = payload;
         }
         setHiddenFooterLinks(hidden);
+      }
+
+      // Load News Articles & Blogs
+      if (newsRes.status === 'fulfilled') {
+        const val = newsRes.value;
+        const payload = val?.data !== undefined ? val.data : val;
+        const nData = payload?.data !== undefined ? payload.data : payload;
+        if (Array.isArray(nData?.articles)) {
+          setNewsList(nData.articles);
+        }
+        if (nData?.counts) {
+          setNewsCounts(nData.counts);
+        }
       }
     } catch (err) {
       console.error('Error fetching admin metrics:', err);
@@ -1167,6 +1216,24 @@ export default function AdminDashboard() {
       return matchesName || matchesEmail || matchesMessage;
     });
   }, [messagesList, searchQuery]);
+
+  // Filtered news articles for management
+  const filteredNewsList = useMemo(() => {
+    return newsList.filter((item) => {
+      if (newsFilter !== 'all' && item.category !== newsFilter) {
+        return false;
+      }
+      if (searchQuery || newsSearch) {
+        const q = (newsSearch || searchQuery).toLowerCase();
+        const matchesTitle = item.title?.toLowerCase().includes(q);
+        const matchesSummary = item.summary?.toLowerCase().includes(q);
+        const matchesSource = item.source?.toLowerCase().includes(q);
+        const matchesTags = item.tags?.some((t) => t.toLowerCase().includes(q));
+        return matchesTitle || matchesSummary || matchesSource || matchesTags;
+      }
+      return true;
+    });
+  }, [newsList, newsFilter, searchQuery, newsSearch]);
 
   // 1. APPROVE BROKER (WITH VERIFIED BROKER BADGE)
   const handleApproveBroker = useCallback(async (broker) => {
@@ -1425,8 +1492,171 @@ export default function AdminDashboard() {
         setMessagesList(prevList);
         showToast(err.response?.data?.message || err.message || 'Failed to delete message');
       });
+    } else if (type === 'news') {
+      const prevList = [...newsList];
+      setNewsList((prev) => prev.filter((n) => (n._id || n.slug) !== id));
+      setNewsCounts((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+      showToast(`News article "${name}" deleted`);
+      newsService.deleteNewsArticle(id).catch((err) => {
+        setNewsList(prevList);
+        showToast(err.response?.data?.message || err.message || 'Failed to delete news article');
+      });
     }
-  }, [deleteModal, brokersList, usersList, reviewsList, messagesList, closeDeleteModal, showToast]);
+  }, [deleteModal, brokersList, usersList, reviewsList, messagesList, newsList, closeDeleteModal, showToast]);
+
+  const promptDeleteNews = useCallback((article) => {
+    setDeleteModal({
+      isOpen: true,
+      type: 'news',
+      id: article._id || article.slug,
+      name: article.title,
+      extraInfo: `Category: ${article.category} • Source: ${article.source || 'PipWise'}`,
+    });
+  }, []);
+
+  const handleOpenCreateNews = useCallback(() => {
+    setNewsFormData({
+      title: '',
+      summary: '',
+      content: '',
+      category: 'forex',
+      tags: '',
+      imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
+      source: 'PipWise Editorial Desk',
+      sourceUrl: '',
+      authorName: 'PipWise Analyst Desk',
+      authorRole: 'Senior Financial Strategist',
+      readTime: '3 min read',
+      isFeatured: false,
+      isPublished: true,
+    });
+    setNewsModal({ isOpen: true, mode: 'create', article: null });
+  }, []);
+
+  const handleOpenEditNews = useCallback((article) => {
+    setNewsFormData({
+      title: article.title || '',
+      summary: article.summary || '',
+      content: article.content || '',
+      category: article.category || 'forex',
+      tags: Array.isArray(article.tags) ? article.tags.join(', ') : (article.tags || ''),
+      imageUrl: article.imageUrl || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
+      source: article.source || 'PipWise Editorial Desk',
+      sourceUrl: article.sourceUrl || '',
+      authorName: article.author?.name || 'PipWise Analyst Desk',
+      authorRole: article.author?.role || 'Senior Financial Strategist',
+      readTime: article.readTime || '3 min read',
+      isFeatured: Boolean(article.isFeatured),
+      isPublished: article.isPublished !== undefined ? Boolean(article.isPublished) : true,
+    });
+    setNewsModal({ isOpen: true, mode: 'edit', article });
+  }, []);
+
+  const handleSaveNews = useCallback(async (e) => {
+    if (e?.preventDefault) e.preventDefault();
+    if (!newsFormData.title.trim()) {
+      showToast('Please enter an article title');
+      return;
+    }
+    if (!newsFormData.summary.trim()) {
+      showToast('Please enter an article summary');
+      return;
+    }
+    if (!newsFormData.content.trim()) {
+      showToast('Please enter article content');
+      return;
+    }
+
+    try {
+      setSavingNews(true);
+      const payload = {
+        ...newsFormData,
+        tags: newsFormData.tags
+          ? (Array.isArray(newsFormData.tags) ? newsFormData.tags : newsFormData.tags.split(',').map((t) => t.trim()).filter(Boolean))
+          : [],
+      };
+
+      if (newsModal.mode === 'create') {
+        const created = await newsService.createNewsArticle(payload);
+        const newArt = created || {
+          ...payload,
+          _id: `news-${Date.now()}`,
+          slug: payload.title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          publishedAt: new Date().toISOString(),
+          views: 0,
+        };
+        setNewsList((prev) => [newArt, ...prev]);
+        setNewsCounts((prev) => ({
+          ...prev,
+          total: prev.total + 1,
+          published: payload.isPublished ? prev.published + 1 : prev.published,
+          drafts: !payload.isPublished ? prev.drafts + 1 : prev.drafts,
+          featured: payload.isFeatured ? prev.featured + 1 : prev.featured,
+        }));
+        showToast('Article published successfully!');
+      } else {
+        const targetId = newsModal.article?._id || newsModal.article?.slug;
+        await newsService.updateNewsArticle(targetId, payload);
+        setNewsList((prev) =>
+          prev.map((item) => ((item._id || item.slug) === targetId ? { ...item, ...payload } : item))
+        );
+        showToast('Article updated successfully!');
+      }
+      setNewsModal({ isOpen: false, mode: 'create', article: null });
+    } catch {
+      // Local optimistic fallback
+      const payload = {
+        ...newsFormData,
+        tags: newsFormData.tags
+          ? (Array.isArray(newsFormData.tags) ? newsFormData.tags : newsFormData.tags.split(',').map((t) => t.trim()).filter(Boolean))
+          : [],
+      };
+      if (newsModal.mode === 'create') {
+        const localArt = {
+          ...payload,
+          _id: `news-${Date.now()}`,
+          slug: payload.title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          publishedAt: new Date().toISOString(),
+          views: 0,
+        };
+        setNewsList((prev) => [localArt, ...prev]);
+        showToast('Article added to live feed');
+      } else {
+        const targetId = newsModal.article?._id || newsModal.article?.slug;
+        setNewsList((prev) =>
+          prev.map((item) => ((item._id || item.slug) === targetId ? { ...item, ...payload } : item))
+        );
+        showToast('Article updated (Live)');
+      }
+      setNewsModal({ isOpen: false, mode: 'create', article: null });
+    } finally {
+      setSavingNews(false);
+    }
+  }, [newsFormData, newsModal, showToast]);
+
+  const handleToggleNewsPublished = useCallback(async (article) => {
+    const targetId = article._id || article.slug;
+    const newStatus = !article.isPublished;
+    setNewsList((prev) =>
+      prev.map((a) => ((a._id || a.slug) === targetId ? { ...a, isPublished: newStatus } : a))
+    );
+    showToast(newStatus ? 'Article is now Live' : 'Article moved to Drafts');
+    try {
+      await newsService.updateNewsArticle(targetId, { isPublished: newStatus });
+    } catch {}
+  }, [showToast]);
+
+  const handleToggleNewsFeatured = useCallback(async (article) => {
+    const targetId = article._id || article.slug;
+    const newFeatured = !article.isFeatured;
+    setNewsList((prev) =>
+      prev.map((a) => ((a._id || a.slug) === targetId ? { ...a, isFeatured: newFeatured } : a))
+    );
+    showToast(newFeatured ? 'Article pinned as Featured story' : 'Article unpinned from Featured');
+    try {
+      await newsService.updateNewsArticle(targetId, { isFeatured: newFeatured });
+    } catch {}
+  }, [showToast]);
 
   const promptDeleteMessage = useCallback((msg) => {
     setDeleteModal({
@@ -1767,7 +1997,18 @@ export default function AdminDashboard() {
               )}
             </motion.button>
 
-            {/* 8. ANALYTICS */}
+            {/* 8. NEWS & BLOGS */}
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              className={`d2-dock-item ${activeDock === 'news' ? 'active' : ''}`}
+              onClick={() => switchDockView('news', 'Market News & Blogs')}
+              title="Market News & Blogs Management"
+            >
+              <Newspaper size={19} />
+              <span className="d2-pro-badge">{newsList.length}</span>
+            </motion.button>
+
+            {/* 9. ANALYTICS */}
             <motion.button
               whileTap={{ scale: 0.92 }}
               className={`d2-dock-item ${activeDock === 'analytics' ? 'active' : ''}`}
@@ -1891,6 +2132,18 @@ export default function AdminDashboard() {
               >
                 <Mail size={15} />
                 <span>Inquiries &amp; Footer ({messagesList.length})</span>
+              </button>
+
+              <button
+                className={`d2-nav-item ${activeNav === 'news' || activeDock === 'news' ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveNav('news');
+                  setActiveDock('news');
+                  showToast('Navigated to Market News & Blogs');
+                }}
+              >
+                <Newspaper size={15} />
+                <span>News &amp; Blogs ({newsList.length})</span>
               </button>
             </nav>
 
@@ -3450,6 +3703,281 @@ export default function AdminDashboard() {
                 </motion.div>
               )}
 
+              {/* VIEW: NEWS & BLOGS MANAGEMENT */}
+              {(activeDock === 'news' || (activeNav === 'news' && activeDock === 'dashboard')) && (
+                <motion.div
+                  key="view-news"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="d2-generic-view"
+                >
+                  <div className="d2-view-banner">
+                    <div className="d2-view-banner-text">
+                      <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Newspaper size={20} color="#10b981" />
+                        <span>Market News &amp; Blog Management ({newsList.length})</span>
+                      </h2>
+                      <p>
+                        Publish, edit, and moderate breaking Forex, Indian Market (RBI, Rupee), Crypto, and Broker articles displayed on the public live wire.
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button
+                        className="d2-banner-btn"
+                        onClick={handleOpenCreateNews}
+                        style={{ background: '#10b981', color: '#052e16', borderColor: '#10b981', fontWeight: 700 }}
+                      >
+                        <Plus size={14} style={{ marginRight: '4px' }} />
+                        Create Article / Blog
+                      </button>
+                      <button
+                        className="d2-banner-btn"
+                        onClick={() => loadAdminData()}
+                        title="Sync with live database"
+                      >
+                        <RefreshCw size={13} style={{ marginRight: '6px' }} />
+                        Sync News
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* KPI Metrics */}
+                  <div className="d2-kpi-strip">
+                    <div className="d2-kpi-card">
+                      <div className="d2-kpi-title">Total Intelligence</div>
+                      <div className="d2-kpi-value">
+                        {newsList.length} <span className="d2-kpi-change up">Articles</span>
+                      </div>
+                    </div>
+                    <div className="d2-kpi-card">
+                      <div className="d2-kpi-title">Live Published</div>
+                      <div className="d2-kpi-value">
+                        {newsList.filter((n) => n.isPublished).length} <span className="d2-kpi-change up">Live</span>
+                      </div>
+                    </div>
+                    <div className="d2-kpi-card">
+                      <div className="d2-kpi-title">Featured Stories</div>
+                      <div className="d2-kpi-value">
+                        {newsList.filter((n) => n.isFeatured).length} <span className="d2-kpi-change up">Hero</span>
+                      </div>
+                    </div>
+                    <div className="d2-kpi-card">
+                      <div className="d2-kpi-title">Drafts / Staged</div>
+                      <div className="d2-kpi-value">
+                        {newsList.filter((n) => !n.isPublished).length} <span className="d2-kpi-change down">Drafts</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Filter & Search Bar */}
+                  <div className="d2-filter-bar" style={{ marginBottom: '18px' }}>
+                    <div className="d2-filter-tabs-custom" style={{ overflowX: 'auto', flexWrap: 'nowrap' }}>
+                      {[
+                        { id: 'all', label: 'All Articles' },
+                        { id: 'forex', label: 'Forex' },
+                        { id: 'indian-market', label: 'Indian Market & RBI' },
+                        { id: 'crypto', label: 'Crypto & Bitcoin' },
+                        { id: 'global', label: 'Global Macro' },
+                        { id: 'commodities', label: 'Commodities' },
+                        { id: 'brokers', label: 'Brokers' },
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          className={`d2-filter-pill-btn ${newsFilter === tab.id ? 'active' : ''}`}
+                          onClick={() => setNewsFilter(tab.id)}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                      Showing {filteredNewsList.length} of {newsList.length} article(s)
+                    </div>
+                  </div>
+
+                  {/* Articles List / Table */}
+                  <div className="d2-table-wrapper">
+                    <table className="d2-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '45%' }}>Article &amp; Source</th>
+                          <th style={{ width: '15%' }}>Category</th>
+                          <th style={{ width: '15%' }}>Published</th>
+                          <th style={{ width: '12%' }}>Status</th>
+                          <th style={{ width: '13%', textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredNewsList.length === 0 ? (
+                          <tr>
+                            <td colSpan="5" style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+                              No news articles match your filter or search query.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredNewsList.map((article) => {
+                            const isLive = article.isPublished !== false;
+                            const isFeat = Boolean(article.isFeatured);
+                            return (
+                              <tr key={article._id || article.slug}>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    {article.imageUrl ? (
+                                      <img
+                                        src={article.imageUrl}
+                                        alt={article.title}
+                                        style={{
+                                          width: '48px',
+                                          height: '38px',
+                                          borderRadius: '6px',
+                                          objectFit: 'cover',
+                                          flexShrink: 0,
+                                        }}
+                                      />
+                                    ) : (
+                                      <div
+                                        style={{
+                                          width: '48px',
+                                          height: '38px',
+                                          borderRadius: '6px',
+                                          background: '#10b98120',
+                                          color: '#10b981',
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'center',
+                                          flexShrink: 0,
+                                        }}
+                                      >
+                                        <Newspaper size={16} />
+                                      </div>
+                                    )}
+                                    <div style={{ minWidth: 0 }}>
+                                      <div
+                                        style={{
+                                          fontWeight: 600,
+                                          fontSize: '13.5px',
+                                          whiteSpace: 'nowrap',
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          maxWidth: '380px',
+                                        }}
+                                        title={article.title}
+                                      >
+                                        {article.title}
+                                      </div>
+                                      <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+                                        {article.source || 'PipWise'} • {article.author?.name || 'Staff'} • {article.readTime || '3 min'}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td>
+                                  <span
+                                    style={{
+                                      display: 'inline-block',
+                                      padding: '3px 8px',
+                                      borderRadius: '6px',
+                                      fontSize: '11px',
+                                      fontWeight: 700,
+                                      textTransform: 'uppercase',
+                                      background:
+                                        article.category === 'indian-market'
+                                          ? 'rgba(249, 115, 22, 0.15)'
+                                          : article.category === 'crypto'
+                                          ? 'rgba(6, 182, 212, 0.15)'
+                                          : 'rgba(16, 185, 129, 0.15)',
+                                      color:
+                                        article.category === 'indian-market'
+                                          ? '#f97316'
+                                          : article.category === 'crypto'
+                                          ? '#06b6d4'
+                                          : '#10b981',
+                                    }}
+                                  >
+                                    {article.category}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                                    {new Date(article.publishedAt || article.createdAt || Date.now()).toLocaleDateString(undefined, {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric',
+                                    })}
+                                  </span>
+                                </td>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleNewsPublished(article)}
+                                      className={isLive ? 'd2-badge-verified' : 'd2-badge-pending'}
+                                      style={{ border: 'none', cursor: 'pointer', fontSize: '11px' }}
+                                      title="Click to toggle live publication"
+                                    >
+                                      {isLive ? 'Live' : 'Draft'}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleNewsFeatured(article)}
+                                      style={{
+                                        background: isFeat ? '#eab30820' : 'transparent',
+                                        color: isFeat ? '#eab308' : '#94a3b8',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        padding: '2px 4px',
+                                        borderRadius: '4px',
+                                      }}
+                                      title={isFeat ? 'Featured story (Click to unpin)' : 'Click to pin as Featured'}
+                                    >
+                                      <Star size={14} fill={isFeat ? '#eab308' : 'none'} />
+                                    </button>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+                                    <Link
+                                      to={`/news/${article.slug || article._id}`}
+                                      target="_blank"
+                                      className="d2-btn-edit"
+                                      style={{ padding: '5px 8px' }}
+                                      title="View on live website"
+                                    >
+                                      <ExternalLink size={13} />
+                                    </Link>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenEditNews(article)}
+                                      className="d2-btn-edit"
+                                      style={{ padding: '5px 8px' }}
+                                      title="Edit article"
+                                    >
+                                      <Pencil size={13} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => promptDeleteNews(article)}
+                                      className="d2-btn-delete"
+                                      style={{ padding: '5px 8px' }}
+                                      title="Delete article"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </motion.div>
+              )}
+
               {/* VIEW 5: ANALYTICS VIEW */}
               {activeDock === 'analytics' && (
                 <motion.div
@@ -3728,6 +4256,17 @@ export default function AdminDashboard() {
         onClose={closeReplyModal}
         onSendReply={handleSendReply}
         sending={replyModal.sending}
+      />
+
+      {/* NEWS ARTICLE & BLOG CREATE / EDIT MODAL */}
+      <AdminNewsModal
+        isOpen={newsModal.isOpen}
+        mode={newsModal.mode}
+        formData={newsFormData}
+        setFormData={setNewsFormData}
+        onClose={() => setNewsModal({ isOpen: false, mode: 'create', article: null })}
+        onSave={handleSaveNews}
+        saving={savingNews}
       />
 
       {/* TOAST FEEDBACK */}
