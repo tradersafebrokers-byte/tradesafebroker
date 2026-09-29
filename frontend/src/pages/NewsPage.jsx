@@ -207,13 +207,8 @@ export const NewsPage = ({ theme = 'dark' }) => {
             and independent forex broker research.
           </p>
 
-          {/* Quick Refresh & Auto-Sync Pill */}
+          {/* Quick Refresh & Status Pill */}
           <div className="news-meta-status-row">
-            <div className="news-live-status-indicator">
-              <span className="live-ping-glow" />
-              <span>Real-Time Sync Active</span>
-            </div>
-            <span className="news-meta-divider">•</span>
             <span className="news-last-updated">
               Updated {formatTimeAgo(lastUpdated)}
             </span>
