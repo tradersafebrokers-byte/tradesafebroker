@@ -23,6 +23,7 @@ import {
   ArrowRight,
   Search,
   Newspaper,
+  Calculator,
 } from 'lucide-react';
 import useAuth from '../../auth/hooks/useAuth.js';
 import { useToast } from './toast/ToastContext.jsx';
@@ -44,6 +45,7 @@ const NAV_LINKS = [
   { label: 'Write a Review', isReviewAction: true, Icon: Star },
   { label: 'Join as Broker', href: '/join-broker', Icon: Briefcase, badge: 'Partner' },
   { label: 'News', href: '/news', Icon: Newspaper },
+  { label: 'Calculator', href: '/calculator', Icon: Calculator },
 ];
 
 const DockNavLink = React.memo(({ link, mouseX }) => {
@@ -456,17 +458,17 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
 
   const hasUser = Boolean(isAuthenticated);
   const baseMaxWidth = hasUser
-    ? (isScrolled ? 1110 : 1150)
-    : (isScrolled ? 1000 : 1080);
+    ? (isScrolled ? 1190 : 1240)
+    : (isScrolled ? 1090 : 1170);
   const hoveredMaxWidth = hasUser
-    ? (isScrolled ? 1150 : 1190)
-    : (isScrolled ? 1050 : 1120);
-  const searchMaxWidth = hasUser
-    ? (isScrolled ? 1200 : 1240)
-    : (isScrolled ? 1100 : 1170);
-  const searchHoverMaxWidth = hasUser
-    ? (isScrolled ? 1240 : 1280)
+    ? (isScrolled ? 1230 : 1280)
     : (isScrolled ? 1140 : 1210);
+  const searchMaxWidth = hasUser
+    ? (isScrolled ? 1280 : 1330)
+    : (isScrolled ? 1190 : 1260);
+  const searchHoverMaxWidth = hasUser
+    ? (isScrolled ? 1320 : 1370)
+    : (isScrolled ? 1230 : 1300);
 
   // When search is open, navbar maxWidth MUST be completely stable and never oscillate on hover
   const targetMaxWidth = searchOpen

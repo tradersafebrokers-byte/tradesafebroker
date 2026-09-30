@@ -10,6 +10,7 @@ import AdminDashboard from '../pages/AdminDashboard.jsx';
 import AdminRoute from '../features/auth/components/AdminRoute.jsx';
 import BrokerReviewPage from '../pages/BrokerReviewPage.jsx';
 import NewsPage from '../pages/NewsPage.jsx';
+import CalculatorPage from '../pages/CalculatorPage.jsx';
 import NotFound from '../pages/NotFound.jsx';
 
 export const AppRoutes = React.memo(({ theme, heroComplete, setHeroComplete, onHeroFinished }) => {
@@ -109,6 +110,18 @@ export const AppRoutes = React.memo(({ theme, heroComplete, setHeroComplete, onH
         <Route
           path="/forex-news"
           element={<Navigate to="/news" replace />}
+        />
+        <Route
+          path="/calculator"
+          element={<CalculatorPage theme={theme} />}
+        />
+        <Route
+          path="/lot-size-calculator"
+          element={<Navigate to="/calculator" replace />}
+        />
+        <Route
+          path="/spread-calculator"
+          element={<Navigate to="/calculator" replace />}
         />
         {/* 404 Not Found Page */}
         <Route path="*" element={<NotFound theme={theme} />} />

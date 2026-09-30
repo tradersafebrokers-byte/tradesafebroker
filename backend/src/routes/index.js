@@ -6,6 +6,7 @@ import testimonialRoutes from './testimonial.routes.js';
 import reviewRoutes from './review.routes.js';
 import contactRoutes from './contact.routes.js';
 import newsRoutes from './news.routes.js';
+import calculatorRoutes from './calculator.routes.js';
 import mongoose from 'mongoose';
 import { ApiResponse } from '../utils/ApiResponse.js';
 
@@ -41,5 +42,6 @@ router.use('/testimonials', testimonialRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/contact', contactRoutes);
 router.use('/news', newsRoutes);
+router.use('/calculator', calculatorRoutes);
 
 export default router;
