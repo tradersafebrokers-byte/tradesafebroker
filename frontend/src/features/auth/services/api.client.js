@@ -5,7 +5,12 @@ import axios from 'axios';
  * withCredentials: true ensures HTTP-Only cookies are sent and received
  */
 const getBaseUrl = () => {
-  let envUrl = import.meta.env.VITE_API_URL;
+  let envUrl =
+    typeof import.meta !== 'undefined' && import.meta.env
+      ? import.meta.env.VITE_API_URL
+      : typeof process !== 'undefined'
+      ? process.env?.VITE_API_URL
+      : '';
 
   // Auto-upgrade obsolete/dead Render backend URL to active live backend
   if (typeof envUrl === 'string' && envUrl.includes('pip-wise-9lox.onrender.com')) {
