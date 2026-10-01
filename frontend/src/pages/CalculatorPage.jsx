@@ -33,7 +33,6 @@ import calculatorService, {
 } from '../features/calculator/services/calculator.service.js';
 import { useToast } from '../features/shared/components/toast/ToastContext.jsx';
 import useLanguage from '../features/shared/context/LanguageContext.jsx';
-import LanguageSelector from '../features/shared/components/LanguageSelector.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
 import './CalculatorPage.css';
 
@@ -269,11 +268,6 @@ Calculated on TradeSafeBrokers.com`;
       {/* 1. HERO HEADER                                           */}
       {/* ══════════════════════════════════════════════════════════ */}
       <section className="calc-hero-container">
-        {/* Language Selector in Hero */}
-        <div className="calc-hero-lang-bar">
-          <LanguageSelector variant="default" showLabel={true} />
-        </div>
-
         <div className="calc-hero-badge">
           <Sparkles size={13} className="calc-badge-sparkle" />
           <span>{t('calc_badge')}</span>

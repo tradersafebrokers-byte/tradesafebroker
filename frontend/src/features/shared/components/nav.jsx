@@ -30,7 +30,6 @@ import { useToast } from './toast/ToastContext.jsx';
 import KycModal from '../../kyc/components/KycModal.jsx';
 import UserNewsModal from '../../news/components/UserNewsModal.jsx';
 import VerifiedGoldBadge from './VerifiedGoldBadge.jsx';
-import LanguageSelector from './LanguageSelector.jsx';
 import useLanguage from '../context/LanguageContext.jsx';
 import './NavProfileDropdown.css';
 
@@ -935,11 +934,6 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
             )}
           </button>
 
-          {/* Language Selector Dropdown */}
-          <div className={`nav-lang-picker-wrap ${searchOpen ? 'is-search-hidden' : ''}`}>
-            <LanguageSelector variant="compact" />
-          </div>
-
           {/* Mobile Menu Toggle Button */}
           <button
             type="button"
@@ -1313,26 +1307,6 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                   </Link>
                 );
               })}
-            </div>
-
-            {/* Language Selector in Mobile Drawer */}
-            <div
-              className="mobile-menu-lang-row"
-              style={{
-                padding: '10px 16px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                background: 'rgba(255, 255, 255, 0.03)',
-                borderRadius: '10px',
-                margin: '8px 12px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-              }}
-            >
-              <span style={{ fontSize: '0.84rem', color: 'rgba(255, 255, 255, 0.75)', fontWeight: 500 }}>
-                🌐 Language / اللغة / Язык
-              </span>
-              <LanguageSelector />
             </div>
 
             <div className="mobile-menu-divider" />
