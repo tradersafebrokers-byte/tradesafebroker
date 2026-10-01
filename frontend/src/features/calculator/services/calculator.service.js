@@ -183,8 +183,27 @@ export const calculatorService = {
         return res.data.data;
       }
     } catch (e) {
-      console.warn('Backend calculator rates endpoint unreachable, using embedded high-precision market rates:', e.message);
+      console.warn('Backend calculator rates endpoint unreachable, trying public live ticker fallback:', e?.message);
     }
+
+    // Direct browser fallback for Realtime Gold (PAXG 1:1 London Gold Spot)
+    try {
+      const goldRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT', {
+        signal: AbortSignal.timeout(3500),
+      });
+      if (goldRes.ok) {
+        const gData = await goldRes.json();
+        const price = parseFloat(gData.price);
+        if (price > 1000 && price < 10000) {
+          return {
+            rates: { XAUUSD: Number(price.toFixed(2)) },
+          };
+        }
+      }
+    } catch {
+      // Ignore
+    }
+
     return null;
   },
 

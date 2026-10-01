@@ -32,11 +32,14 @@ import calculatorService, {
   clientCalculateSpreadCost,
 } from '../features/calculator/services/calculator.service.js';
 import { useToast } from '../features/shared/components/toast/ToastContext.jsx';
+import useLanguage from '../features/shared/context/LanguageContext.jsx';
+import LanguageSelector from '../features/shared/components/LanguageSelector.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
 import './CalculatorPage.css';
 
 export const CalculatorPage = ({ theme = 'dark' }) => {
   const { showToast } = useToast();
+  const { t, isRtl, language } = useLanguage();
 
   // Active Tab: 'lot-size' | 'spread-cost' | 'pip-value' | 'profit-loss'
   const [activeTab, setActiveTab] = useState('lot-size');
@@ -45,6 +48,12 @@ export const CalculatorPage = ({ theme = 'dark' }) => {
   const [selectedPair, setSelectedPair] = useState('EURUSD');
   const [accountCurrency, setAccountCurrency] = useState('USD');
   const [balance, setBalance] = useState(10000);
+
+  // Live Market Rates & Custom Price state
+  const [liveRates, setLiveRates] = useState(null);
+  const [customMarketPrice, setCustomMarketPrice] = useState('');
+  const [isRefreshingRates, setIsRefreshingRates] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState(null);
 
   // Lot Size Specific States
   const [riskMode, setRiskMode] = useState('percent'); // 'percent' | 'cash'
@@ -69,8 +78,6 @@ export const CalculatorPage = ({ theme = 'dark' }) => {
 
   // UI States
   const [copiedSummary, setCopiedSummary] = useState(false);
-  const [instrumentCategory, setInstrumentCategory] = useState('All');
-  const [liveRates, setLiveRates] = useState(null);
 
   // Current instrument metadata
   const currentInstrument = useMemo(() => {
@@ -82,33 +89,70 @@ export const CalculatorPage = ({ theme = 'dark' }) => {
     return ACCOUNT_CURRENCIES_LIST.find((c) => c.code === accountCurrency) || ACCOUNT_CURRENCIES_LIST[0];
   }, [accountCurrency]);
 
+  // Effective Realtime Market Price
+  const effectivePairRate = useMemo(() => {
+    if (customMarketPrice && !isNaN(parseFloat(customMarketPrice)) && parseFloat(customMarketPrice) > 0) {
+      return parseFloat(customMarketPrice);
+    }
+    if (liveRates && liveRates[selectedPair]) {
+      return liveRates[selectedPair];
+    }
+    return currentInstrument.defaultRate;
+  }, [customMarketPrice, liveRates, selectedPair, currentInstrument]);
+
   // Fetch live market benchmark rates on load
   useEffect(() => {
     const loadRates = async () => {
       const data = await calculatorService.fetchLiveRates();
       if (data?.rates) {
         setLiveRates(data.rates);
+        setLastSyncTime(new Date().toLocaleTimeString());
       }
     };
     loadRates();
   }, []);
 
-  // Update default prices when pair changes
+  // Sync pricing when selected currency pair changes
   useEffect(() => {
     if (currentInstrument) {
+      const initialRate = (liveRates && liveRates[selectedPair]) || currentInstrument.defaultRate;
+      setCustomMarketPrice(String(initialRate));
       setCustomSpread(currentInstrument.typicalSpread);
-      if (!entryPrice || entryPrice === '') {
-        setEntryPrice(currentInstrument.defaultRate);
-      }
-      if (!pnlEntryPrice || pnlEntryPrice === '') {
-        setPnlEntryPrice(currentInstrument.defaultRate);
-      }
-      if (!pnlExitPrice || pnlExitPrice === '') {
-        const move = currentInstrument.pipSize * 30;
-        setPnlExitPrice(Number((currentInstrument.defaultRate + move).toFixed(5)));
-      }
+      setEntryPrice(String(initialRate));
+      setPnlEntryPrice(String(initialRate));
+      const move = currentInstrument.pipSize * 30;
+      setPnlExitPrice(Number((initialRate + move).toFixed(5)));
     }
-  }, [currentInstrument]);
+  }, [selectedPair, currentInstrument, liveRates]);
+
+  // Realtime Live Rate Refresh Handler
+  const handleSyncLivePrice = async () => {
+    setIsRefreshingRates(true);
+    try {
+      const data = await calculatorService.fetchLiveRates();
+      if (data?.rates) {
+        setLiveRates(data.rates);
+        if (data.rates[selectedPair]) {
+          const newRate = data.rates[selectedPair];
+          setCustomMarketPrice(String(newRate));
+          setEntryPrice(String(newRate));
+          setPnlEntryPrice(String(newRate));
+          const move = currentInstrument.pipSize * 30;
+          setPnlExitPrice(Number((newRate + move).toFixed(5)));
+          showToast(`${currentInstrument.symbol}: ${newRate} (${t('live_badge')})`, 'success');
+        } else {
+          showToast(`${t('live_spot_quote')} synced`, 'info');
+        }
+        setLastSyncTime(new Date().toLocaleTimeString());
+      } else {
+        showToast(`${t('live_spot_quote')} verified`, 'info');
+      }
+    } catch {
+      showToast('Live ticker unavailable', 'warning');
+    } finally {
+      setIsRefreshingRates(false);
+    }
+  };
 
   // Calculate pips from Entry Price & Stop Loss Price
   useEffect(() => {
@@ -134,9 +178,9 @@ export const CalculatorPage = ({ theme = 'dark' }) => {
       riskPercent: riskMode === 'percent' ? riskPercent : null,
       riskAmount: riskMode === 'cash' ? riskCashAmount : null,
       stopLossPips,
-      currentPrice: currentInstrument.defaultRate,
+      currentPrice: effectivePairRate,
     });
-  }, [selectedPair, accountCurrency, balance, riskMode, riskPercent, riskCashAmount, stopLossPips, currentInstrument]);
+  }, [selectedPair, accountCurrency, balance, riskMode, riskPercent, riskCashAmount, stopLossPips, effectivePairRate]);
 
   // Instant Spread Cost Calculation
   const spreadResult = useMemo(() => {
@@ -162,8 +206,8 @@ export const CalculatorPage = ({ theme = 'dark' }) => {
 
   // Instant Profit / Loss Calculation
   const pnlResult = useMemo(() => {
-    const e = parseFloat(pnlEntryPrice) || currentInstrument.defaultRate;
-    const x = parseFloat(pnlExitPrice) || currentInstrument.defaultRate;
+    const e = parseFloat(pnlEntryPrice) || effectivePairRate;
+    const x = parseFloat(pnlExitPrice) || effectivePairRate;
     const isBuy = pnlDirection === 'buy';
     const priceDiff = isBuy ? x - e : e - x;
     const pipsGained = Number((priceDiff / currentInstrument.pipSize).toFixed(1));
@@ -177,7 +221,7 @@ export const CalculatorPage = ({ theme = 'dark' }) => {
       isProfit,
       roi,
     };
-  }, [pnlEntryPrice, pnlExitPrice, pnlDirection, currentInstrument, lotSizeResult, pnlLots, balance]);
+  }, [pnlEntryPrice, pnlExitPrice, pnlDirection, currentInstrument, lotSizeResult, pnlLots, balance, effectivePairRate]);
 
   // Copy Calculation Summary
   const handleCopySummary = () => {
@@ -185,11 +229,12 @@ export const CalculatorPage = ({ theme = 'dark' }) => {
     if (activeTab === 'lot-size') {
       summaryText = `📊 TradeSafe Position Size Plan:
 • Instrument: ${currentInstrument.symbol}
+• Current Price: ${effectivePairRate}
 • Account Balance: ${currentCurrency.symbol}${Number(balance).toLocaleString()} (${accountCurrency})
 • Risk: ${lotSizeResult.riskPercent}% (${currentCurrency.symbol}${lotSizeResult.riskAmountCash})
 • Stop Loss: ${stopLossPips} pips
 👉 Recommended Lot Size: ${lotSizeResult.standardLots} Standard Lots (${lotSizeResult.miniLots} Mini / ${lotSizeResult.microLots} Micro)
-• Total Position Pip Value: ${currentCurrency.symbol}${lotSizeResult.totalPositionPipValue}/pip
+• Position Pip Value: ${currentCurrency.symbol}${lotSizeResult.totalPositionPipValue}/pip
 • Notional Value: $${lotSizeResult.notionalValue.toLocaleString()}
 Calculated on TradeSafeBrokers.com`;
     } else if (activeTab === 'spread-cost') {
@@ -213,35 +258,33 @@ Calculated on TradeSafeBrokers.com`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(summaryText);
       setCopiedSummary(true);
-      showToast('Calculation summary copied to clipboard!', 'success');
+      showToast(t('copied_toast'), 'success');
       setTimeout(() => setCopiedSummary(false), 2400);
     }
   };
 
-  // Filtered Instruments List
-  const filteredInstruments = useMemo(() => {
-    if (instrumentCategory === 'All') return POPULAR_INSTRUMENTS;
-    return POPULAR_INSTRUMENTS.filter((i) => i.category === instrumentCategory);
-  }, [instrumentCategory]);
-
   return (
-    <div className={`pipwise-calculator-page ${theme}`}>
+    <div className={`pipwise-calculator-page ${theme} ${isRtl ? 'is-rtl-page' : ''}`}>
       {/* ══════════════════════════════════════════════════════════ */}
       {/* 1. HERO HEADER                                           */}
       {/* ══════════════════════════════════════════════════════════ */}
       <section className="calc-hero-container">
+        {/* Language Selector in Hero */}
+        <div className="calc-hero-lang-bar">
+          <LanguageSelector variant="default" showLabel={true} />
+        </div>
+
         <div className="calc-hero-badge">
           <Sparkles size={13} className="calc-badge-sparkle" />
-          <span>Professional Risk Management Suite</span>
+          <span>{t('calc_badge')}</span>
         </div>
 
         <h1 className="calc-hero-title">
-          Forex Lot Size <span className="calc-accent-text">&amp; Spread Calculator</span>
+          {t('calc_hero_title')} <span className="calc-accent-text">{t('calc_hero_title_accent')}</span>
         </h1>
 
         <p className="calc-hero-subtitle">
-          Calculate exact position size in standard, mini, and micro lots, audit broker spread costs,
-          and manage your risk with institutional mathematical precision.
+          {t('calc_hero_subtitle')}
         </p>
 
         {/* Tab Switcher */}
@@ -252,7 +295,7 @@ Calculated on TradeSafeBrokers.com`;
             onClick={() => setActiveTab('lot-size')}
           >
             <Calculator size={15} />
-            <span>Position / Lot Size</span>
+            <span>{t('tab_lot_size')}</span>
           </button>
 
           <button
@@ -261,7 +304,7 @@ Calculated on TradeSafeBrokers.com`;
             onClick={() => setActiveTab('spread-cost')}
           >
             <Scale size={15} />
-            <span>Spread &amp; Broker Fee</span>
+            <span>{t('tab_spread_cost')}</span>
           </button>
 
           <button
@@ -270,7 +313,7 @@ Calculated on TradeSafeBrokers.com`;
             onClick={() => setActiveTab('pip-value')}
           >
             <Layers size={15} />
-            <span>Pip Value Matrix</span>
+            <span>{t('tab_pip_value')}</span>
           </button>
 
           <button
@@ -279,7 +322,7 @@ Calculated on TradeSafeBrokers.com`;
             onClick={() => setActiveTab('profit-loss')}
           >
             <TrendingUp size={15} />
-            <span>Profit &amp; Loss</span>
+            <span>{t('tab_profit_loss')}</span>
           </button>
         </div>
       </section>
@@ -295,8 +338,8 @@ Calculated on TradeSafeBrokers.com`;
           <div className="calc-card calc-input-card">
             <div className="calc-card-header">
               <div className="calc-card-title-group">
-                <h3>Trade Parameters</h3>
-                <p>Customize instrument, risk tolerance, and account specs</p>
+                <h3>{t('trade_parameters')}</h3>
+                <p>{t('trade_parameters_sub')}</p>
               </div>
               <button
                 type="button"
@@ -312,16 +355,16 @@ Calculated on TradeSafeBrokers.com`;
                 title="Reset to defaults"
               >
                 <RefreshCw size={13} />
-                <span>Reset</span>
+                <span>{t('reset')}</span>
               </button>
             </div>
 
             {/* Instrument Selection */}
             <div className="calc-field-group">
               <div className="calc-label-row">
-                <label htmlFor="instrument-select">Currency Pair / Instrument</label>
+                <label htmlFor="instrument-select">{t('instrument_label')}</label>
                 <span className="calc-live-price-pill" title="Live Benchmark Reference Quote">
-                  1 {currentInstrument.base} = {currentInstrument.defaultRate} {currentInstrument.quote}
+                  1 {currentInstrument.base} = {effectivePairRate} {currentInstrument.quote}
                 </span>
               </div>
 
@@ -372,10 +415,57 @@ Calculated on TradeSafeBrokers.com`;
               </div>
             </div>
 
+            {/* REAL-TIME LIVE MARKET PRICE & BROKER SYNC BOX */}
+            <div className="calc-field-group calc-live-price-box">
+              <div className="calc-label-row">
+                <label htmlFor="custom-market-price">{t('current_market_price')}</label>
+                <div className="calc-live-pill-group">
+                  <span className="calc-live-pulse-badge">
+                    <span className="calc-pulse-dot" />
+                    {t('live_badge')}
+                  </span>
+                  <button
+                    type="button"
+                    className={`calc-sync-price-btn ${isRefreshingRates ? 'spinning' : ''}`}
+                    onClick={handleSyncLivePrice}
+                    disabled={isRefreshingRates}
+                    title={t('refresh_price')}
+                  >
+                    <RefreshCw size={12} className={isRefreshingRates ? 'spin-anim' : ''} />
+                    <span>{isRefreshingRates ? 'Syncing...' : t('refresh_price')}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="calc-input-adornment">
+                <span className="input-currency-tag">{currentInstrument.quote === 'USD' ? '$' : currentInstrument.quote}</span>
+                <input
+                  id="custom-market-price"
+                  type="number"
+                  step="any"
+                  value={customMarketPrice !== '' ? customMarketPrice : effectivePairRate}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setCustomMarketPrice(val);
+                    setEntryPrice(val);
+                    setPnlEntryPrice(val);
+                  }}
+                  className="calc-input"
+                  placeholder={String(effectivePairRate)}
+                />
+              </div>
+
+              {selectedPair === 'XAUUSD' && (
+                <div className="calc-gold-note-pill">
+                  🥇 <strong>{t('gold_spec_note')}</strong>
+                </div>
+              )}
+            </div>
+
             {/* Account Currency & Balance */}
             <div className="calc-two-col-row">
               <div className="calc-field-group">
-                <label htmlFor="account-currency-select">Account Currency</label>
+                <label htmlFor="account-currency-select">{t('account_currency')}</label>
                 <div className="calc-select-wrap">
                   <select
                     id="account-currency-select"
@@ -394,7 +484,7 @@ Calculated on TradeSafeBrokers.com`;
               </div>
 
               <div className="calc-field-group">
-                <label htmlFor="account-balance-input">Account Balance</label>
+                <label htmlFor="account-balance-input">{t('account_balance')}</label>
                 <div className="calc-input-adornment">
                   <span className="input-currency-tag">{currentCurrency.symbol}</span>
                   <input
@@ -413,7 +503,7 @@ Calculated on TradeSafeBrokers.com`;
 
             {/* Quick Balance Presets */}
             <div className="calc-quick-pills-row">
-              <span className="quick-pill-label">Quick Balance:</span>
+              <span className="quick-pill-label">Presets:</span>
               {[1000, 5000, 10000, 25000, 100000].map((presetVal) => (
                 <button
                   key={presetVal}
@@ -435,14 +525,14 @@ Calculated on TradeSafeBrokers.com`;
                 {/* Risk Mode Switcher (% vs Cash) */}
                 <div className="calc-field-group">
                   <div className="calc-label-row">
-                    <label>Risk Sizing Mode</label>
+                    <label>{t('risk_mode_label')}</label>
                     <div className="calc-sub-mode-toggle">
                       <button
                         type="button"
                         className={`sub-toggle-btn ${riskMode === 'percent' ? 'active' : ''}`}
                         onClick={() => setRiskMode('percent')}
                       >
-                        <Percent size={12} /> Percentage (%)
+                        <Percent size={12} /> {t('risk_percent_tab')}
                       </button>
                       <button
                         type="button"
@@ -452,7 +542,7 @@ Calculated on TradeSafeBrokers.com`;
                           setRiskCashAmount((balance * riskPercent) / 100);
                         }}
                       >
-                        <DollarSign size={12} /> Cash Amount
+                        <DollarSign size={12} /> {t('risk_cash_tab')}
                       </button>
                     </div>
                   </div>
@@ -506,21 +596,21 @@ Calculated on TradeSafeBrokers.com`;
                 {/* Stop Loss (Pips vs Price Mode) */}
                 <div className="calc-field-group">
                   <div className="calc-label-row">
-                    <label>Stop Loss Parameter</label>
+                    <label>{t('stop_loss_mode')}</label>
                     <div className="calc-sub-mode-toggle">
                       <button
                         type="button"
                         className={`sub-toggle-btn ${stopLossMode === 'pips' ? 'active' : ''}`}
                         onClick={() => setStopLossMode('pips')}
                       >
-                        Pips
+                        {t('stop_loss_pips')}
                       </button>
                       <button
                         type="button"
                         className={`sub-toggle-btn ${stopLossMode === 'price' ? 'active' : ''}`}
                         onClick={() => setStopLossMode('price')}
                       >
-                        Price Levels
+                        {t('stop_loss_price')}
                       </button>
                     </div>
                   </div>
@@ -556,25 +646,25 @@ Calculated on TradeSafeBrokers.com`;
                   ) : (
                     <div className="calc-two-col-row">
                       <div className="calc-field-group">
-                        <label className="sub-field-label">Entry Price</label>
+                        <label className="sub-field-label">{t('entry_price')}</label>
                         <input
                           type="number"
                           step="any"
                           value={entryPrice}
                           onChange={(e) => setEntryPrice(e.target.value)}
                           className="calc-input"
-                          placeholder="1.08650"
+                          placeholder={String(effectivePairRate)}
                         />
                       </div>
                       <div className="calc-field-group">
-                        <label className="sub-field-label">Stop Loss Price</label>
+                        <label className="sub-field-label">{t('sl_target_price')}</label>
                         <input
                           type="number"
                           step="any"
                           value={stopLossPrice}
                           onChange={(e) => setStopLossPrice(e.target.value)}
                           className="calc-input"
-                          placeholder="1.08400"
+                          placeholder={String(effectivePairRate)}
                         />
                       </div>
                     </div>
@@ -588,7 +678,7 @@ Calculated on TradeSafeBrokers.com`;
               <>
                 <div className="calc-two-col-row">
                   <div className="calc-field-group">
-                    <label>Trade Size (Lots)</label>
+                    <label>{t('trade_size_lots')}</label>
                     <div className="calc-input-adornment">
                       <input
                         type="number"
@@ -603,7 +693,7 @@ Calculated on TradeSafeBrokers.com`;
                   </div>
 
                   <div className="calc-field-group">
-                    <label>Broker Spread (Pips)</label>
+                    <label>{t('broker_spread_pips')}</label>
                     <div className="calc-input-adornment">
                       <input
                         type="number"
@@ -619,7 +709,7 @@ Calculated on TradeSafeBrokers.com`;
                 </div>
 
                 <div className="calc-quick-pills-row">
-                  <span className="quick-pill-label">Spread Tier:</span>
+                  <span className="quick-pill-label">Tier:</span>
                   {[
                     { label: 'Raw ECN (0.2)', val: 0.2 },
                     { label: 'Competitive (0.8)', val: 0.8 },
@@ -638,7 +728,7 @@ Calculated on TradeSafeBrokers.com`;
                 </div>
 
                 <div className="calc-field-group mt-3">
-                  <label>Commission per Lot (Optional)</label>
+                  <label>{t('commission_per_lot')}</label>
                   <div className="calc-input-adornment">
                     <span className="input-currency-tag">{currentCurrency.symbol}</span>
                     <input
@@ -660,28 +750,28 @@ Calculated on TradeSafeBrokers.com`;
             {activeTab === 'profit-loss' && (
               <>
                 <div className="calc-field-group">
-                  <label>Order Direction</label>
+                  <label>{t('trade_direction')}</label>
                   <div className="calc-order-direction-toggle">
                     <button
                       type="button"
                       className={`order-btn buy ${pnlDirection === 'buy' ? 'active' : ''}`}
                       onClick={() => setPnlDirection('buy')}
                     >
-                      <TrendingUp size={14} /> Buy (Long)
+                      <TrendingUp size={14} /> {t('direction_buy')}
                     </button>
                     <button
                       type="button"
                       className={`order-btn sell ${pnlDirection === 'sell' ? 'active' : ''}`}
                       onClick={() => setPnlDirection('sell')}
                     >
-                      <TrendingDown size={14} /> Sell (Short)
+                      <TrendingDown size={14} /> {t('direction_sell')}
                     </button>
                   </div>
                 </div>
 
                 <div className="calc-two-col-row">
                   <div className="calc-field-group">
-                    <label>Trade Size (Lots)</label>
+                    <label>{t('trade_size_lots')}</label>
                     <input
                       type="number"
                       min="0.01"
@@ -693,7 +783,7 @@ Calculated on TradeSafeBrokers.com`;
                   </div>
 
                   <div className="calc-field-group">
-                    <label>Entry Price</label>
+                    <label>{t('entry_price')}</label>
                     <input
                       type="number"
                       step="any"
@@ -705,7 +795,7 @@ Calculated on TradeSafeBrokers.com`;
                 </div>
 
                 <div className="calc-field-group">
-                  <label>Target Exit Price</label>
+                  <label>{t('exit_price')}</label>
                   <input
                     type="number"
                     step="any"
@@ -720,7 +810,7 @@ Calculated on TradeSafeBrokers.com`;
             {/* PIP VALUE MATRIX CONTROLS */}
             {activeTab === 'pip-value' && (
               <div className="calc-field-group">
-                <label>Custom Trade Size (Lots)</label>
+                <label>{t('trade_size_lots')}</label>
                 <div className="calc-input-adornment">
                   <input
                     type="number"
@@ -744,23 +834,23 @@ Calculated on TradeSafeBrokers.com`;
             {activeTab === 'lot-size' && (
               <>
                 <div className="calc-hero-result-banner">
-                  <span className="hero-result-eyebrow">Recommended Position Size</span>
+                  <span className="hero-result-eyebrow">{t('rec_lot_size')}</span>
                   <div className="hero-result-big-number">
                     {lotSizeResult.standardLots}{' '}
-                    <span className="hero-lot-unit">Standard Lots</span>
+                    <span className="hero-lot-unit">{t('standard_lots')}</span>
                   </div>
 
                   <div className="hero-breakdown-subchips">
                     <span className="subchip">
-                      <strong>{lotSizeResult.miniLots}</strong> Mini Lots
+                      <strong>{lotSizeResult.miniLots}</strong> {t('mini_lots')}
                     </span>
                     <span className="subchip-dot">•</span>
                     <span className="subchip">
-                      <strong>{lotSizeResult.microLots}</strong> Micro Lots
+                      <strong>{lotSizeResult.microLots}</strong> {t('micro_lots')}
                     </span>
                     <span className="subchip-dot">•</span>
                     <span className="subchip">
-                      <strong>{lotSizeResult.units.toLocaleString()}</strong> Units
+                      <strong>{lotSizeResult.units.toLocaleString()}</strong> {t('units_contract')}
                     </span>
                   </div>
                 </div>
@@ -772,11 +862,11 @@ Calculated on TradeSafeBrokers.com`;
                 >
                   <div className="radar-pulse-dot" />
                   <span className="radar-label">
-                    Risk Profile: <strong>{lotSizeResult.riskClassification.toUpperCase()}</strong> (
-                    {lotSizeResult.riskPercent}% of account)
+                    {t('risk_radar_title')}: <strong>{t(`risk_${lotSizeResult.riskClassification}`)}</strong> (
+                    {lotSizeResult.riskPercent}% of balance)
                   </span>
                   <span className="radar-cash-tag">
-                    Max Loss: {currentCurrency.symbol}
+                    Max: {currentCurrency.symbol}
                     {lotSizeResult.riskAmountCash.toLocaleString()}
                   </span>
                 </div>
@@ -784,37 +874,37 @@ Calculated on TradeSafeBrokers.com`;
                 {/* Metrics Breakdown Grid */}
                 <div className="calc-metrics-grid">
                   <div className="calc-metric-box">
-                    <span className="metric-label">Cash at Risk</span>
+                    <span className="metric-label">{t('cash_at_risk_label')}</span>
                     <span className="metric-value">
                       {currentCurrency.symbol}
                       {lotSizeResult.riskAmountCash.toLocaleString()}
                     </span>
-                    <span className="metric-note">{lotSizeResult.riskPercent}% Balance</span>
+                    <span className="metric-note">{lotSizeResult.riskPercent}% {t('account_balance')}</span>
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">Pip Value (Position)</span>
+                    <span className="metric-label">{t('total_pos_pip_value')}</span>
                     <span className="metric-value text-accent">
                       {currentCurrency.symbol}
                       {lotSizeResult.totalPositionPipValue}
                     </span>
-                    <span className="metric-note">Per 1.0 pip movement</span>
+                    <span className="metric-note">Per 1.0 pip move</span>
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">Notional Trade Value</span>
+                    <span className="metric-label">{t('notional_value_label')}</span>
                     <span className="metric-value">
                       ${lotSizeResult.notionalValue.toLocaleString()}
                     </span>
-                    <span className="metric-note">{lotSizeResult.units.toLocaleString()} contract units</span>
+                    <span className="metric-note">{lotSizeResult.units.toLocaleString()} units</span>
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">Stop Loss Range</span>
+                    <span className="metric-label">{t('stop_loss_pips')}</span>
                     <span className="metric-value">
                       {stopLossPips} <span className="small-unit">pips</span>
                     </span>
-                    <span className="metric-note">Safety buffer</span>
+                    <span className="metric-note">Risk limit</span>
                   </div>
                 </div>
 
@@ -822,7 +912,7 @@ Calculated on TradeSafeBrokers.com`;
                 <div className="calc-leverage-matrix-card">
                   <div className="matrix-title-row">
                     <ShieldCheck size={14} className="text-accent" />
-                    <span>Estimated Required Margin by Leverage</span>
+                    <span>{t('margin_table_title')}</span>
                   </div>
                   <div className="matrix-table-row">
                     <div className="matrix-cell">
@@ -858,20 +948,20 @@ Calculated on TradeSafeBrokers.com`;
             {activeTab === 'spread-cost' && (
               <>
                 <div className="calc-hero-result-banner">
-                  <span className="hero-result-eyebrow">Estimated Total Round-Turn Cost</span>
+                  <span className="hero-result-eyebrow">{t('total_cost_label')}</span>
                   <div className="hero-result-big-number">
                     {currentCurrency.symbol}
                     {spreadResult.totalTradeCost}{' '}
-                    <span className="hero-lot-unit">Total Cost</span>
+                    <span className="hero-lot-unit">{t('total_cost_label')}</span>
                   </div>
 
                   <div className="hero-breakdown-subchips">
                     <span className="subchip">
-                      Spread Fee: {currentCurrency.symbol}{spreadResult.spreadCost}
+                      {t('spread_cost_only')}: {currentCurrency.symbol}{spreadResult.spreadCost}
                     </span>
                     <span className="subchip-dot">•</span>
                     <span className="subchip">
-                      Commission: {currentCurrency.symbol}{spreadResult.commissionCost}
+                      {t('commission_cost')}: {currentCurrency.symbol}{spreadResult.commissionCost}
                     </span>
                   </div>
                 </div>
@@ -879,11 +969,11 @@ Calculated on TradeSafeBrokers.com`;
                 <div className={`calc-risk-radar-pill ${spreadResult.spreadRating}`}>
                   <div className="radar-pulse-dot" />
                   <span className="radar-label">
-                    Broker Condition: <strong>{spreadResult.ratingLabel}</strong> ({customSpread} pips)
+                    {t('spread_condition')}: <strong>{t(`rating_${spreadResult.spreadRating}`, spreadResult.ratingLabel)}</strong> ({customSpread} pips)
                   </span>
                   {spreadResult.potentialSavings > 0 && (
                     <span className="radar-cash-tag green">
-                      Saves ~{currentCurrency.symbol}{spreadResult.potentialSavings} vs Retail Standard
+                      {t('est_savings_vs_retail')}: ~{currentCurrency.symbol}{spreadResult.potentialSavings}
                     </span>
                   )}
                 </div>
@@ -891,13 +981,13 @@ Calculated on TradeSafeBrokers.com`;
                 {/* Metrics Breakdown Grid */}
                 <div className="calc-metrics-grid">
                   <div className="calc-metric-box">
-                    <span className="metric-label">Spread in Pips</span>
+                    <span className="metric-label">{t('broker_spread_pips')}</span>
                     <span className="metric-value">{customSpread} pips</span>
                     <span className="metric-note">Spread Markup</span>
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">Cost per Pip</span>
+                    <span className="metric-label">{t('cost_per_pip_label')}</span>
                     <span className="metric-value text-accent">
                       {currentCurrency.symbol}{spreadResult.costPerPip}
                     </span>
@@ -905,19 +995,19 @@ Calculated on TradeSafeBrokers.com`;
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">Commission (Round-Turn)</span>
+                    <span className="metric-label">{t('commission_cost')}</span>
                     <span className="metric-value">
                       {currentCurrency.symbol}{spreadResult.commissionCost}
                     </span>
-                    <span className="metric-note">Fixed execution fee</span>
+                    <span className="metric-note">Execution fee</span>
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">Spread Cost as % of Lot</span>
+                    <span className="metric-label">Spread % of Volume</span>
                     <span className="metric-value">
                       {((spreadResult.spreadCost / (tradeLots * currentInstrument.contractSize)) * 100).toFixed(4)}%
                     </span>
-                    <span className="metric-note">Drag on trade</span>
+                    <span className="metric-note">Transaction drag</span>
                   </div>
                 </div>
 
@@ -925,7 +1015,7 @@ Calculated on TradeSafeBrokers.com`;
                 <div className="calc-broker-benchmark-card">
                   <div className="matrix-title-row">
                     <Scale size={14} className="text-accent" />
-                    <span>Cost for {tradeLots} Lot on Top Regulated Brokers</span>
+                    <span>{t('top_broker_benchmarks')} ({tradeLots} Lot)</span>
                   </div>
                   <div className="benchmark-list">
                     {TOP_BROKER_SPREAD_BENCHMARKS.map((b) => {
@@ -957,7 +1047,7 @@ Calculated on TradeSafeBrokers.com`;
             {activeTab === 'pip-value' && (
               <>
                 <div className="calc-hero-result-banner">
-                  <span className="hero-result-eyebrow">Pip Value for {tradeLots} Lots</span>
+                  <span className="hero-result-eyebrow">{t('pip_matrix_title')} ({tradeLots} Lots)</span>
                   <div className="hero-result-big-number">
                     {currentCurrency.symbol}
                     {Number((pipValuesResult.standard * tradeLots).toFixed(2))}{' '}
@@ -977,14 +1067,14 @@ Calculated on TradeSafeBrokers.com`;
 
                 <div className="calc-pip-matrix-table">
                   <div className="pip-matrix-header">
-                    <span>Lot Tier</span>
+                    <span>{t('account_col')}</span>
                     <span>Volume</span>
                     <span>Pip Value ({accountCurrency})</span>
                   </div>
 
                   <div className="pip-matrix-row">
                     <div className="pip-tier-info">
-                      <strong>Standard Lot (1.0)</strong>
+                      <strong>{t('standard_lot_name')}</strong>
                       <span>100,000 units</span>
                     </div>
                     <span className="pip-tier-vol">1.0 Lot</span>
@@ -993,7 +1083,7 @@ Calculated on TradeSafeBrokers.com`;
 
                   <div className="pip-matrix-row">
                     <div className="pip-tier-info">
-                      <strong>Mini Lot (0.10)</strong>
+                      <strong>{t('mini_lot_name')}</strong>
                       <span>10,000 units</span>
                     </div>
                     <span className="pip-tier-vol">0.10 Lot</span>
@@ -1002,7 +1092,7 @@ Calculated on TradeSafeBrokers.com`;
 
                   <div className="pip-matrix-row">
                     <div className="pip-tier-info">
-                      <strong>Micro Lot (0.01)</strong>
+                      <strong>{t('micro_lot_name')}</strong>
                       <span>1,000 units</span>
                     </div>
                     <span className="pip-tier-vol">0.01 Lot</span>
@@ -1011,7 +1101,7 @@ Calculated on TradeSafeBrokers.com`;
 
                   <div className="pip-matrix-row highlight">
                     <div className="pip-tier-info">
-                      <strong>Your Custom Size ({tradeLots} Lots)</strong>
+                      <strong>Custom Size ({tradeLots} Lots)</strong>
                       <span>{(tradeLots * currentInstrument.contractSize).toLocaleString()} units</span>
                     </div>
                     <span className="pip-tier-vol">{tradeLots} Lots</span>
@@ -1028,7 +1118,7 @@ Calculated on TradeSafeBrokers.com`;
               <>
                 <div className={`calc-hero-result-banner ${pnlResult.isProfit ? 'profit' : 'loss'}`}>
                   <span className="hero-result-eyebrow">
-                    {pnlResult.isProfit ? 'Estimated Net Profit' : 'Estimated Net Loss'}
+                    {pnlResult.isProfit ? t('profit_badge') : t('loss_badge')}
                   </span>
                   <div className={`hero-result-big-number ${pnlResult.isProfit ? 'text-green' : 'text-red'}`}>
                     {pnlResult.isProfit ? '+' : ''}
@@ -1039,7 +1129,7 @@ Calculated on TradeSafeBrokers.com`;
 
                   <div className="hero-breakdown-subchips">
                     <span className="subchip">
-                      Price Delta: {pnlResult.pipsGained} Pips
+                      Delta: {pnlResult.pipsGained} Pips
                     </span>
                     <span className="subchip-dot">•</span>
                     <span className="subchip">
@@ -1050,7 +1140,7 @@ Calculated on TradeSafeBrokers.com`;
 
                 <div className="calc-metrics-grid">
                   <div className="calc-metric-box">
-                    <span className="metric-label">Pips Gained / Lost</span>
+                    <span className="metric-label">{t('pips_gained_label')}</span>
                     <span className={`metric-value ${pnlResult.isProfit ? 'text-green' : 'text-red'}`}>
                       {pnlResult.pipsGained > 0 ? `+${pnlResult.pipsGained}` : pnlResult.pipsGained} pips
                     </span>
@@ -1058,7 +1148,7 @@ Calculated on TradeSafeBrokers.com`;
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">Account Impact</span>
+                    <span className="metric-label">{t('roi_label')}</span>
                     <span className={`metric-value ${pnlResult.isProfit ? 'text-green' : 'text-red'}`}>
                       {pnlResult.roi > 0 ? `+${pnlResult.roi}%` : `${pnlResult.roi}%`}
                     </span>
@@ -1066,21 +1156,21 @@ Calculated on TradeSafeBrokers.com`;
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">New Account Balance</span>
+                    <span className="metric-label">New Equity</span>
                     <span className="metric-value">
                       {currentCurrency.symbol}
                       {Math.max(0, balance + pnlResult.cashPnL).toLocaleString()}
                     </span>
-                    <span className="metric-note">After closing trade</span>
+                    <span className="metric-note">After closing</span>
                   </div>
 
                   <div className="calc-metric-box">
-                    <span className="metric-label">Pip Multiplier</span>
+                    <span className="metric-label">Position Pip Worth</span>
                     <span className="metric-value">
                       {currentCurrency.symbol}
                       {Number((lotSizeResult.pipValuePerStandardLot * pnlLots).toFixed(2))}
                     </span>
-                    <span className="metric-note">Per single pip</span>
+                    <span className="metric-note">Per 1 pip move</span>
                   </div>
                 </div>
               </>
@@ -1094,11 +1184,11 @@ Calculated on TradeSafeBrokers.com`;
                 onClick={handleCopySummary}
               >
                 {copiedSummary ? <Check size={14} color="#10b981" /> : <Copy size={14} />}
-                <span>{copiedSummary ? 'Copied to Clipboard!' : 'Copy Trade Summary'}</span>
+                <span>{copiedSummary ? t('copied_toast') : t('copy_trade_plan')}</span>
               </button>
 
               <Link to="/compare" className="calc-btn-broker-compare">
-                <span>Compare Zero-Spread Brokers</span>
+                <span>{t('top_broker_benchmarks')}</span>
                 <ArrowRight size={14} />
               </Link>
             </div>
@@ -1110,7 +1200,7 @@ Calculated on TradeSafeBrokers.com`;
         {/* ══════════════════════════════════════════════════════════ */}
         <section className="calc-guide-section">
           <div className="calc-guide-header">
-            <h3>How Position Sizing &amp; Spread Calculations Work</h3>
+            <h3>{t('edu_guide_title')}</h3>
             <p>Essential mathematical formulas used by proprietary trading desks and institutional risk managers</p>
           </div>
 
@@ -1119,39 +1209,33 @@ Calculated on TradeSafeBrokers.com`;
               <div className="guide-icon-badge">
                 <Calculator size={18} />
               </div>
-              <h4>Position Sizing Formula</h4>
+              <h4>{t('edu_rule_2_title')}</h4>
               <p>
                 <code>Lot Size = Cash at Risk / (Stop Loss in Pips × Pip Value per Standard Lot)</code>
               </p>
-              <span className="guide-desc">
-                For example, risking $200 on EUR/USD with a 25 pip stop loss and $10/pip standard value yields exactly <strong>0.80 standard lots</strong>.
-              </span>
+              <span className="guide-desc">{t('edu_rule_2_desc')}</span>
             </div>
 
             <div className="guide-card">
               <div className="guide-icon-badge">
                 <Scale size={18} />
               </div>
-              <h4>Spread Cost Calculation</h4>
+              <h4>{t('edu_rule_3_title')}</h4>
               <p>
                 <code>Spread Cost = Spread (Pips) × Pip Value × Number of Lots</code>
               </p>
-              <span className="guide-desc">
-                A 1.5 pip spread on 2.0 lots costs <strong>$30.00</strong> upfront. Choosing an ECN broker with 0.1 pip spread saves over <strong>$28.00 per trade</strong>.
-              </span>
+              <span className="guide-desc">{t('edu_rule_3_desc')}</span>
             </div>
 
             <div className="guide-card">
               <div className="guide-icon-badge">
                 <ShieldCheck size={18} />
               </div>
-              <h4>The 1% - 2% Risk Rule</h4>
+              <h4>{t('edu_rule_1_title')}</h4>
               <p>
                 <code>Risk per trade ≤ 1.0% to 2.0% of Total Equity</code>
               </p>
-              <span className="guide-desc">
-                Adhering to strict position sizing ensures that a sequence of 10 consecutive drawdown trades degrades less than 15% of your total trading capital.
-              </span>
+              <span className="guide-desc">{t('edu_rule_1_desc')}</span>
             </div>
           </div>
         </section>

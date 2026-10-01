@@ -30,6 +30,8 @@ import { useToast } from './toast/ToastContext.jsx';
 import KycModal from '../../kyc/components/KycModal.jsx';
 import UserNewsModal from '../../news/components/UserNewsModal.jsx';
 import VerifiedGoldBadge from './VerifiedGoldBadge.jsx';
+import LanguageSelector from './LanguageSelector.jsx';
+import useLanguage from '../context/LanguageContext.jsx';
 import './NavProfileDropdown.css';
 
 const bouncySpring = {
@@ -40,12 +42,12 @@ const bouncySpring = {
 };
 
 const NAV_LINKS = [
-  { label: 'Brokers', href: '/brokers', Icon: Building2 },
-  { label: 'Comparisons', href: '/compare', Icon: SlidersHorizontal },
-  { label: 'Write a Review', isReviewAction: true, Icon: Star },
-  { label: 'Join as Broker', href: '/join-broker', Icon: Briefcase, badge: 'Partner' },
-  { label: 'News', href: '/news', Icon: Newspaper },
-  { label: 'Calculator', href: '/calculator', Icon: Calculator },
+  { key: 'nav_brokers', label: 'Brokers', href: '/brokers', Icon: Building2 },
+  { key: 'nav_compare', label: 'Comparisons', href: '/compare', Icon: SlidersHorizontal },
+  { key: 'nav_review', label: 'Write a Review', isReviewAction: true, Icon: Star },
+  { key: 'nav_join_broker', label: 'Join as Broker', href: '/join-broker', Icon: Briefcase, badge: 'Partner' },
+  { key: 'nav_news', label: 'News', href: '/news', Icon: Newspaper },
+  { key: 'nav_calculator', label: 'Calculator', href: '/calculator', Icon: Calculator },
 ];
 
 const DockNavLink = React.memo(({ link, mouseX }) => {
@@ -454,21 +456,28 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
     setWaveKey((prev) => prev + 1);
   };
 
-  const navLinks = NAV_LINKS;
+  const { t } = useLanguage();
+
+  const navLinks = useMemo(() => {
+    return NAV_LINKS.map((link) => ({
+      ...link,
+      label: t(link.key, link.label),
+    }));
+  }, [t]);
 
   const hasUser = Boolean(isAuthenticated);
   const baseMaxWidth = hasUser
-    ? (isScrolled ? 1190 : 1240)
-    : (isScrolled ? 1090 : 1170);
-  const hoveredMaxWidth = hasUser
     ? (isScrolled ? 1230 : 1280)
-    : (isScrolled ? 1140 : 1210);
+    : (isScrolled ? 1130 : 1210);
+  const hoveredMaxWidth = hasUser
+    ? (isScrolled ? 1270 : 1320)
+    : (isScrolled ? 1180 : 1250);
   const searchMaxWidth = hasUser
-    ? (isScrolled ? 1280 : 1330)
-    : (isScrolled ? 1190 : 1260);
-  const searchHoverMaxWidth = hasUser
     ? (isScrolled ? 1320 : 1370)
     : (isScrolled ? 1230 : 1300);
+  const searchHoverMaxWidth = hasUser
+    ? (isScrolled ? 1360 : 1410)
+    : (isScrolled ? 1270 : 1340);
 
   // When search is open, navbar maxWidth MUST be completely stable and never oscillate on hover
   const targetMaxWidth = searchOpen
@@ -642,7 +651,7 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                   ref={searchInputRef}
                   type="text"
                   className="pipwise-inline-search-input"
-                  placeholder="Search broker to review..."
+                  placeholder={t('nav_search_placeholder', 'Search brokers, licenses...')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
@@ -926,7 +935,10 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
             )}
           </button>
 
-          {/* Auth block moved outside the main navbar */}
+          {/* Language Selector Dropdown */}
+          <div className={`nav-lang-picker-wrap ${searchOpen ? 'is-search-hidden' : ''}`}>
+            <LanguageSelector variant="compact" />
+          </div>
 
           {/* Mobile Menu Toggle Button */}
           <button
@@ -1301,6 +1313,26 @@ const Nav = ({ theme, toggleTheme, heroComplete = false }) => {
                   </Link>
                 );
               })}
+            </div>
+
+            {/* Language Selector in Mobile Drawer */}
+            <div
+              className="mobile-menu-lang-row"
+              style={{
+                padding: '10px 16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: '10px',
+                margin: '8px 12px',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+              }}
+            >
+              <span style={{ fontSize: '0.84rem', color: 'rgba(255, 255, 255, 0.75)', fontWeight: 500 }}>
+                🌐 Language / اللغة / Язык
+              </span>
+              <LanguageSelector />
             </div>
 
             <div className="mobile-menu-divider" />

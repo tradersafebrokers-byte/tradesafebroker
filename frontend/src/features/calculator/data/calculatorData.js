@@ -23,9 +23,9 @@ export const POPULAR_INSTRUMENTS = [
   { id: 'AUDJPY', symbol: 'AUD/JPY', name: 'Australian Dollar / Japanese Yen', category: 'Forex Crosses', base: 'AUD', quote: 'JPY', pipSize: 0.01, contractSize: 100000, defaultRate: 102.90, typicalSpread: 1.5, flag: '🇦🇺/🇯🇵' },
 
   // Commodities & Metals
-  { id: 'XAUUSD', symbol: 'XAU/USD (Gold)', name: 'Spot Gold / US Dollar', category: 'Metals & Commodities', base: 'XAU', quote: 'USD', pipSize: 0.01, contractSize: 100, defaultRate: 2388.50, typicalSpread: 1.5, flag: '🥇/🇺🇸' },
-  { id: 'XAGUSD', symbol: 'XAG/USD (Silver)', name: 'Spot Silver / US Dollar', category: 'Metals & Commodities', base: 'XAG', quote: 'USD', pipSize: 0.001, contractSize: 5000, defaultRate: 30.80, typicalSpread: 2.0, flag: '🥈/🇺🇸' },
-  { id: 'USOIL', symbol: 'USOIL (Crude)', name: 'WTI Light Sweet Crude Oil', category: 'Metals & Commodities', base: 'OIL', quote: 'USD', pipSize: 0.01, contractSize: 1000, defaultRate: 81.40, typicalSpread: 2.5, flag: '🛢️/🇺🇸' },
+  { id: 'XAUUSD', symbol: 'XAU/USD (Gold)', name: 'Spot Gold / US Dollar', category: 'Metals & Commodities', base: 'XAU', quote: 'USD', pipSize: 0.01, contractSize: 100, defaultRate: 2658.50, typicalSpread: 1.5, flag: '🥇/🇺🇸' },
+  { id: 'XAGUSD', symbol: 'XAG/USD (Silver)', name: 'Spot Silver / US Dollar', category: 'Metals & Commodities', base: 'XAG', quote: 'USD', pipSize: 0.001, contractSize: 5000, defaultRate: 31.45, typicalSpread: 2.0, flag: '🥈/🇺🇸' },
+  { id: 'USOIL', symbol: 'USOIL (Crude)', name: 'WTI Light Sweet Crude Oil', category: 'Metals & Commodities', base: 'OIL', quote: 'USD', pipSize: 0.01, contractSize: 1000, defaultRate: 74.20, typicalSpread: 2.5, flag: '🛢️/🇺🇸' },
 
   // Crypto
   { id: 'BTCUSD', symbol: 'BTC/USD', name: 'Bitcoin / US Dollar', category: 'Crypto', base: 'BTC', quote: 'USD', pipSize: 1.0, contractSize: 1, defaultRate: 67800.00, typicalSpread: 12.0, flag: '₿/🇺🇸' },

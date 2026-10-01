@@ -32,14 +32,62 @@ export const DEFAULT_MARKET_RATES = {
   JPYINR: 0.5395,
 
   // Commodities & Precious Metals
-  XAUUSD: 2388.50, // Gold
-  XAGUSD: 30.80,   // Silver
-  USOIL: 81.40,    // WTI Crude Oil
+  XAUUSD: 2658.50, // Real-time Spot Gold (Benchmark)
+  XAGUSD: 31.45,   // Silver
+  USOIL: 74.20,    // WTI Crude Oil
 
   // Crypto
-  BTCUSD: 67800.00,
-  ETHUSD: 3520.00,
+  BTCUSD: 66500.00,
+  ETHUSD: 2640.00,
 };
+
+// In-memory live rates cache
+let cachedLiveRates = { ...DEFAULT_MARKET_RATES };
+let lastRateFetchTime = 0;
+
+async function refreshLiveRatesIfStale() {
+  const now = Date.now();
+  // Cache for 60 seconds
+  if (now - lastRateFetchTime < 60000) {
+    return cachedLiveRates;
+  }
+
+  try {
+    // Attempt fetching live FX rates from open endpoint if online
+    const fxRes = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(3000) });
+    if (fxRes.ok) {
+      const data = await fxRes.json();
+      if (data?.rates) {
+        if (data.rates.EUR) cachedLiveRates.EURUSD = Number((1 / data.rates.EUR).toFixed(4));
+        if (data.rates.GBP) cachedLiveRates.GBPUSD = Number((1 / data.rates.GBP).toFixed(4));
+        if (data.rates.JPY) cachedLiveRates.USDJPY = Number(data.rates.JPY.toFixed(2));
+        if (data.rates.CHF) cachedLiveRates.USDCHF = Number(data.rates.CHF.toFixed(4));
+        if (data.rates.AUD) cachedLiveRates.AUDUSD = Number((1 / data.rates.AUD).toFixed(4));
+        if (data.rates.CAD) cachedLiveRates.USDCAD = Number(data.rates.CAD.toFixed(4));
+        if (data.rates.INR) cachedLiveRates.USDINR = Number(data.rates.INR.toFixed(2));
+      }
+    }
+  } catch {
+    // Silently continue if network unavailable
+  }
+
+  try {
+    // Attempt fetching live Gold Spot price (XAU / PAXG)
+    const goldRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT', { signal: AbortSignal.timeout(3000) });
+    if (goldRes.ok) {
+      const goldData = await goldRes.json();
+      const goldPrice = parseFloat(goldData.price);
+      if (goldPrice > 1000 && goldPrice < 10000) {
+        cachedLiveRates.XAUUSD = Number(goldPrice.toFixed(2));
+      }
+    }
+  } catch {
+    // Silently continue
+  }
+
+  lastRateFetchTime = now;
+  return cachedLiveRates;
+}
 
 // Instrument Metadata (Contract Size, Pip/Tick size, Decimals, Asset Class)
 export const INSTRUMENTS_DATA = {
@@ -137,11 +185,13 @@ export const calculatePipValuePerStandardLot = (pairKey, accountCurrency = 'USD'
  * @access  Public
  */
 export const getCalculatorRates = asyncHandler(async (req, res) => {
+  const currentRates = await refreshLiveRatesIfStale();
+
   return res.status(200).json(
     new ApiResponse(
       200,
       {
-        rates: DEFAULT_MARKET_RATES,
+        rates: currentRates,
         instruments: INSTRUMENTS_DATA,
         accountCurrencies: ACCOUNT_CURRENCIES,
         timestamp: new Date().toISOString(),
