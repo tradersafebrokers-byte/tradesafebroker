@@ -15,6 +15,7 @@ export const POPULAR_INSTRUMENTS = [
   { id: 'EURINR', symbol: 'EUR/INR', name: 'Euro / Indian Rupee', category: 'INR Pairs', base: 'EUR', quote: 'INR', pipSize: 0.0025, contractSize: 100000, defaultRate: 90.75, typicalSpread: 2.2, flag: '🇪🇺/🇮🇳' },
   { id: 'GBPINR', symbol: 'GBP/INR', name: 'British Pound / Indian Rupee', category: 'INR Pairs', base: 'GBP', quote: 'INR', pipSize: 0.0025, contractSize: 100000, defaultRate: 107.65, typicalSpread: 2.8, flag: '🇬🇧/🇮🇳' },
   { id: 'JPYINR', symbol: 'JPY/INR', name: 'Japanese Yen / Indian Rupee', category: 'INR Pairs', base: 'JPY', quote: 'INR', pipSize: 0.0025, contractSize: 100000, defaultRate: 0.5395, typicalSpread: 2.0, flag: '🇯🇵/🇮🇳' },
+  { id: 'XAUINR', symbol: 'XAU/INR (Gold INR)', name: 'Spot Gold / Indian Rupee (₹/oz)', category: 'INR Pairs', base: 'XAU', quote: 'INR', pipSize: 1.0, contractSize: 100, defaultRate: 222050.00, typicalSpread: 50.0, flag: '🥇/🇮🇳' },
 
   // Forex Crosses
   { id: 'EURGBP', symbol: 'EUR/GBP', name: 'Euro / British Pound', category: 'Forex Crosses', base: 'EUR', quote: 'GBP', pipSize: 0.0001, contractSize: 100000, defaultRate: 0.8430, typicalSpread: 1.2, flag: '🇪🇺/🇬🇧' },

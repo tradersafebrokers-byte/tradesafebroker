@@ -30,6 +30,7 @@ export const DEFAULT_MARKET_RATES = {
   EURINR: 90.75,
   GBPINR: 107.65,
   JPYINR: 0.5395,
+  XAUINR: 222050.00, // Spot Gold in INR (per Ounce)
 
   // Commodities & Precious Metals
   XAUUSD: 2658.50, // Real-time Spot Gold (Benchmark)
@@ -114,6 +115,7 @@ export const INSTRUMENTS_DATA = {
   EURINR: { name: 'EUR/INR', category: 'inr', base: 'EUR', quote: 'INR', contractSize: 100000, pipSize: 0.0025, typicalSpread: 2.2 },
   GBPINR: { name: 'GBP/INR', category: 'inr', base: 'GBP', quote: 'INR', contractSize: 100000, pipSize: 0.0025, typicalSpread: 2.8 },
   JPYINR: { name: 'JPY/INR', category: 'inr', base: 'JPY', quote: 'INR', contractSize: 100000, pipSize: 0.0025, typicalSpread: 2.0 },
+  XAUINR: { name: 'Gold / INR (XAU/INR)', category: 'inr', base: 'XAU', quote: 'INR', contractSize: 100, pipSize: 1.0, typicalSpread: 50.0 },
 
   XAUUSD: { name: 'Gold (XAU/USD)', category: 'metals', base: 'XAU', quote: 'USD', contractSize: 100, pipSize: 0.01, typicalSpread: 1.5 },
   XAGUSD: { name: 'Silver (XAG/USD)', category: 'metals', base: 'XAG', quote: 'USD', contractSize: 5000, pipSize: 0.001, typicalSpread: 2.0 },
