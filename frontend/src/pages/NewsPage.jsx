@@ -22,6 +22,7 @@ import UserNewsModal from '../features/news/components/UserNewsModal.jsx';
 import newsService, { FALLBACK_NEWS, FALLBACK_BREAKING_TICKER } from '../features/news/services/news.service.js';
 import { useToast } from '../features/shared/components/toast/ToastContext.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
+import { useLanguage } from '../features/shared/context/LanguageContext.jsx';
 import './NewsPage.css';
 
 const CATEGORIES = [
@@ -70,6 +71,7 @@ const getCategoryLabel = (catId) => {
 };
 
 export const NewsPage = ({ theme = 'dark' }) => {
+  const { t } = useLanguage();
   const { slug } = useParams();
   const { showToast } = useToast();
   const { user, isAuthenticated } = useAuth();
@@ -82,6 +84,16 @@ export const NewsPage = ({ theme = 'dark' }) => {
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [activeArticleModal, setActiveArticleModal] = useState(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  const categories = useMemo(() => [
+    { id: 'all', label: t('news_cat_all', 'All Intelligence'), icon: Globe },
+    { id: 'forex', label: t('news_cat_forex', 'Forex & Currencies'), icon: TrendingUp },
+    { id: 'indian-market', label: 'Indian Market & RBI', icon: Sparkles },
+    { id: 'crypto', label: t('news_cat_crypto', 'Crypto & Bitcoin'), icon: Radio },
+    { id: 'global', label: t('news_cat_global', 'Global Macro'), icon: Globe },
+    { id: 'commodities', label: t('news_cat_commodities', 'Gold & Commodities'), icon: TrendingUp },
+    { id: 'brokers', label: t('news_cat_brokers', 'Broker Analyses'), icon: Newspaper },
+  ], [t]);
 
   // Auto-open article modal if URL contains :slug
   useEffect(() => {
@@ -174,7 +186,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
       <div className="news-ticker-container">
         <div className="news-ticker-badge">
           <span className="ticker-pulse-dot" />
-          <span className="ticker-badge-text">LIVE WIRE</span>
+          <span className="ticker-badge-text">{t('news_live_wire', 'LIVE WIRE')}</span>
         </div>
         <div className="news-ticker-track-wrapper">
           <div className="news-ticker-track">
@@ -196,16 +208,15 @@ export const NewsPage = ({ theme = 'dark' }) => {
         <div className="news-hero-content">
           <div className="news-badge-pill">
             <Radio size={14} className="badge-pulse-icon" />
-            <span>24/7 Global &amp; Indian Financial Feed</span>
+            <span>{t('news_badge', '24/7 Global Financial Feed')}</span>
           </div>
 
           <h1 className="news-hero-title">
-            Live Market Intelligence <span className="news-green-accent">&amp; News</span>
+            {t('news_title', 'Live Market Intelligence & News')}
           </h1>
 
           <p className="news-hero-subtitle">
-            Institutional macro analysis, real-time RBI &amp; Indian market updates, Bitcoin dynamics,
-            and independent forex broker research.
+            {t('news_subtitle', 'Institutional macro analysis, central bank updates, Bitcoin dynamics, and independent forex broker research.')}
           </p>
 
           {/* Quick Refresh & Status Pill */}
@@ -220,7 +231,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
               title="Pull latest live market stories"
             >
               <RefreshCw size={13} />
-              <span>{refreshing ? 'Refreshing...' : 'Refresh Now'}</span>
+              <span>{refreshing ? t('news_refreshing', 'Refreshing...') : t('news_refresh_btn', 'Refresh Now')}</span>
             </button>
             <button
               className="news-btn-create-post"
@@ -234,7 +245,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
               title="Share market analysis, price breakdown, or news"
             >
               <PenSquare size={13} />
-              <span>Post Analysis / News</span>
+              <span>{t('news_post_analysis', 'Post Analysis / News')}</span>
             </button>
           </div>
         </div>
@@ -247,7 +258,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
         <div className="news-control-bar">
           {/* Category Filter Pills */}
           <div className="news-category-scroll">
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const Icon = cat.icon;
               const isActive = selectedCategory === cat.id;
               return (

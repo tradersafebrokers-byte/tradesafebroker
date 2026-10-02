@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import InteractiveDotGrid from '../features/shared/components/InteractiveDotGrid';
@@ -9,117 +9,112 @@ import BrokerComparisonBanner from '../features/shared/components/BrokerComparis
 import Testimonials from '../features/shared/components/Testimonials';
 import Footer from '../features/shared/components/Footer';
 import useLiveMarketData from '../features/shared/hooks/useLiveMarketData.js';
-
-const titleLines = [
-  { words: ['Find', 'the', 'Best'] },
-  { words: ['Forex', 'Broker'] },
-  { words: ['for', 'a', 'Smarter'], accentIndexStart: 2 },
-  { words: ['Tomorrow'], accentIndexStart: 0 },
-];
-
-const descText = 'Unbiased broker reviews, real spread monitoring, and tier-1 regulatory verification to safeguard your trading capital.';
+import useLanguage from '../features/shared/context/LanguageContext.jsx';
 
 // Reusable Transparency Card Component (used in desktop right column and mobile hero)
-const TransparencyCard = React.memo(() => (
-  <div className="transparency-card">
-    <h3 className="transparency-title">
-      100% Transparent
-      <br />
-      Review System
-    </h3>
-    <div className="green-accent-line" />
+const TransparencyCard = React.memo(() => {
+  const { t } = useLanguage();
+  return (
+    <div className="transparency-card">
+      <h3 className="transparency-title">
+        {t('transparency_title_1', '100% Transparent')}
+        <br />
+        {t('transparency_title_2', 'Review System')}
+      </h3>
+      <div className="green-accent-line" />
 
-    <div className="transparency-points">
-      <div className="transparency-point">
-        <svg
-          className="transparency-check-svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--brand-green)"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        <span>Zero Paid Broker Rankings</span>
+      <div className="transparency-points">
+        <div className="transparency-point">
+          <svg
+            className="transparency-check-svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--brand-green)"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span>{t('transparency_point_1', 'Zero Paid Broker Rankings')}</span>
+        </div>
+        <div className="transparency-point">
+          <svg
+            className="transparency-check-svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--brand-green)"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span>{t('transparency_point_2', 'Verified Withdrawal Proof')}</span>
+        </div>
+        <div className="transparency-point">
+          <svg
+            className="transparency-check-svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--brand-green)"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span>{t('transparency_point_3', 'Tier-1 Regulation Checked')}</span>
+        </div>
+        <div className="transparency-point">
+          <svg
+            className="transparency-check-svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--brand-green)"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span>{t('transparency_point_4', 'Live Execution Spreads')}</span>
+        </div>
       </div>
-      <div className="transparency-point">
-        <svg
-          className="transparency-check-svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--brand-green)"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        <span>Verified Withdrawal Proof</span>
-      </div>
-      <div className="transparency-point">
-        <svg
-          className="transparency-check-svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--brand-green)"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        <span>Tier-1 Regulation Checked</span>
-      </div>
-      <div className="transparency-point">
-        <svg
-          className="transparency-check-svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--brand-green)"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        <span>Live Execution Spreads</span>
+
+      {/* Social Proof Avatars */}
+      <div className="social-proof-section">
+        <div className="avatar-stack-group">
+          <img
+            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+            alt="Trader"
+            className="trader-avatar"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
+            alt="Trader"
+            className="trader-avatar"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
+            alt="Trader"
+            className="trader-avatar"
+          />
+          <span className="avatar-badge-count">+45k</span>
+        </div>
+        <span className="social-proof-text">{t('social_proof_traders_joined', 'Traders joined this month')}</span>
       </div>
     </div>
-
-    {/* Social Proof Avatars */}
-    <div className="social-proof-section">
-      <div className="avatar-stack-group">
-        <img
-          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-          alt="Trader"
-          className="trader-avatar"
-        />
-        <img
-          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80"
-          alt="Trader"
-          className="trader-avatar"
-        />
-        <img
-          src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80"
-          alt="Trader"
-          className="trader-avatar"
-        />
-        <span className="avatar-badge-count">+45k</span>
-      </div>
-      <span className="social-proof-text">Traders joined this month</span>
-    </div>
-  </div>
-));
+  );
+});
 
 // Generate smooth cubic bezier SVG path for real-time market sparklines
 const generateSparklinePath = (points, width = 160, height = 36) => {
@@ -149,8 +144,18 @@ const generateSparklinePath = (points, width = 160, height = 36) => {
 };
 
 const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
+  const { t } = useLanguage();
   const { btc, gold } = useLiveMarketData();
   const [complete, setComplete] = useState(heroComplete);
+
+  const titleLines = useMemo(() => [
+    { words: t('hero_title_1', 'Find the Best').split(' ') },
+    { words: t('hero_title_2', 'Forex Broker').split(' ') },
+    { words: t('hero_title_3', 'for a Smarter').split(' '), accentIndexStart: 2 },
+    { words: t('hero_title_4', 'Tomorrow').split(' '), accentIndexStart: 0 },
+  ], [t]);
+
+  const descText = t('hero_desc', 'Unbiased broker reviews, real spread monitoring, and tier-1 regulatory verification to safeguard your trading capital.');
 
   useEffect(() => {
     if (heroComplete) {
@@ -166,6 +171,9 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
 
   let runningChar = 0;
   let runningDescChar = 0;
+
+  const exploreBrokersLabel = t('cta_explore_brokers', 'Explore Brokers');
+  const compareAllLabel = t('cta_compare_all', 'Compare All');
 
   return (
     <main className="pipwise-home-page">
@@ -184,7 +192,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
           <div className="pipwise-hero-grid">
             {/* Left Column: Headline, Description, CTAs, Mobile Transparency Card, Stats */}
             <div className="pipwise-hero-left">
-              <span className="pipwise-hero-eyebrow">VERIFIED BROKER DIRECTORY</span>
+              <span className="pipwise-hero-eyebrow">{t('hero_eyebrow', 'VERIFIED BROKER DIRECTORY')}</span>
 
               <h1 className="pipwise-hero-title">
                 {titleLines.map((line, lIdx) => (
@@ -255,9 +263,9 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                 <Link to="/brokers" className="pipwise-btn-primary">
                   <span className="login-wave-text">
                     {heroComplete ? (
-                      <span>Explore Brokers</span>
+                      <span>{exploreBrokersLabel}</span>
                     ) : (
-                      'Explore Brokers'.split('').map((c, i) => (
+                      exploreBrokersLabel.split('').map((c, i) => (
                         <span key={i} className="wave-letter" style={{ animationDelay: `${i * 0.02}s` }}>
                           {c === ' ' ? '\u00A0' : c}
                         </span>
@@ -283,9 +291,9 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                 <Link to="/compare" className="pipwise-btn-secondary">
                   <span className="login-wave-text">
                     {heroComplete ? (
-                      <span>Compare All</span>
+                      <span>{compareAllLabel}</span>
                     ) : (
-                      'Compare All'.split('').map((c, i) => (
+                      compareAllLabel.split('').map((c, i) => (
                         <span key={i} className="wave-letter" style={{ animationDelay: `${i * 0.02}s` }}>
                           {c === ' ' ? '\u00A0' : c}
                         </span>
@@ -304,7 +312,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                       <div className="market-pair-title-row">
                         <span className="market-pair-title">{btc.symbol}</span>
                         <span className="market-live-pill" title="Live Real-time Crypto Feed">
-                          <span className="market-live-dot" /> LIVE
+                          <span className="market-live-dot" /> {t('market_live', 'LIVE')}
                         </span>
                       </div>
                       <Link to="/news" className="market-arrow-btn" title="View live crypto & trading news for BTC">↗</Link>
@@ -313,7 +321,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                       ${btc.price}
                     </div>
                     <div className={`market-change-badge ${btc.isPositive ? "positive" : "negative"}`}>
-                      {btc.change}% Today
+                      {btc.change}% {t('market_today', 'Today')}
                     </div>
                     <svg className="sparkline-svg" viewBox="0 0 160 38" fill="none">
                       <path
@@ -331,7 +339,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                       <div className="market-pair-title-row">
                         <span className="market-pair-title">{gold.symbol}</span>
                         <span className="market-live-pill" title="Live Real-time Spot Feed">
-                          <span className="market-live-dot" /> LIVE
+                          <span className="market-live-dot" /> {t('market_live', 'LIVE')}
                         </span>
                       </div>
                       <Link to="/compare" className="market-arrow-btn" title="Compare broker spreads & execution for Gold">↗</Link>
@@ -340,7 +348,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                       {gold.price}
                     </div>
                     <div className={`market-change-badge ${gold.isPositive ? "positive" : "negative"}`}>
-                      {gold.change}% Today
+                      {gold.change}% {t('market_today', 'Today')}
                     </div>
                     <svg className="sparkline-svg" viewBox="0 0 180 38" fill="none">
                       <path
@@ -358,22 +366,22 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   <div className="mobile-location-badge">
                     <span className="location-pin-dot active" />
                     <div className="location-info">
-                      <span className="location-city">Tokyo</span>
-                      <span className="location-desc">TSE Active</span>
+                      <span className="location-city">{t('market_tokyo', 'Tokyo')}</span>
+                      <span className="location-desc">TSE {t('market_active', 'Active')}</span>
                     </div>
                   </div>
                   <div className="mobile-location-badge">
                     <span className="location-pin-dot active" />
                     <div className="location-info">
-                      <span className="location-city">London</span>
-                      <span className="location-desc">LSE Active</span>
+                      <span className="location-city">{t('market_london', 'London')}</span>
+                      <span className="location-desc">LSE {t('market_active', 'Active')}</span>
                     </div>
                   </div>
                   <div className="mobile-location-badge">
                     <span className="location-pin-dot" />
                     <div className="location-info">
-                      <span className="location-city">New York</span>
-                      <span className="location-desc">NYSE Active</span>
+                      <span className="location-city">{t('market_new_york', 'New York')}</span>
+                      <span className="location-desc">NYSE {t('market_active', 'Active')}</span>
                     </div>
                   </div>
                 </div>
@@ -394,10 +402,10 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                     </svg>
                   </div>
                   <div className="stat-content">
-                    <span className="stat-value">450+</span>
+                    <span className="stat-value">{t('stat_brokers_count', '450+')}</span>
                     <span className="stat-label">
-                      <span>Brokers</span>
-                      <span>Reviewed</span>
+                      <span>{t('stat_brokers_label_1', 'Brokers')}</span>
+                      <span>{t('stat_brokers_label_2', 'Reviewed')}</span>
                     </span>
                   </div>
                 </div>
@@ -411,8 +419,8 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   <div className="stat-content">
                     <span className="stat-value">100%</span>
                     <span className="stat-label">
-                      <span>Free &amp;</span>
-                      <span>Unbiased</span>
+                      <span>{t('stat_unbiased_label_1', 'Free &')}</span>
+                      <span>{t('stat_unbiased_label_2', 'Unbiased')}</span>
                     </span>
                   </div>
                 </div>
@@ -426,8 +434,8 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   <div className="stat-content">
                     <span className="stat-value">4.9/5</span>
                     <span className="stat-label">
-                      <span>User</span>
-                      <span>Rating</span>
+                      <span>{t('stat_rating_label_1', 'User')}</span>
+                      <span>{t('stat_rating_label_2', 'Rating')}</span>
                     </span>
                   </div>
                 </div>
@@ -441,8 +449,8 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                   <div className="stat-content">
                     <span className="stat-value">24/7</span>
                     <span className="stat-label">
-                      <span>Live</span>
-                      <span>Spreads</span>
+                      <span>{t('stat_spreads_label_1', 'Live')}</span>
+                      <span>{t('stat_spreads_label_2', 'Spreads')}</span>
                     </span>
                   </div>
                 </div>
@@ -467,7 +475,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                 {/* Handwritten Annotation & Arrow */}
                 <div className="handwritten-annotation">
                   <span className="handwritten-text">
-                    Trusted by 50,000+ traders
+                    {t('globe_trusted_by', 'Trusted by 50,000+ traders')}
                     <span className="handwriting-cursor" />
                   </span>
                   <svg
@@ -489,7 +497,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                     <div className="market-pair-title-row">
                       <span className="market-pair-title">{btc.symbol}</span>
                       <span className="market-live-pill" title="Live Real-time Crypto Feed">
-                        <span className="market-live-dot" /> LIVE
+                        <span className="market-live-dot" /> {t('market_live', 'LIVE')}
                       </span>
                     </div>
                     <Link to="/news" className="market-arrow-btn" title="View live crypto & trading news for BTC">↗</Link>
@@ -498,7 +506,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                     ${btc.price}
                   </div>
                   <div className={`market-change-badge ${btc.isPositive ? "positive" : "negative"}`}>
-                    {btc.change}% Today
+                    {btc.change}% {t('market_today', 'Today')}
                   </div>
                   <svg className="sparkline-svg" viewBox="0 0 160 38" fill="none">
                     <path
@@ -516,7 +524,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                     <div className="market-pair-title-row">
                       <span className="market-pair-title">{gold.symbol}</span>
                       <span className="market-live-pill" title="Live Real-time Spot Feed">
-                        <span className="market-live-dot" /> LIVE
+                        <span className="market-live-dot" /> {t('market_live', 'LIVE')}
                       </span>
                     </div>
                     <Link to="/compare" className="market-arrow-btn" title="Compare broker spreads & execution for Gold">↗</Link>
@@ -525,7 +533,7 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                     {gold.price}
                   </div>
                   <div className={`market-change-badge ${gold.isPositive ? "positive" : "negative"}`}>
-                    {gold.change}% Today
+                    {gold.change}% {t('market_today', 'Today')}
                   </div>
                   <svg className="sparkline-svg" viewBox="0 0 180 38" fill="none">
                     <path
@@ -541,24 +549,24 @@ const Home = ({ theme = 'dark', heroComplete = false, onTitleComplete }) => {
                 <div className="globe-location-badge badge-london">
                   <span className="location-pin-icon">●</span>
                   <div className="location-info">
-                    <span className="location-city">London</span>
-                    <span className="location-desc">LSE Active</span>
+                    <span className="location-city">{t('market_london', 'London')}</span>
+                    <span className="location-desc">LSE {t('market_active', 'Active')}</span>
                   </div>
                 </div>
 
                 <div className="globe-location-badge badge-tokyo">
                   <span className="location-pin-icon">●</span>
                   <div className="location-info">
-                    <span className="location-city">Tokyo</span>
-                    <span className="location-desc">TSE Active</span>
+                    <span className="location-city">{t('market_tokyo', 'Tokyo')}</span>
+                    <span className="location-desc">TSE {t('market_active', 'Active')}</span>
                   </div>
                 </div>
 
                 <div className="globe-location-badge badge-sydney">
                   <span className="location-pin-icon">●</span>
                   <div className="location-info">
-                    <span className="location-city">Sydney</span>
-                    <span className="location-desc">ASX Active</span>
+                    <span className="location-city">{t('market_sydney', 'Sydney')}</span>
+                    <span className="location-desc">ASX {t('market_active', 'Active')}</span>
                   </div>
                 </div>
               </div>

@@ -31,6 +31,7 @@ import { useBrokers } from '../features/brokers/hooks/useBrokers.js';
 import { BrokerLogo } from '../features/brokers/components/BrokerLogo.jsx';
 import { useToast } from '../features/shared/components/toast/ToastContext.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
+import { useLanguage } from '../features/shared/context/LanguageContext.jsx';
 import './CompareBrokers.css';
 
 // Predefined quick-comparison presets
@@ -66,6 +67,7 @@ const PRESETS = [
 ];
 
 export const CompareBrokers = React.memo(({ theme = 'dark' }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -585,31 +587,31 @@ export const CompareBrokers = React.memo(({ theme = 'dark' }) => {
       <main className="compare-page-container">
         {/* Breadcrumb Navigation */}
         <nav className="compare-breadcrumb" aria-label="Breadcrumb">
-          <Link to="/" className="breadcrumb-item">Home</Link>
+          <Link to="/" className="breadcrumb-item">{t('breadcrumb_home', 'Home')}</Link>
           <span className="breadcrumb-sep">/</span>
-          <Link to="/brokers" className="breadcrumb-item">Brokers</Link>
+          <Link to="/brokers" className="breadcrumb-item">{t('nav_brokers', 'Brokers')}</Link>
           <span className="breadcrumb-sep">/</span>
-          <span className="breadcrumb-current">Broker Comparison Matrix</span>
+          <span className="breadcrumb-current">{t('compare_breadcrumb_matrix', 'Broker Comparison Matrix')}</span>
         </nav>
 
         {/* Hero Header Area (Clean, Minimal, High-Fidelity) */}
         <header className="compare-header">
           <div className="compare-header-badge">
             <Scale size={13} className="header-badge-icon" />
-            <span>Interactive Broker Matrix</span>
+            <span>{t('compare_header_badge', 'Interactive Broker Matrix')}</span>
           </div>
 
           <h1 className="compare-main-title">
-            Compare Top Forex Brokers Side-by-Side
+            {t('compare_main_title', 'Compare Top Forex Brokers Side-by-Side')}
           </h1>
 
           <p className="compare-subtitle">
-            Evaluate spreads, verified UPI payouts, regulatory security, and trading terms in a clean, minimal side-by-side view.
+            {t('compare_subtitle', 'Evaluate spreads, verified UPI payouts, regulatory security, and trading terms in a clean, minimal side-by-side view.')}
           </p>
 
           {/* Quick Comparison Presets Bar */}
           <div className="compare-presets-bar">
-            <span className="presets-label">Popular Presets:</span>
+            <span className="presets-label">{t('compare_presets_label', 'Popular Presets:')}</span>
             <div className="presets-chips">
               {PRESETS.map((preset) => {
                 const isActive =
@@ -644,7 +646,7 @@ export const CompareBrokers = React.memo(({ theme = 'dark' }) => {
                 />
                 <span className="diff-toggle-slider" />
                 <span className="diff-toggle-text">
-                  Show Differences Only
+                  {t('compare_diff_only', 'Show Differences Only')}
                 </span>
               </label>
 
@@ -653,7 +655,7 @@ export const CompareBrokers = React.memo(({ theme = 'dark' }) => {
                 <Search size={14} className="criteria-search-icon" />
                 <input
                   type="text"
-                  placeholder="Filter criteria (spread, UPI, MT5...)"
+                  placeholder={t('compare_search_placeholder', 'Filter criteria (spread, UPI, MT5)...')}
                   value={criteriaSearch}
                   onChange={(e) => setCriteriaSearch(e.target.value)}
                   className="criteria-search-input"
@@ -917,7 +919,7 @@ export const CompareBrokers = React.memo(({ theme = 'dark' }) => {
                             <h3 className="broker-name">{broker.name}</h3>
                             <span className="broker-badge-pill" title="PipWise Verified Partner & Genuine Broker">
                               <CheckCircle2 size={11} className="verified-icon" />
-                              {(broker.isVerified || broker.isVerifiedPartner) ? 'Verified Broker' : 'Verified'}
+                              {(broker.isVerified || broker.isVerifiedPartner) ? t('top_brokers_verified', 'Verified Broker') : 'Verified'}
                             </span>
                           </div>
                         </div>

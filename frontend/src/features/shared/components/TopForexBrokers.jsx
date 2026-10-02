@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import { TOP_BROKERS_DATA } from '../../brokers/data/brokersData.jsx';
 import { useBrokers } from '../../brokers/hooks/useBrokers.js';
 import { BrokerLogo } from '../../brokers/components/BrokerLogo.jsx';
+import useLanguage from '../context/LanguageContext.jsx';
 
 const TopForexBrokers = ({ onSelectBroker }) => {
+  const { t } = useLanguage();
   const { brokers } = useBrokers();
   const carouselRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -147,7 +149,7 @@ const TopForexBrokers = ({ onSelectBroker }) => {
                     },
                   }}
                 >
-                  Top Forex Brokers
+                  {t('top_brokers_heading', 'Top Forex Brokers')}
                 </motion.span>
 
                 {/* 4 Animated Corner Handle Dots (Synchronized to line arrivals) */}
@@ -211,13 +213,13 @@ const TopForexBrokers = ({ onSelectBroker }) => {
                 },
               }}
             >
-              Compare real trading conditions, fees, platforms, and user reviews.
+              {t('top_brokers_subheading', 'Compare real trading conditions, fees, platforms, and user reviews.')}
             </motion.p>
           </motion.div>
 
           <div className="top-brokers-header-actions">
             <Link to="/brokers" className="top-brokers-see-all-cta" aria-label="See all forex brokers">
-              <span>See All Brokers</span>
+              <span>{t('top_brokers_see_all', 'See All Brokers')}</span>
               <span className="see-all-count-pill">16+</span>
               <svg
                 width="14"
@@ -326,7 +328,7 @@ const TopForexBrokers = ({ onSelectBroker }) => {
                     }}
                     title={`Write a verified review for ${broker.name}`}
                   >
-                    ★ Review
+                    {t('top_brokers_review_btn', '★ Review')}
                   </button>
                 </div>
 
@@ -356,7 +358,7 @@ const TopForexBrokers = ({ onSelectBroker }) => {
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
-                      Verified Broker
+                      {t('top_brokers_verified', 'Verified Broker')}
                     </span>
                   )}
                 </div>
@@ -364,22 +366,22 @@ const TopForexBrokers = ({ onSelectBroker }) => {
                 {/* Specs List Grid */}
                 <div className="broker-card-specs">
                   <div className="spec-row">
-                    <span className="spec-label">Min. Deposit</span>
+                    <span className="spec-label">{t('spec_min_deposit', 'Min. Deposit')}</span>
                     <span className="spec-value spec-value-deposit spec-value-strong">{broker.minDeposit}</span>
                   </div>
 
                   <div className="spec-row">
-                    <span className="spec-label">Spread</span>
+                    <span className="spec-label">{t('spec_spread', 'Spread')}</span>
                     <span className="spec-value spec-value-spread">{broker.spread}</span>
                   </div>
 
                   <div className="spec-row">
-                    <span className="spec-label">Regulation</span>
+                    <span className="spec-label">{t('spec_regulation', 'Regulation')}</span>
                     <span className="spec-value spec-value-regulation">{broker.regulation}</span>
                   </div>
 
                   <div className="spec-row">
-                    <span className="spec-label">Platforms</span>
+                    <span className="spec-label">{t('spec_platforms', 'Platforms')}</span>
                     <span className="spec-value spec-value-platforms">{broker.platforms}</span>
                   </div>
                 </div>
@@ -390,7 +392,7 @@ const TopForexBrokers = ({ onSelectBroker }) => {
                   className="broker-card-cta-btn"
                   aria-label={`View review for ${broker.name}`}
                 >
-                  <span>View Review</span>
+                  <span>{t('view_review_btn', 'View Review')}</span>
                   <svg
                     className="broker-btn-arrow"
                     width="15"
@@ -421,11 +423,11 @@ const TopForexBrokers = ({ onSelectBroker }) => {
           transition={{ duration: 0.6, delay: 0.15 }}
         >
           <div className="bottom-banner-text">
-            <h4>Looking for more brokers or specific criteria?</h4>
-            <p>Access our complete directory of verified brokers with real spreads, zero swap fees &amp; tier-1 regulations.</p>
+            <h4>{t('top_brokers_bottom_title', 'Looking for more brokers or specific criteria?')}</h4>
+            <p>{t('top_brokers_bottom_desc', 'Access our complete directory of verified brokers with real spreads, zero swap fees & tier-1 regulations.')}</p>
           </div>
           <Link to="/brokers" className="bottom-banner-btn" aria-label="Explore all brokers directory">
-            <span>Explore All Brokers</span>
+            <span>{t('top_brokers_explore_dir', 'Explore All Brokers')}</span>
             <svg
               width="15"
               height="15"

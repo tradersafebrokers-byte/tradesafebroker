@@ -25,6 +25,7 @@ import { brokerService } from '../features/brokers/services/broker.service.js';
 import BrokerReviewsModal from '../features/reviews/components/BrokerReviewsModal.jsx';
 import BrokerHubModal from '../features/brokers/components/BrokerHubModal.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
+import { useLanguage } from '../features/shared/context/LanguageContext.jsx';
 import './AllBrokers.css';
 
 const CATEGORY_TABS = [
@@ -39,6 +40,7 @@ const CATEGORY_TABS = [
 ];
 
 export const AllBrokers = React.memo(({ theme = 'dark' }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { brokers, isLoading } = useBrokers();
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +53,17 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
   const [selectedBrokerForHub, setSelectedBrokerForHub] = useState(null);
   const [compareList, setCompareList] = useState([]);
   const [showCompareModal, setShowCompareModal] = useState(false);
+
+  const categoryTabs = useMemo(() => [
+    { id: 'all', label: t('tab_all_brokers', 'All Brokers') },
+    { id: 'upi-accepted', label: '⚡ Instant UPI & IMPS' },
+    { id: 'raw-spread', label: t('tab_raw_spread', '0.0 Raw Spread') },
+    { id: 'low-deposit', label: t('tab_low_deposit', 'Low Deposit (≤ ₹1,000)') },
+    { id: 'high-leverage', label: t('tab_high_leverage', 'High Leverage (1:1000+)') },
+    { id: 'top-rated', label: t('tab_top_rated', '★ Top Rated (4.7+)') },
+    { id: 'ecn', label: t('tab_ecn', 'True ECN / Scalping') },
+    { id: 'tradingview', label: t('tab_tradingview', 'TradingView Direct') },
+  ], [t]);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -135,10 +148,10 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
         <header className="all-brokers-header">
           <nav className="all-brokers-breadcrumbs" aria-label="Breadcrumb">
             <Link to="/" className="breadcrumb-link">
-              Home
+              {t('breadcrumb_home', 'Home')}
             </Link>
             <span className="breadcrumb-separator">/</span>
-            <span className="breadcrumb-current">Brokers Directory</span>
+            <span className="breadcrumb-current">{t('breadcrumb_brokers_dir', 'Brokers Directory')}</span>
           </nav>
 
           <div className="all-brokers-eyebrow-wrap">
@@ -148,17 +161,16 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
                 <span />
                 <span />
               </span>
-              <span>VERIFIED FOREX BROKERS • INDIA &amp; GLOBAL</span>
+              <span>{t('all_brokers_eyebrow', 'VERIFIED FOREX BROKERS • GLOBAL DIRECTORY')}</span>
             </div>
           </div>
 
           <h1 className="all-brokers-title">
-            Top Forex Brokers in <span className="accent-orange">India</span>
+            {t('all_brokers_title', 'Top Forex Brokers Worldwide')}
           </h1>
 
           <p className="all-brokers-desc">
-            Compare top forex brokers supporting instant UPI, NetBanking &amp; INR deposits.
-            Audited for live 0.0 spreads, zero swap fees, and tier-1 regulatory safety.
+            {t('all_brokers_desc', 'Compare top forex brokers audited for live 0.0 spreads, zero swap fees, and tier-1 regulatory safety.')}
           </p>
 
           {/* Minimalist Seamless Trust Metrics Strip (No Box Clutter) */}
@@ -168,8 +180,8 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
                 <Zap size={15} />
               </span>
               <div className="trust-metric-text">
-                <span className="trust-metric-value">Instant UPI</span>
-                <span className="trust-metric-sub">Google Pay &amp; PhonePe</span>
+                <span className="trust-metric-value">{t('trust_metric_fast_deposits', 'Instant Deposits')}</span>
+                <span className="trust-metric-sub">{t('trust_metric_fast_sub', 'Fast Local Payouts')}</span>
               </div>
             </div>
 
@@ -180,8 +192,8 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
                 <TrendingDown size={15} />
               </span>
               <div className="trust-metric-text">
-                <span className="trust-metric-value">From 0.0 Pips</span>
-                <span className="trust-metric-sub">Real Audited Spreads</span>
+                <span className="trust-metric-value">{t('trust_metric_raw_spreads', 'From 0.0 Pips')}</span>
+                <span className="trust-metric-sub">{t('trust_metric_raw_sub', 'Real Audited Spreads')}</span>
               </div>
             </div>
 
@@ -192,8 +204,8 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
                 <ShieldCheck size={15} />
               </span>
               <div className="trust-metric-text">
-                <span className="trust-metric-value">INR (₹) Base</span>
-                <span className="trust-metric-sub">Zero Forex Markups</span>
+                <span className="trust-metric-value">{t('trust_metric_multi_currency', 'Multi-Currency')}</span>
+                <span className="trust-metric-sub">{t('trust_metric_multi_sub', 'Zero Hidden Markups')}</span>
               </div>
             </div>
 
@@ -204,8 +216,8 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
                 <Award size={15} />
               </span>
               <div className="trust-metric-text">
-                <span className="trust-metric-value">100% Unbiased</span>
-                <span className="trust-metric-sub">Verified Trader Reviews</span>
+                <span className="trust-metric-value">{t('trust_metric_unbiased', '100% Unbiased')}</span>
+                <span className="trust-metric-sub">{t('trust_metric_unbiased_sub', 'Verified Trader Reviews')}</span>
               </div>
             </div>
           </div>
@@ -219,7 +231,7 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
               <input
                 type="text"
                 className="toolbar-search-input"
-                placeholder="Search brokers (Exness, XM, Octa, UPI, MT5)..."
+                placeholder={t('search_brokers_placeholder', 'Search brokers (Exness, XM, Octa, MT5)...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -238,13 +250,13 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
             <div className="toolbar-controls-group">
               {/* Regulator Filter */}
               <div className="toolbar-select-wrap">
-                <span className="toolbar-select-label">License:</span>
+                <span className="toolbar-select-label">{t('filter_license_label', 'License:')}</span>
                 <select
                   className="toolbar-dropdown"
                   value={selectedRegulator}
                   onChange={(e) => setSelectedRegulator(e.target.value)}
                 >
-                  <option value="all">All Regulators</option>
+                  <option value="all">{t('filter_all_regulators', 'All Regulators')}</option>
                   <option value="FCA">FCA (UK)</option>
                   <option value="ASIC">ASIC (Australia)</option>
                   <option value="CySEC">CySEC (EU)</option>
@@ -254,16 +266,16 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
 
               {/* Sort By Dropdown */}
               <div className="toolbar-select-wrap">
-                <span className="toolbar-select-label">Sort:</span>
+                <span className="toolbar-select-label">{t('filter_sort_label', 'Sort:')}</span>
                 <select
                   className="toolbar-dropdown"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                 >
-                  <option value="rank">PipWise Rank (#1)</option>
-                  <option value="rating">Rating (Highest)</option>
-                  <option value="deposit">Deposit (Lowest ₹)</option>
-                  <option value="spread">Spread (Tightest)</option>
+                  <option value="rank">{t('sort_rank', 'Top Ranked')}</option>
+                  <option value="rating">{t('sort_rating', 'Highest Rated')}</option>
+                  <option value="deposit">{t('sort_deposit', 'Minimum Deposit')}</option>
+                  <option value="spread">{t('sort_spread', 'Lowest Spreads')}</option>
                 </select>
               </div>
 
@@ -293,8 +305,8 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
               <Link
                 to="/join-broker"
                 className="toolbar-join-broker-btn"
-                title="Join as Broker Partner"
-                aria-label="Join as Broker Partner"
+                title={t('nav_join_broker', 'Join as Broker')}
+                aria-label={t('nav_join_broker', 'Join as Broker')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -312,14 +324,14 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
                 }}
               >
                 <Plus size={14} />
-                <span>Join as Broker</span>
+                <span>{t('nav_join_broker', 'Join as Broker')}</span>
               </Link>
             </div>
           </div>
 
           {/* Category Chips Strip */}
           <div className="toolbar-categories-strip" role="tablist">
-            {CATEGORY_TABS.map((tab) => {
+            {categoryTabs.map((tab) => {
               const isActive = selectedCategory === tab.id;
               const count = tab.id === 'all'
                 ? (brokers || []).length
@@ -440,7 +452,7 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
                         title="PipWise Verified Partner & Genuine Broker"
                       >
                         <CheckCircle2 size={11} strokeWidth={2.8} />
-                        Verified Broker
+                        {t('top_brokers_verified', 'Verified Broker')}
                       </span>
                     )}
                   </div>
@@ -465,12 +477,12 @@ export const AllBrokers = React.memo(({ theme = 'dark' }) => {
                   {/* Clean Minimal Specs List */}
                   <div className="card-specs-list">
                     <div className="spec-clean-row">
-                      <span className="spec-clean-label">Min. Deposit</span>
+                      <span className="spec-clean-label">{t('spec_min_deposit', 'Min. Deposit')}</span>
                       <span className="spec-clean-value is-deposit">{broker.minDeposit}</span>
                     </div>
 
                     <div className="spec-clean-row">
-                      <span className="spec-clean-label">Spread</span>
+                      <span className="spec-clean-label">{t('spec_spread', 'Spread')}</span>
                       <span className="spec-clean-value is-spread">{broker.spread}</span>
                     </div>
 

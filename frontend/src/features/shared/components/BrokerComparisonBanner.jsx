@@ -2,8 +2,10 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import MacbookScrollChoreography from '../../../macbook/MacbookScrollChoreography';
+import useLanguage from '../context/LanguageContext.jsx';
 
 const BrokerComparisonBanner = ({ onStartComparing }) => {
+  const { t } = useLanguage();
   const bannerRef = useRef(null);
   const navigate = useNavigate();
 
@@ -128,7 +130,7 @@ const BrokerComparisonBanner = ({ onStartComparing }) => {
                   aria-hidden="true"
                 />
 
-                <span className="comp-boxed-text">BROKER COMPARISON</span>
+                <span className="comp-boxed-text">{t('comp_banner_eyebrow', 'BROKER COMPARISON')}</span>
 
                 {/* 4 Animated Corner Handle Dots */}
                 <span className="corner-handles" aria-hidden="true">
@@ -187,7 +189,7 @@ const BrokerComparisonBanner = ({ onStartComparing }) => {
               viewport={{ once: true }}
               transition={{ duration: 0.65, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
             >
-              Compare Brokers Side by Side
+              {t('comp_banner_title', 'Compare Brokers Side by Side')}
             </motion.h2>
 
             <motion.p
@@ -197,19 +199,19 @@ const BrokerComparisonBanner = ({ onStartComparing }) => {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
             >
-              Analyze fees, trading conditions, platforms and more to find your perfect match.
+              {t('comp_banner_desc', 'Analyze fees, trading conditions, platforms and more to find your perfect match.')}
             </motion.p>
 
             {/* Mobile Feature Highlights Chips */}
             <div className="comp-mobile-badges" aria-hidden="true">
               <span className="comp-mini-pill">
-                <span className="comp-mini-dot" /> Live Spreads
+                <span className="comp-mini-dot" /> {t('comp_banner_pill_spreads', 'Live Spreads')}
               </span>
               <span className="comp-mini-pill">
-                <span className="comp-mini-dot" /> Side-by-Side Matrix
+                <span className="comp-mini-dot" /> {t('comp_banner_pill_matrix', 'Side-by-Side Matrix')}
               </span>
               <span className="comp-mini-pill">
-                <span className="comp-mini-dot" /> Verified Fees
+                <span className="comp-mini-dot" /> {t('comp_banner_pill_fees', 'Verified Fees')}
               </span>
             </div>
 
@@ -219,7 +221,7 @@ const BrokerComparisonBanner = ({ onStartComparing }) => {
               onClick={handleCompareClick}
               aria-label="Start Comparing Brokers"
             >
-              <span>Start Comparing</span>
+              <span>{t('comp_banner_cta', 'Start Comparing')}</span>
               <svg
                 className="comp-btn-arrow"
                 width="16"

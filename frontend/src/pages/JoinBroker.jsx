@@ -27,6 +27,7 @@ import { useBrokers } from '../features/brokers/hooks/useBrokers.js';
 import { BrokerLogo } from '../features/brokers/components/BrokerLogo.jsx';
 import { useToast } from '../features/shared/components/toast/ToastContext.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
+import { useLanguage } from '../features/shared/context/LanguageContext.jsx';
 import './JoinBroker.css';
 
 const PRESET_COLORS = [
@@ -89,6 +90,7 @@ const PRESET_THEMES = [
 ];
 
 export const JoinBroker = ({ theme = 'dark' }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const toast = useToast();
   const { brokers, createBroker, isCreating, createError } = useBrokers();
@@ -354,11 +356,11 @@ export const JoinBroker = ({ theme = 'dark' }) => {
         <main className="join-broker-page">
           <div className="join-broker-container">
             <nav className="join-breadcrumb-nav" aria-label="Breadcrumbs">
-              <Link to="/" className="join-breadcrumb-link">Home</Link>
+              <Link to="/" className="join-breadcrumb-link">{t('breadcrumb_home', 'Home')}</Link>
               <span className="join-breadcrumb-sep">/</span>
-              <Link to="/brokers" className="join-breadcrumb-link">Brokers</Link>
+              <Link to="/brokers" className="join-breadcrumb-link">{t('nav_brokers', 'Brokers')}</Link>
               <span className="join-breadcrumb-sep">/</span>
-              <span className="join-breadcrumb-current">Partner Verification</span>
+              <span className="join-breadcrumb-current">{t('nav_join_broker', 'Join as Broker')}</span>
             </nav>
 
             <motion.div
@@ -374,16 +376,16 @@ export const JoinBroker = ({ theme = 'dark' }) => {
               <div className="gatekeeper-tag-wrap">
                 <div className="gatekeeper-tag">
                   <span className="gatekeeper-status-dot" />
-                  <span>INSTITUTIONAL PARTNER ACCESS</span>
+                  <span>{t('join_badge', 'INSTITUTIONAL PARTNER ACCESS')}</span>
                 </div>
               </div>
 
               <h1 className="gatekeeper-title">
-                Partner Authentication Required
+                {t('join_title', 'Partner Authentication Required')}
               </h1>
 
               <p className="gatekeeper-desc">
-                To protect Indian traders and maintain regulatory authenticity, broker registration and profile management is restricted to authorized corporate representatives with an active TradeSafe Brokers partner account.
+                {t('join_desc', 'To protect traders and maintain regulatory authenticity, broker registration and profile management is restricted to authorized corporate representatives.')}
               </p>
 
               <div className="gatekeeper-actions">
@@ -393,7 +395,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
                   onClick={openLogin}
                 >
                   <KeyRound size={15} strokeWidth={2.2} />
-                  <span>Log In to Partner Account</span>
+                  <span>{t('join_login_btn', 'Log In to Partner Account')}</span>
                 </button>
 
                 <button
@@ -401,7 +403,7 @@ export const JoinBroker = ({ theme = 'dark' }) => {
                   className="gatekeeper-secondary-btn"
                   onClick={openRegister}
                 >
-                  <span>Register Corporate Account</span>
+                  <span>{t('join_register_btn', 'Register Corporate Account')}</span>
                 </button>
               </div>
 
@@ -471,12 +473,12 @@ export const JoinBroker = ({ theme = 'dark' }) => {
           {/* Header & Hero Intro */}
           <header className="join-broker-header">
             <nav className="join-breadcrumb-nav" aria-label="Breadcrumbs">
-              <Link to="/" className="join-breadcrumb-link">Home</Link>
+              <Link to="/" className="join-breadcrumb-link">{t('breadcrumb_home', 'Home')}</Link>
               <span className="join-breadcrumb-sep">/</span>
-              <Link to="/brokers" className="join-breadcrumb-link">Brokers</Link>
-            <span className="join-breadcrumb-sep">/</span>
-            <span className="join-breadcrumb-current">Join as Broker</span>
-          </nav>
+              <Link to="/brokers" className="join-breadcrumb-link">{t('nav_brokers', 'Brokers')}</Link>
+              <span className="join-breadcrumb-sep">/</span>
+              <span className="join-breadcrumb-current">{t('nav_join_broker', 'Join as Broker')}</span>
+            </nav>
 
           {/* Authenticated Partner Status Banner */}
           <div className="join-auth-status-bar">

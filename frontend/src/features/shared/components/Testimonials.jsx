@@ -5,16 +5,19 @@ import {
   getSynchronousTestimonials,
   fetchActiveTestimonials,
 } from '../../testimonials/services/testimonialStorage.js';
+import useLanguage from '../context/LanguageContext.jsx';
 
 // Single Testimonial Card Component (Memoized to prevent redundant card re-renders)
-const TestimonialCard = React.memo(({ item }) => (
+const TestimonialCard = React.memo(({ item }) => {
+  const { t } = useLanguage();
+  return (
   <div className="pw-testimonial-card">
     <div className="pw-testimonial-body">
       {/* Top Header: Broker Name Pill & Trustpilot Star Boxes */}
       <div className="pw-card-broker-header">
         <div className="pw-broker-badge-pill" title={`Verified Trader review for ${item.brokerName || 'Broker'}`}>
           <Building2 size={12} className="pw-broker-icon" />
-          <span>Review for <strong>{item.brokerName || 'Forex Broker'}</strong></span>
+          <span>{t('testimonials_review_for', 'Review for')} <strong>{item.brokerName || 'Forex Broker'}</strong></span>
         </div>
         <div className="pw-trustpilot-stars-cluster" aria-label={`${item.rating || '5.0'} out of 5 stars`}>
           {[1, 2, 3, 4, 5].map((s) => {
@@ -67,7 +70,7 @@ const TestimonialCard = React.memo(({ item }) => (
     {/* Footer Verified Badge */}
     <div className="pw-testimonial-footer">
       <span className="pw-verified-tag">
-        <CheckCircle2 size={11} className="pw-check-icon-footer" /> Verified Trader
+        <CheckCircle2 size={11} className="pw-check-icon-footer" /> {t('testimonials_verified_trader', 'Verified Trader')}
       </span>
       {item.depositMethod ? (
         <span className="pw-deposit-tag">{item.depositMethod}</span>
@@ -76,9 +79,11 @@ const TestimonialCard = React.memo(({ item }) => (
       )}
     </div>
   </div>
-));
+  );
+});
 
 const Testimonials = React.memo(() => {
+  const { t } = useLanguage();
   // Synchronous initial load guarantees instant render with ZERO re-render flash
   const [items, setItems] = useState(() => getSynchronousTestimonials());
   const itemsRef = useRef(items);
@@ -149,7 +154,7 @@ const Testimonials = React.memo(() => {
           <span className="pw-handle-dot pw-h-br" aria-hidden="true" />
 
           <span className="pw-figma-badge-text">
-            HEAR FROM OUR TRADERS & INVESTORS
+            {t('testimonials_badge', 'HEAR FROM OUR TRADERS & INVESTORS')}
           </span>
         </motion.div>
 
@@ -161,8 +166,8 @@ const Testimonials = React.memo(() => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="pw-testimonials-heading"
         >
-          Trade With True Confidence. <br className="pw-br-desktop" />
-          Powered By 50,000+ Real Forex Traders.
+          {t('testimonials_heading_1', 'Trade With True Confidence.')} <br className="pw-br-desktop" />
+          {t('testimonials_heading_2', 'Powered By 50,000+ Real Forex Traders.')}
         </motion.h2>
 
         {/* Subtitle */}
@@ -173,7 +178,7 @@ const Testimonials = React.memo(() => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="pw-testimonials-subheading"
         >
-          Read real experiences from active scalpers, day traders, and fund managers who empower their trading edge with TradeSafeBrokers comparisons.
+          {t('testimonials_subheading', 'Read real experiences from active scalpers, day traders, and fund managers who empower their trading edge with TradeSafeBrokers comparisons.')}
         </motion.p>
 
         {/* Trustpilot-Style Rating & Write Review CTA Strip */}
@@ -193,7 +198,7 @@ const Testimonials = React.memo(() => {
                 </span>
               ))}
             </div>
-            <span className="pw-tp-score-label">TradeSafe Score <strong>4.9</strong> • 50,000+ Verified Trader Reviews</span>
+            <span className="pw-tp-score-label">{t('testimonials_score_summary', 'TradeSafe Score 4.9 • 50,000+ Verified Trader Reviews')}</span>
           </div>
 
           <button
@@ -204,7 +209,7 @@ const Testimonials = React.memo(() => {
             }}
           >
             <Star size={14} fill="#ffffff" color="#ffffff" />
-            <span>Write a Broker Review</span>
+            <span>{t('testimonials_write_cta', 'Write a Broker Review')}</span>
           </button>
         </motion.div>
       </div>

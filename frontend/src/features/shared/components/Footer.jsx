@@ -6,6 +6,7 @@ import ContactModal from '../../contact/components/ContactModal.jsx';
 import FooterDetailModal from './FooterDetailModal.jsx';
 import FooterLanguageSelector from './FooterLanguageSelector.jsx';
 import apiClient from '../../auth/services/api.client.js';
+import useLanguage from '../context/LanguageContext.jsx';
 
 export const ALL_FOOTER_SECTIONS = [
   {
@@ -54,7 +55,33 @@ export const ALL_FOOTER_SECTIONS = [
 ];
 
 const Footer = ({ onNavigate }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
+
+  const getSectionTitle = (secId, defaultTitle) => {
+    if (secId === 'brokers') return t('footer_col_brokers', defaultTitle);
+    if (secId === 'compare') return t('footer_col_compare', defaultTitle);
+    if (secId === 'tools') return t('footer_col_tools', defaultTitle);
+    if (secId === 'company') return t('footer_col_company', defaultTitle);
+    return defaultTitle;
+  };
+
+  const getLinkLabel = (label) => {
+    if (label === 'Compare Brokers Side by Side') return t('footer_link_compare', label);
+    if (label === 'Pip Value Calculator') return t('footer_link_pip_calc', label);
+    if (label === 'Margin & Leverage Tool') return t('footer_link_margin', label);
+    if (label === 'Live Spread Benchmarks') return t('footer_link_spreads', label);
+    if (label === 'Broker Withdrawal Speed Test') return t('footer_link_withdrawal', label);
+    if (label === 'License & Regulatory Check') return t('footer_link_license', label);
+    if (label === 'About Our Mission') return t('footer_link_mission', label);
+    if (label === 'Join as Broker') return t('footer_link_join_broker', label);
+    if (label === 'How We Rate Brokers') return t('footer_link_rating_policy', label);
+    if (label === 'Editorial Independence') return t('footer_link_editorial', label);
+    if (label === 'Trader Review Policy') return t('footer_link_review_policy', label);
+    if (label === 'Contact Support & Desk') return t('footer_link_contact', label);
+    if (label === 'Privacy & Terms of Service') return t('footer_link_privacy', label);
+    return label;
+  };
   const [openSection, setOpenSection] = useState(null);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [detailTopic, setDetailTopic] = useState(null);
@@ -131,7 +158,7 @@ const Footer = ({ onNavigate }) => {
               </span>
             </a>
             <p className="pw-footer-tagline">
-              Independent, transparent forex broker comparisons and verified ratings for traders worldwide.
+              {t('footer_tagline', 'Independent, transparent forex broker comparisons and verified ratings for traders worldwide.')}
             </p>
           </div>
 
@@ -141,7 +168,7 @@ const Footer = ({ onNavigate }) => {
               const visibleLinks = section.links.filter((l) => !hiddenLinks.includes(l.label));
               return (
                 <div key={section.id} className="pw-footer-col">
-                  <h4 className="pw-footer-col-title">{section.title}</h4>
+                  <h4 className="pw-footer-col-title">{getSectionTitle(section.id, section.title)}</h4>
                   <ul className="pw-footer-links-list">
                     {visibleLinks.map((link, idx) => (
                       <li key={idx}>
@@ -150,7 +177,7 @@ const Footer = ({ onNavigate }) => {
                           onClick={(e) => handleLinkAction(link, e)}
                           className={`pw-footer-link ${link.highlight ? 'is-highlight' : ''} ${link.coral ? 'is-coral' : ''} ${link.joinBroker ? 'is-join-broker' : ''}`}
                         >
-                          <span>{link.label}</span>
+                          <span>{getLinkLabel(link.label)}</span>
                           {link.joinBroker && <span className="pw-join-pill-tag">Partner</span>}
                         </a>
                       </li>
@@ -162,9 +189,9 @@ const Footer = ({ onNavigate }) => {
 
             {/* Column 5: Social Links & Independence Badge */}
             <div className="pw-footer-col pw-footer-col-community">
-              <h4 className="pw-footer-col-title">Join Community</h4>
+              <h4 className="pw-footer-col-title">{t('footer_col_community', 'Join Community')}</h4>
               <p className="pw-footer-social-desc">
-                Follow real-time spread updates, broker alerts & trader news.
+                {t('footer_community_desc', 'Follow real-time spread updates, broker alerts & trader news.')}
               </p>
 
               {/* Social Buttons */}
@@ -230,13 +257,13 @@ const Footer = ({ onNavigate }) => {
               >
                 <div className="pw-join-broker-tag">
                   <span className="pw-join-dot" />
-                  <span>Broker Partnership</span>
+                  <span>{t('footer_partnership_tag', 'Broker Partnership')}</span>
                 </div>
                 <div className="pw-join-broker-title-row">
-                  <span className="pw-join-broker-title">Join as Broker</span>
+                  <span className="pw-join-broker-title">{t('footer_join_broker_title', 'Join as Broker')}</span>
                   <ArrowRight size={14} className="pw-join-arrow" />
                 </div>
-                <span className="pw-join-broker-sub">List your brokerage on TradeSafeBrokers</span>
+                <span className="pw-join-broker-sub">{t('footer_join_broker_sub', 'List your brokerage on TradeSafeBrokers')}</span>
               </Link>
 
               {/* Verified Independence Trust Badge */}
@@ -245,8 +272,8 @@ const Footer = ({ onNavigate }) => {
                   <Shield size={16} className="pw-trust-shield" />
                 </div>
                 <div className="pw-trust-meta">
-                  <span className="pw-trust-title">100% Unbiased & Independent</span>
-                  <span className="pw-trust-subtitle">Zero Pay-to-Rank • Real Broker Tests</span>
+                  <span className="pw-trust-title">{t('footer_trust_title', '100% Unbiased & Independent')}</span>
+                  <span className="pw-trust-subtitle">{t('footer_trust_sub', 'Zero Pay-to-Rank • Real Broker Tests')}</span>
                 </div>
               </div>
             </div>
@@ -270,7 +297,7 @@ const Footer = ({ onNavigate }) => {
               </span>
             </a>
             <p className="pw-footer-mobile-desc">
-              Independent forex broker reviews and comparisons for traders.
+              {t('footer_tagline', 'Independent forex broker reviews and comparisons for traders.')}
             </p>
           </div>
 
@@ -280,8 +307,8 @@ const Footer = ({ onNavigate }) => {
               <Shield size={15} className="pw-trust-shield" />
             </div>
             <div className="pw-trust-meta">
-              <span className="pw-trust-title">Verified Transparency</span>
-              <span className="pw-trust-subtitle">Independent Broker Benchmarks</span>
+              <span className="pw-trust-title">{t('footer_transparency_mobile', 'Verified Transparency')}</span>
+              <span className="pw-trust-subtitle">{t('footer_benchmarks_mobile', 'Independent Broker Benchmarks')}</span>
             </div>
           </div>
 
@@ -293,13 +320,13 @@ const Footer = ({ onNavigate }) => {
           >
             <div className="pw-join-broker-tag">
               <span className="pw-join-dot" />
-              <span>Broker Portal</span>
+              <span>{t('footer_partnership_portal', 'Broker Portal')}</span>
             </div>
             <div className="pw-join-broker-title-row">
-              <span className="pw-join-broker-title">Join as Broker</span>
+              <span className="pw-join-broker-title">{t('footer_join_broker_title', 'Join as Broker')}</span>
               <ArrowRight size={14} className="pw-join-arrow" />
             </div>
-            <span className="pw-join-broker-sub">Get listed and reviewed by 50,000+ traders</span>
+            <span className="pw-join-broker-sub">{t('footer_join_broker_mobile_sub', 'Get listed and reviewed by 50,000+ traders')}</span>
           </Link>
 
           {/* Accordion List */}
@@ -316,7 +343,7 @@ const Footer = ({ onNavigate }) => {
                     className="pw-accordion-btn"
                     aria-expanded={isOpen}
                   >
-                    <span>{sec.title}</span>
+                    <span>{getSectionTitle(sec.id, sec.title)}</span>
                     <ChevronDown
                       size={18}
                       className={`pw-accordion-chevron ${isOpen ? 'is-open' : ''}`}
@@ -340,7 +367,7 @@ const Footer = ({ onNavigate }) => {
                               onClick={(e) => handleLinkAction(link, e)}
                               className={`pw-accordion-link ${link.joinBroker ? 'is-join-broker' : ''} ${link.coral ? 'is-coral' : ''} ${link.highlight ? 'is-highlight' : ''}`}
                             >
-                              <span>{link.label}</span>
+                              <span>{getLinkLabel(link.label)}</span>
                               <ArrowRight size={13} className="pw-link-arrow" />
                             </a>
                           ))}
@@ -355,7 +382,7 @@ const Footer = ({ onNavigate }) => {
 
           {/* Mobile Social Cluster */}
           <div className="pw-footer-mobile-social">
-            <span className="pw-mobile-social-label">Follow TradeSafeBrokers</span>
+            <span className="pw-mobile-social-label">{t('footer_follow_brand', 'Follow TradeSafeBrokers')}</span>
             <div className="pw-footer-social-cluster">
               <a href="https://x.com" target="_blank" rel="noreferrer" aria-label="X" className="pw-social-btn">
                 <svg className="pw-social-svg" viewBox="0 0 24 24" fill="currentColor">
@@ -387,21 +414,21 @@ const Footer = ({ onNavigate }) => {
         {/* Regulatory Risk Disclaimer */}
         <div className="pw-footer-disclaimer-box">
           <p className="pw-footer-disclaimer-text">
-            <strong>High-Risk Investment Notice:</strong> Trading Forex and Leveraged Financial Instruments (CFDs) carries a high level of risk and may not be suitable for all investors. Approximately 74% to 89% of retail investor accounts lose capital when trading CFDs. Never trade with funds you cannot afford to lose. TradeSafeBrokers is an independent financial comparison and educational publication; we do not accept funds or provide investment advisory services.
+            <strong>{t('footer_disclaimer_notice', 'High-Risk Investment Notice:')}</strong> {t('footer_disclaimer_text', 'Trading Forex and Leveraged Financial Instruments (CFDs) carries a high level of risk and may not be suitable for all investors. Approximately 74% to 89% of retail investor accounts lose capital when trading CFDs. Never trade with funds you cannot afford to lose. TradeSafeBrokers is an independent financial comparison and educational publication; we do not accept funds or provide investment advisory services.')}
           </p>
         </div>
 
         {/* Bottom Legal Copyright Bar */}
         <div className="pw-footer-bottom-bar">
           <p className="pw-footer-copyright">
-            © 2024-2026 TradeSafeBrokers™ Inc. All rights reserved. All broker trademarks and logos belong to their respective registered entities.
+            {t('footer_copyright', '© 2024-2026 TradeSafeBrokers™ Inc. All rights reserved. All broker trademarks and logos belong to their respective registered entities.')}
           </p>
           <div className="pw-footer-bottom-group">
             <FooterLanguageSelector />
             <div className="pw-footer-made-with">
-              <span>Made with</span>
+              <span>{t('footer_made_with', 'Made with')}</span>
               <Heart size={13} fill="#fc5d21" stroke="none" className="pw-footer-heart" />
-              <span>for traders worldwide</span>
+              <span>{t('footer_for_traders', 'for traders worldwide')}</span>
             </div>
           </div>
         </div>

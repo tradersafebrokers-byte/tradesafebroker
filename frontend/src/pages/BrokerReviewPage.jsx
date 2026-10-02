@@ -51,6 +51,7 @@ import { reviewService } from '../features/reviews/services/review.service.js';
 import { useAuth } from '../features/auth/hooks/useAuth.js';
 import { useToast } from '../features/shared/components/toast/ToastContext.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
+import { useLanguage } from '../features/shared/context/LanguageContext.jsx';
 import './BrokerReviewPage.css';
 
 const DEPOSIT_METHODS = [
@@ -63,6 +64,7 @@ const DEPOSIT_METHODS = [
 ];
 
 export default function BrokerReviewPage({ theme = 'dark' }) {
+  const { t } = useLanguage();
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
@@ -373,16 +375,16 @@ export default function BrokerReviewPage({ theme = 'dark' }) {
       <div className="brp-top-bar-wrapper">
         <div className="brp-container brp-top-bar">
           <nav className="brp-breadcrumbs" aria-label="Breadcrumb">
-            <Link to="/" className="brp-crumb-link">Home</Link>
+            <Link to="/" className="brp-crumb-link">{t('breadcrumb_home', 'Home')}</Link>
             <ChevronRight size={13} className="brp-crumb-sep" />
-            <Link to="/brokers" className="brp-crumb-link">Top Forex Brokers</Link>
+            <Link to="/brokers" className="brp-crumb-link">{t('top_brokers_heading', 'Top Forex Brokers')}</Link>
             <ChevronRight size={13} className="brp-crumb-sep" />
-            <span className="brp-crumb-current">{broker.name} Review</span>
+            <span className="brp-crumb-current">{broker.name} {t('testimonials_verified_trader', 'Review')}</span>
           </nav>
 
           <Link to="/brokers" className="brp-back-link">
             <ArrowLeft size={14} />
-            <span>Back to All Brokers</span>
+            <span>{t('top_brokers_explore_dir', 'Back to All Brokers')}</span>
           </Link>
         </div>
       </div>
