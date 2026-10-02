@@ -4,6 +4,7 @@ import { ChevronDown, Heart, Shield, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ContactModal from '../../contact/components/ContactModal.jsx';
 import FooterDetailModal from './FooterDetailModal.jsx';
+import FooterLanguageSelector from './FooterLanguageSelector.jsx';
 import apiClient from '../../auth/services/api.client.js';
 
 export const ALL_FOOTER_SECTIONS = [
@@ -395,10 +396,13 @@ const Footer = ({ onNavigate }) => {
           <p className="pw-footer-copyright">
             © 2024-2026 TradeSafeBrokers™ Inc. All rights reserved. All broker trademarks and logos belong to their respective registered entities.
           </p>
-          <div className="pw-footer-made-with">
-            <span>Made with</span>
-            <Heart size={13} fill="#fc5d21" stroke="none" className="pw-footer-heart" />
-            <span>for traders worldwide</span>
+          <div className="pw-footer-bottom-group">
+            <FooterLanguageSelector />
+            <div className="pw-footer-made-with">
+              <span>Made with</span>
+              <Heart size={13} fill="#fc5d21" stroke="none" className="pw-footer-heart" />
+              <span>for traders worldwide</span>
+            </div>
           </div>
         </div>
         </div>
