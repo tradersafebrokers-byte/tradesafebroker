@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Newspaper,
@@ -13,6 +13,7 @@ import {
   Clock,
   User,
   Star,
+  Link2,
 } from 'lucide-react';
 import './AdminNewsModal.css';
 
@@ -49,6 +50,16 @@ const PRESET_IMAGES = [
   },
 ];
 
+const INTERNAL_LINK_PRESETS = [
+  { label: 'Compare Brokers', path: '/compare' },
+  { label: 'All Brokers', path: '/brokers' },
+  { label: 'Calculator', path: '/calculator' },
+  { label: 'News', path: '/news' },
+  { label: 'Join Broker', path: '/join-broker' },
+];
+
+const EMPTY_LINK_FORM = { open: false, text: '', url: '', start: 0, end: 0 };
+
 export default function AdminNewsModal({
   isOpen,
   mode = 'create',
@@ -58,7 +69,61 @@ export default function AdminNewsModal({
   onSave,
   saving = false,
 }) {
+  const contentRef = useRef(null);
+  const [linkForm, setLinkForm] = useState(EMPTY_LINK_FORM);
+
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    setLinkForm(EMPTY_LINK_FORM);
+    onClose();
+  };
+
+  const openLinkForm = () => {
+    const textarea = contentRef.current;
+    const start = textarea?.selectionStart ?? formData.content.length;
+    const end = textarea?.selectionEnd ?? start;
+    setLinkForm({
+      open: true,
+      text: formData.content.slice(start, end),
+      url: '',
+      start,
+      end,
+    });
+  };
+
+  const insertLink = () => {
+    const url = linkForm.url.trim();
+    if (!url) return;
+    const text = linkForm.text.trim() || url;
+    const anchor = `<a href="${url.replace(/"/g, '%22')}">${text}</a>`;
+    const { start, end } = linkForm;
+
+    setFormData((prev) => ({
+      ...prev,
+      content: prev.content.slice(0, start) + anchor + prev.content.slice(end),
+    }));
+    setLinkForm(EMPTY_LINK_FORM);
+
+    requestAnimationFrame(() => {
+      const textarea = contentRef.current;
+      if (!textarea) return;
+      const caret = start + anchor.length;
+      textarea.focus();
+      textarea.setSelectionRange(caret, caret);
+    });
+  };
+
+  // Enter inside the link inputs must not submit (publish) the article form
+  const handleLinkKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      insertLink();
+    } else if (e.key === 'Escape') {
+      e.stopPropagation();
+      setLinkForm(EMPTY_LINK_FORM);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -78,7 +143,7 @@ export default function AdminNewsModal({
 
   return (
     <AnimatePresence>
-      <div className="d2-news-modal-overlay" onClick={onClose}>
+      <div className="d2-news-modal-overlay" onClick={handleClose}>
         <motion.div
           className="d2-news-modal-card"
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -98,7 +163,7 @@ export default function AdminNewsModal({
                 <p>Articles published here immediately appear on the live /news section and homepage wire.</p>
               </div>
             </div>
-            <button className="d2-news-modal-close" onClick={onClose}>
+            <button className="d2-news-modal-close" onClick={handleClose}>
               <X size={18} />
             </button>
           </div>
@@ -189,8 +254,68 @@ export default function AdminNewsModal({
 
               {/* Full Content */}
               <div className="d2-form-group span-2">
-                <label>Full Article Content * (Supports paragraphs &amp; bullet points)</label>
+                <label>Full Article Content * (Supports paragraphs, bullet points &amp; links)</label>
+                <div className="d2-content-toolbar">
+                  <button type="button" className="d2-preset-pill d2-link-btn" onClick={openLinkForm}>
+                    <Link2 size={13} />
+                    <span>Insert Link</span>
+                  </button>
+                  <span className="d2-presets-label">
+                    Select text in the article first to turn it into a link
+                  </span>
+                </div>
+
+                {linkForm.open && (
+                  <div className="d2-link-form">
+                    <div className="d2-link-form-inputs">
+                      <input
+                        type="text"
+                        value={linkForm.text}
+                        onChange={(e) => setLinkForm((prev) => ({ ...prev, text: e.target.value }))}
+                        onKeyDown={handleLinkKeyDown}
+                        placeholder="Link text, e.g. compare forex brokers"
+                      />
+                      <input
+                        type="text"
+                        value={linkForm.url}
+                        onChange={(e) => setLinkForm((prev) => ({ ...prev, url: e.target.value }))}
+                        onKeyDown={handleLinkKeyDown}
+                        placeholder="/compare or https://example.com"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="d2-presets-row">
+                      <span className="d2-presets-label">Internal Pages:</span>
+                      {INTERNAL_LINK_PRESETS.map((p) => (
+                        <button
+                          type="button"
+                          key={p.path}
+                          className="d2-preset-pill"
+                          onClick={() => setLinkForm((prev) => ({ ...prev, url: p.path }))}
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="d2-link-form-actions">
+                      <button type="button" className="d2-btn-cancel" onClick={() => setLinkForm(EMPTY_LINK_FORM)}>
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className="d2-btn-publish"
+                        onClick={insertLink}
+                        disabled={!linkForm.url.trim()}
+                      >
+                        <Check size={14} />
+                        <span>Insert Link</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <textarea
+                  ref={contentRef}
                   name="content"
                   rows="6"
                   value={formData.content}
@@ -198,6 +323,10 @@ export default function AdminNewsModal({
                   placeholder="Write the full analytical article here. Use blank lines between paragraphs and bullet points (•) for key takeaways..."
                   required
                 />
+                <p className="d2-content-hint">
+                  Links use the format <code>&lt;a href="/compare"&gt;compare forex brokers&lt;/a&gt;</code>.
+                  Paths starting with / are internal site links; full https:// URLs open in a new tab.
+                </p>
               </div>
 
               {/* Source & Source URL */}
@@ -272,7 +401,7 @@ export default function AdminNewsModal({
 
             {/* Modal Actions */}
             <div className="d2-news-modal-footer">
-              <button type="button" className="d2-btn-cancel" onClick={onClose} disabled={saving}>
+              <button type="button" className="d2-btn-cancel" onClick={handleClose} disabled={saving}>
                 Cancel
               </button>
               <button type="submit" className="d2-btn-publish" disabled={saving}>

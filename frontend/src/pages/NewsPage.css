@@ -1020,6 +1020,19 @@
   white-space: pre-line;
 }
 
+.reader-article-content .article-inline-link {
+  color: var(--brand-green, #10b981);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: opacity 0.15s ease;
+}
+
+.reader-article-content .article-inline-link:hover {
+  opacity: 0.8;
+}
+
 .reader-tags-row {
   display: flex;
   align-items: center;

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import useAuth from '../features/auth/hooks/useAuth.js';
 import UserNewsModal from '../features/news/components/UserNewsModal.jsx';
+import ArticleContent from '../features/news/components/ArticleContent.jsx';
 import newsService, { FALLBACK_NEWS, FALLBACK_BREAKING_TICKER } from '../features/news/services/news.service.js';
 import { useToast } from '../features/shared/components/toast/ToastContext.jsx';
 import Footer from '../features/shared/components/Footer.jsx';
@@ -439,6 +440,7 @@ export const NewsPage = ({ theme = 'dark' }) => {
             onClick={() => setActiveArticleModal(null)}
           >
             <motion.div
+              key={activeArticleModal._id || activeArticleModal.slug}
               className="news-reader-modal"
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -500,9 +502,10 @@ export const NewsPage = ({ theme = 'dark' }) => {
                 </div>
 
                 <div className="reader-article-content">
-                  {activeArticleModal.content.split('\n\n').map((para, i) => (
-                    <p key={i}>{para}</p>
-                  ))}
+                  <ArticleContent
+                    content={activeArticleModal.content}
+                    isCommunityPost={activeArticleModal.isCommunityPost}
+                  />
                 </div>
 
                 {activeArticleModal.tags && activeArticleModal.tags.length > 0 && (
