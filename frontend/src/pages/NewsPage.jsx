@@ -117,6 +117,9 @@ export const NewsPage = ({ theme = 'dark' }) => {
         refresh: isUserRefresh,
       });
 
+      // A failed background poll returns the static fallback list; keep the feed already on screen
+      if (data?.isFallback && isSilent && !isUserRefresh) return;
+
       if (data?.articles && data.articles.length > 0) {
         setArticles(data.articles);
       }

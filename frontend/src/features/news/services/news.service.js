@@ -229,6 +229,7 @@ export const newsService = {
         articles: FALLBACK_NEWS,
         pagination: { total: FALLBACK_NEWS.length, page: 1, limit, totalPages: 1 },
         breakingTicker: FALLBACK_BREAKING_TICKER,
+        isFallback: true,
       };
     } catch (error) {
       console.warn('Backend news fetch failed, falling back to local market news:', error.message);
@@ -258,6 +259,7 @@ export const newsService = {
         articles: filtered,
         pagination: { total: filtered.length, page: 1, limit, totalPages: 1 },
         breakingTicker: FALLBACK_BREAKING_TICKER,
+        isFallback: true,
       };
     }
   },

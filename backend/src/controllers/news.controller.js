@@ -212,26 +212,66 @@ const stripHtml = (html = '') => {
     .trim();
 };
 
+const decodeXmlEntities = (str = '') => {
+  return str
+    .replace(/&#(\d+);/g, (_, code) => (Number(code) <= 0x10ffff ? String.fromCodePoint(Number(code)) : ''))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => (parseInt(hex, 16) <= 0x10ffff ? String.fromCodePoint(parseInt(hex, 16)) : ''))
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&amp;/gi, '&');
+};
+
+// Inner text of every <tag>...</tag> in an RSS fragment, unwrapping CDATA sections
+const readXmlTags = (xml, tag) => {
+  const pattern = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, 'gi');
+  return [...xml.matchAll(pattern)].map((m) => {
+    const raw = m[1].trim();
+    const cdata = raw.match(/^<!\[CDATA\[([\s\S]*?)\]\]>$/);
+    return cdata ? cdata[1].trim() : decodeXmlEntities(raw);
+  });
+};
+
+const readXmlTag = (xml, tag) => readXmlTags(xml, tag)[0] || '';
+
+const readXmlAttr = (xml, tag, attr) => {
+  const match = xml.match(new RegExp(`<${tag}\\s[^>]*?\\b${attr}=["']([^"']+)["']`, 'i'));
+  return match ? decodeXmlEntities(match[1]) : '';
+};
+
+const parseRssItems = (xml = '') => {
+  return [...xml.matchAll(/<item[\s>][\s\S]*?<\/item>/gi)].map(([itemXml]) => ({
+    title: readXmlTag(itemXml, 'title'),
+    link: readXmlTag(itemXml, 'link'),
+    description: readXmlTag(itemXml, 'description') || readXmlTag(itemXml, 'content:encoded'),
+    pubDate: readXmlTag(itemXml, 'pubDate'),
+    author: readXmlTag(itemXml, 'dc:creator') || readXmlTag(itemXml, 'author'),
+    categories: readXmlTags(itemXml, 'category'),
+    imageUrl:
+      readXmlAttr(itemXml, 'media:content', 'url') ||
+      readXmlAttr(itemXml, 'media:thumbnail', 'url') ||
+      readXmlAttr(itemXml, 'enclosure', 'url'),
+  }));
+};
+
 const extractImageUrl = (item, fallbackUrl) => {
-  if (item.enclosure?.link && typeof item.enclosure.link === 'string' && item.enclosure.link.startsWith('http')) {
-    return item.enclosure.link;
+  if (item.imageUrl && item.imageUrl.startsWith('http')) {
+    return item.imageUrl;
   }
-  if (item.thumbnail && typeof item.thumbnail === 'string' && item.thumbnail.startsWith('http')) {
-    return item.thumbnail;
-  }
-  const desc = item.description || item.content || '';
-  const match = desc.match(/<img[^>]+src=["']([^"']+)["']/i);
+  const match = (item.description || '').match(/<img[^>]+src=["']([^"']+)["']/i);
   if (match && match[1] && match[1].startsWith('http')) {
     return match[1];
   }
   return fallbackUrl;
 };
 
+// Feeds are fetched directly: the rss2json proxy now answers server requests with a Cloudflare challenge page
 const RSS_FEEDS = [
   {
     name: 'ForexLive',
     category: 'forex',
-    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.forexlive.com%2Ffeed%2Fnews',
+    url: 'https://www.forexlive.com/feed/news',
     fallbackImage: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&auto=format&fit=crop&q=80',
     source: 'ForexLive Direct',
     author: {
@@ -244,7 +284,7 @@ const RSS_FEEDS = [
   {
     name: 'Livemint Markets',
     category: 'indian-market',
-    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.livemint.com%2Frss%2Fmarkets',
+    url: 'https://www.livemint.com/rss/markets',
     fallbackImage: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&auto=format&fit=crop&q=80',
     source: 'Livemint Markets',
     author: {
@@ -257,7 +297,7 @@ const RSS_FEEDS = [
   {
     name: 'Economic Times',
     category: 'indian-market',
-    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Feconomictimes.indiatimes.com%2Fmarkets%2Frssfeeds%2F1977021501.cms',
+    url: 'https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms',
     fallbackImage: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&auto=format&fit=crop&q=80',
     source: 'Economic Times Markets',
     author: {
@@ -270,7 +310,7 @@ const RSS_FEEDS = [
   {
     name: 'Cointelegraph',
     category: 'crypto',
-    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss',
+    url: 'https://cointelegraph.com/rss',
     fallbackImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
     source: 'Cointelegraph Direct',
     author: {
@@ -283,7 +323,7 @@ const RSS_FEEDS = [
   {
     name: 'CNBC Finance',
     category: 'global',
-    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.cnbc.com%2Fid%2F10000664%2Fdevice%2Frss%2Frss.html',
+    url: 'https://www.cnbc.com/id/100727362/device/rss/rss.html',
     fallbackImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&auto=format&fit=crop&q=80',
     source: 'CNBC Finance Wire',
     author: {
@@ -296,7 +336,7 @@ const RSS_FEEDS = [
   {
     name: 'Yahoo Finance',
     category: 'commodities',
-    url: 'https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffinance.yahoo.com%2Fnews%2Frssindex',
+    url: 'https://feeds.finance.yahoo.com/rss/2.0/headline?s=GC=F,SI=F,CL=F&region=US&lang=en-US',
     fallbackImage: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?w=800&auto=format&fit=crop&q=80',
     source: 'Yahoo Finance Wire',
     author: {
@@ -334,23 +374,25 @@ export const fetchLiveSyndicatedNews = async (forceRefresh = false) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 6500);
         try {
-          const reqUrl = forceRefresh ? `${feedConfig.url}&_nocache=${Date.now()}` : feedConfig.url;
-          const res = await fetch(reqUrl, {
+          const res = await fetch(feedConfig.url, {
             signal: controller.signal,
             headers: {
-              'User-Agent': 'MarketWireNews/1.0',
+              'User-Agent': 'Mozilla/5.0 (compatible; TradeSafeNewsBot/1.0)',
+              Accept: 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8',
               'Cache-Control': 'no-cache',
               Pragma: 'no-cache',
             },
           });
+          if (!res.ok) {
+            clearTimeout(timeoutId);
+            return [];
+          }
+          const items = parseRssItems(await res.text());
           clearTimeout(timeoutId);
-          if (!res.ok) return [];
-          const data = await res.json();
-          if (!data || !Array.isArray(data.items)) return [];
 
-          return data.items.slice(0, 8).map((item, idx) => {
-            const rawTitle = stripHtml(item.title || '');
-            const rawDesc = stripHtml(item.description || item.content || '');
+          return items.filter((item) => item.title).slice(0, 8).map((item, idx) => {
+            const rawTitle = stripHtml(item.title);
+            const rawDesc = stripHtml(item.description);
             const summary = rawDesc.length > 280 ? rawDesc.substring(0, 277) + '...' : rawDesc || rawTitle;
             const fullContent =
               rawDesc.length > 100
@@ -365,7 +407,8 @@ export const fetchLiveSyndicatedNews = async (forceRefresh = false) => {
               .slice(0, 90);
             if (!slug) slug = `news-${Date.now()}-${idx}`;
 
-            const pubDate = item.pubDate ? new Date(item.pubDate) : new Date();
+            const parsedDate = new Date(item.pubDate);
+            const pubDate = Number.isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
 
             return {
               _id: `syn-${slug.slice(0, 24)}-${idx}`,
@@ -375,8 +418,8 @@ export const fetchLiveSyndicatedNews = async (forceRefresh = false) => {
               content: fullContent,
               category: feedConfig.category,
               tags:
-                Array.isArray(item.categories) && item.categories.length > 0
-                  ? item.categories.map((c) => String(c).trim()).filter(Boolean)
+                item.categories.length > 0
+                  ? item.categories.map((c) => stripHtml(c)).filter(Boolean)
                   : feedConfig.defaultTags,
               imageUrl: extractImageUrl(item, feedConfig.fallbackImage),
               source: feedConfig.source,
@@ -498,6 +541,23 @@ export const diversifyAndInterleaveNews = (items = [], isForceRefresh = false) =
 };
 
 /**
+ * Slot DB articles (sorted newest first) into the interleaved live feed by publish time,
+ * so a freshly published post lands at the top without disturbing the wire rotation.
+ */
+export const mergeByPublishTime = (syndicated = [], dbArticles = []) => {
+  const merged = [];
+  let next = 0;
+  for (const item of syndicated) {
+    const itemTime = new Date(item.publishedAt).getTime();
+    while (next < dbArticles.length && new Date(dbArticles[next].publishedAt).getTime() >= itemTime) {
+      merged.push(dbArticles[next++]);
+    }
+    merged.push(item);
+  }
+  return merged.concat(dbArticles.slice(next));
+};
+
+/**
  * @desc    Get all published news articles with category filter, search, & pagination
  * @route   GET /api/v1/news
  * @access  Public
@@ -526,7 +586,7 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
 
   // 1. Fetch DB articles (user-submitted and admin-submitted posts)
   const dbArticles = await News.find(query)
-    .sort({ createdAt: -1 })
+    .sort({ publishedAt: -1, createdAt: -1 })
     .lean();
 
   // 2. Fetch live syndicated RSS news items
@@ -558,12 +618,7 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
   }
 
   // Real DB articles (user-submitted, admin posts) merged with live syndicated articles
-  let allMergedArticles = [];
-  if (diversifiedSyndicated.length > 0) {
-    allMergedArticles = [...diversifiedSyndicated, ...dbArticles];
-  } else {
-    allMergedArticles = dbArticles;
-  }
+  const allMergedArticles = mergeByPublishTime(diversifiedSyndicated, dbArticles);
 
   // Pagination
   const pageNum = Math.max(1, parseInt(page, 10));
@@ -610,7 +665,7 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
           hasPrevPage: pageNum > 1,
         },
         breakingTicker,
-        featuredCount: featuredDbArticles.length,
+        featuredCount: dbArticles.filter((a) => a.isFeatured).length,
       },
       'News articles retrieved successfully'
     )
@@ -822,7 +877,11 @@ export const updateNewsArticle = asyncHandler(async (req, res) => {
   if (source !== undefined) article.source = source.trim();
   if (sourceUrl !== undefined) article.sourceUrl = sourceUrl.trim();
   if (isAdmin && isFeatured !== undefined) article.isFeatured = Boolean(isFeatured);
-  if (isAdmin && isPublished !== undefined) article.isPublished = Boolean(isPublished);
+  if (isAdmin && isPublished !== undefined) {
+    // A draft going live counts as fresh news, so it surfaces at the top of the feed
+    if (!article.isPublished && Boolean(isPublished)) article.publishedAt = new Date();
+    article.isPublished = Boolean(isPublished);
+  }
   if (readTime !== undefined) article.readTime = readTime.trim();
 
   if (isAdmin && (authorName || authorRole)) {
