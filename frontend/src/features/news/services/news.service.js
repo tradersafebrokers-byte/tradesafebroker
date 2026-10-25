@@ -222,8 +222,8 @@ export const newsService = {
       }
 
       const res = await apiClient.get(`/news?${params.toString()}`);
-      if (res.data?.data) {
-        return res.data.data;
+      if (res.data) {
+        return res.data;
       }
       return {
         articles: FALLBACK_NEWS,
@@ -268,8 +268,8 @@ export const newsService = {
   async getNewsArticle(slugOrId) {
     try {
       const res = await apiClient.get(`/news/${slugOrId}`);
-      if (res.data?.data) {
-        return res.data.data;
+      if (res.data) {
+        return res.data;
       }
       const match = FALLBACK_NEWS.find((a) => a.slug === slugOrId || a._id === slugOrId);
       if (match) {
@@ -294,25 +294,25 @@ export const newsService = {
   // Admin: Get all articles (drafts + published)
   async getAllAdminNews() {
     const res = await apiClient.get('/news/admin/all');
-    return res.data?.data || { articles: [], counts: {} };
+    return res.data || { articles: [], counts: {} };
   },
 
   // Admin: Create article
   async createNewsArticle(articleData) {
     const res = await apiClient.post('/news', articleData);
-    return res.data?.data;
+    return res.data;
   },
 
   // Admin: Update article
   async updateNewsArticle(id, articleData) {
     const res = await apiClient.put(`/news/${id}`, articleData);
-    return res.data?.data;
+    return res.data;
   },
 
   // Admin: Delete article
   async deleteNewsArticle(id) {
     const res = await apiClient.delete(`/news/${id}`);
-    return res.data?.data;
+    return res.data;
   },
 };
 

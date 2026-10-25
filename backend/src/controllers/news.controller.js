@@ -596,13 +596,20 @@ export const getPublishedNews = asyncHandler(async (req, res) => {
   // 3. Interleave and diversify across all active news wires (ForexLive, Livemint, ET, Cointelegraph, CNBC, Yahoo)
   const diversifiedSyndicated = diversifyAndInterleaveNews(syndicatedItems, isForceRefresh);
 
-  // Mark the #1 freshest breaking live story as featured for the hero display
-  if (diversifiedSyndicated.length > 0) {
+  // Admin-featured posts are pinned to the top (hero) so the live wire never pushes them down
+  const featuredDbArticles = dbArticles.filter((a) => a.isFeatured);
+  const regularDbArticles = dbArticles.filter((a) => !a.isFeatured);
+
+  // With no admin-featured post, the #1 freshest breaking live story takes the hero slot
+  if (featuredDbArticles.length === 0 && diversifiedSyndicated.length > 0) {
     diversifiedSyndicated[0].isFeatured = true;
   }
 
   // Real DB articles (user-submitted, admin posts) merged with live syndicated articles
-  const allMergedArticles = mergeByPublishTime(diversifiedSyndicated, dbArticles);
+  const allMergedArticles = [
+    ...featuredDbArticles,
+    ...mergeByPublishTime(diversifiedSyndicated, regularDbArticles),
+  ];
 
   // Pagination
   const pageNum = Math.max(1, parseInt(page, 10));
