@@ -466,20 +466,6 @@ export const fetchLiveSyndicatedNews = async (forceRefresh = false) => {
 };
 
 /**
- * Seed initial market news if database collection is empty
- */
-const ensureInitialNewsSeeded = async () => {
-  try {
-    const count = await News.countDocuments();
-    if (count === 0) {
-      await News.insertMany(INITIAL_MARKET_NEWS);
-    }
-  } catch (error) {
-    console.error('Error auto-seeding initial news:', error.message);
-  }
-};
-
-/**
  * Interleave stories from multiple news sources so the feed features a balanced mix
  * of Forex, Indian Market, Crypto, and Global Macro. On forceRefresh, shift the order
  * so the user immediately sees fresh different stories.
@@ -563,8 +549,6 @@ export const mergeByPublishTime = (syndicated = [], dbArticles = []) => {
  * @access  Public
  */
 export const getPublishedNews = asyncHandler(async (req, res) => {
-  await ensureInitialNewsSeeded();
-
   const { category, search, page = 1, limit = 15, refresh } = req.query;
   const isForceRefresh = refresh === 'true' || refresh === '1';
 
