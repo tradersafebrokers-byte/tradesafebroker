@@ -108,7 +108,7 @@ const newsSchema = new mongoose.Schema(
 );
 
 // Helper method to generate slug if not provided
-newsSchema.pre('validate', function (next) {
+newsSchema.pre('validate', function () {
   if (this.title && !this.slug) {
     this.slug = this.title
       .toLowerCase()
@@ -117,7 +117,6 @@ newsSchema.pre('validate', function (next) {
       .replace(/\s+/g, '-')
       .concat('-', Math.random().toString(36).substring(2, 7));
   }
-  next();
 });
 
 export const News = mongoose.model('News', newsSchema);

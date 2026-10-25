@@ -1603,32 +1603,9 @@ export default function AdminDashboard() {
         showToast('Article updated successfully!');
       }
       setNewsModal({ isOpen: false, mode: 'create', article: null });
-    } catch {
-      // Local optimistic fallback
-      const payload = {
-        ...newsFormData,
-        tags: newsFormData.tags
-          ? (Array.isArray(newsFormData.tags) ? newsFormData.tags : newsFormData.tags.split(',').map((t) => t.trim()).filter(Boolean))
-          : [],
-      };
-      if (newsModal.mode === 'create') {
-        const localArt = {
-          ...payload,
-          _id: `news-${Date.now()}`,
-          slug: payload.title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-          publishedAt: new Date().toISOString(),
-          views: 0,
-        };
-        setNewsList((prev) => [localArt, ...prev]);
-        showToast('Article added to live feed');
-      } else {
-        const targetId = newsModal.article?._id || newsModal.article?.slug;
-        setNewsList((prev) =>
-          prev.map((item) => ((item._id || item.slug) === targetId ? { ...item, ...payload } : item))
-        );
-        showToast('Article updated (Live)');
-      }
-      setNewsModal({ isOpen: false, mode: 'create', article: null });
+    } catch (err) {
+      // Keep the modal open so the draft isn't lost
+      showToast(err.response?.data?.message || err.message || 'Failed to save news article');
     } finally {
       setSavingNews(false);
     }
@@ -1643,7 +1620,12 @@ export default function AdminDashboard() {
     showToast(newStatus ? 'Article is now Live' : 'Article moved to Drafts');
     try {
       await newsService.updateNewsArticle(targetId, { isPublished: newStatus });
-    } catch {}
+    } catch (err) {
+      setNewsList((prev) =>
+        prev.map((a) => ((a._id || a.slug) === targetId ? { ...a, isPublished: article.isPublished } : a))
+      );
+      showToast(err.response?.data?.message || err.message || 'Failed to update article status');
+    }
   }, [showToast]);
 
   const handleToggleNewsFeatured = useCallback(async (article) => {
@@ -1655,7 +1637,12 @@ export default function AdminDashboard() {
     showToast(newFeatured ? 'Article pinned as Featured story' : 'Article unpinned from Featured');
     try {
       await newsService.updateNewsArticle(targetId, { isFeatured: newFeatured });
-    } catch {}
+    } catch (err) {
+      setNewsList((prev) =>
+        prev.map((a) => ((a._id || a.slug) === targetId ? { ...a, isFeatured: article.isFeatured } : a))
+      );
+      showToast(err.response?.data?.message || err.message || 'Failed to update featured status');
+    }
   }, [showToast]);
 
   const promptDeleteMessage = useCallback((msg) => {
